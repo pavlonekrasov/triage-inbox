@@ -134,7 +134,8 @@ export function LaneSwitcher({ lane, counts, onSelect }: LaneSwitcherProps) {
   };
 
   return (
-    <Glass surface="lane-track" tint="light" className="p-1">
+    // Strong tint: the track carries labels, and rows scroll under it (brief 3.2, "any glass that carries text").
+    <Glass surface="lane-track" tint="strong" className="p-1">
       <div
         ref={trackRef}
         role="tablist"

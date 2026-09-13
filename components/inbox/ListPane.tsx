@@ -3,6 +3,7 @@
 import { CirclePause, X } from "lucide-react";
 import { useCallback, useEffect, type KeyboardEvent } from "react";
 import { PillButton } from "@/components/controls/PillButton";
+import { PrototypeControls } from "@/components/dev/PrototypeControls";
 import { rowsFor, useDesk } from "@/components/desk/desk-store";
 import { ThemeIconToggle } from "@/components/theme/ThemeIconToggle";
 import { formatDuration, formatPercent, TODAY } from "@/data/metrics";
@@ -16,11 +17,12 @@ import { rowId, TicketRow } from "./TicketRow";
 
 export function ListPane() {
   const { state, dispatch } = useDesk();
-  const { lane, listState, editMode, checked, cursorId, openId, notice, focusRequest } = state;
-  const rows = rowsFor(listState, lane);
+  const { lane, listState, editMode, checked, cursorId, openId, dismissed, focusRequest } = state;
+  const notice = state.notice?.where === "list" ? state.notice : null;
+  const rows = rowsFor(listState, lane, dismissed);
 
   const counts = Object.fromEntries(
-    LANES.map((l) => [l.id, listState === "loading" ? null : rowsFor(listState, l.id).length]),
+    LANES.map((l) => [l.id, listState === "loading" ? null : rowsFor(listState, l.id, dismissed).length]),
   ) as Record<Lane, number | null>;
 
   // Keep the keyboard row in view with no smooth scroll: J/K runs hundreds of times a shift.
@@ -31,13 +33,6 @@ export function ListPane() {
   useEffect(() => {
     if (focusRequest) document.getElementById(rowId(focusRequest.id))?.focus({ preventScroll: true });
   }, [focusRequest]);
-
-  // A notice stays 4 s; a newer notice restarts the timer.
-  useEffect(() => {
-    if (!notice) return;
-    const timer = setTimeout(() => dispatch({ type: "clearNotice", id: notice.id }), 4000);
-    return () => clearTimeout(timer);
-  }, [notice, dispatch]);
 
   const activate = useCallback((id: string) => dispatch({ type: "activate", id }), [dispatch]);
 
@@ -66,7 +61,14 @@ export function ListPane() {
           <LaneSwitcher lane={lane} counts={counts} onSelect={(next) => dispatch({ type: "selectLane", lane: next })} />
           <div role="status" aria-live="polite">
             {notice && (
-              <p className="mt-2 rounded-card border border-border bg-card px-3 py-2 text-body-s">{notice.text}</p>
+              <div className="mt-2 flex items-center gap-2 rounded-card border border-border bg-card py-1.5 pr-1.5 pl-3">
+                <p className="min-w-0 flex-1 py-0.5 text-body-s">{notice.text}</p>
+                {notice.action && (
+                  <PillButton variant="outline" onClick={() => dispatch(notice.action!.dispatch)}>
+                    {notice.action.label}
+                  </PillButton>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -116,11 +118,12 @@ export function ListPane() {
       </div>
 
       {/* Metrics live one click away (brief 1); the line becomes the quality sheet's trigger in step 8. */}
-      <footer className="flex h-10 shrink-0 items-center border-t border-border px-4 text-micro text-muted-foreground tabular-nums">
-        <p className="truncate">
+      <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-border pr-1 pl-4 text-micro text-muted-foreground tabular-nums">
+        <p className="min-w-0 flex-1 truncate">
           Today {formatPercent(TODAY.autoResolutionRate)} auto · {formatDuration(TODAY.firstResponseMedianSeconds)} first
           response · {formatPercent(TODAY.reopenRate)} reopened
         </p>
+        <PrototypeControls />
       </footer>
     </section>
   );
@@ -129,7 +132,7 @@ export function ListPane() {
 /** Telegram grammar: the title bar becomes the selection bar in edit mode. */
 function ListHeader() {
   const { state, dispatch } = useDesk();
-  const sureIds = rowsFor(state.listState, "drafts")
+  const sureIds = rowsFor(state.listState, "drafts", state.dismissed)
     .filter((t) => isSureLowRiskDraft(t.triage))
     .map((t) => t.id);
   const sureCount = sureIds.length;

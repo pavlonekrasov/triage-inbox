@@ -1,0 +1,194 @@
+[
+  {
+    "name": "thread-t02-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-3/thread-t02-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "(() => { const draft = document.querySelector('[data-draft] > div'); const scroller = document.querySelector('main ol').parentElement; const s = getComputedStyle(draft); return { glass: [...document.querySelectorAll('[data-glass]')].map(e => e.dataset.glass), draftLabel: document.querySelector('[data-draft] > p').textContent, draftBorder: s.borderTopStyle + ' ' + s.borderTopWidth, draftBgOpaque: s.backgroundColor, atBottom: Math.abs(scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop) < 2, swapOnFirstPaint: document.querySelector('main ol').dataset.swap, header: document.querySelector('[data-glass=thread-header]').textContent }; })()"
+  },
+  {
+    "name": "thread-t12-reopened-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "out": "docs/evidence/step-3/thread-t12-reopened-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "[...document.querySelectorAll('main ol > li')].map(li => li.textContent.slice(0, 48))"
+  },
+  {
+    "name": "draft-vs-sent-25pct",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "out": "docs/evidence/step-3/draft-vs-sent-25pct.png",
+    "scale": 0.25,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "thread-t07-translated-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t07",
+    "out": "docs/evidence/step-3/thread-t07-translated-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "({ chip: document.querySelector('[aria-pressed]')?.textContent, pressed: document.querySelector('[aria-pressed]')?.getAttribute('aria-pressed'), translations: document.querySelectorAll('main p[lang=en]').length, originalLang: document.querySelector('main ol p[lang]')?.getAttribute('lang') })"
+  },
+  {
+    "name": "translation-toggle-off",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t07",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[aria-pressed]')",
+    "actions": ["document.querySelector('[aria-pressed]').click()"],
+    "eval": "({ chip: document.querySelector('[aria-pressed]').textContent, pressed: document.querySelector('[aria-pressed]').getAttribute('aria-pressed'), translations: document.querySelectorAll('main p[lang=en]').length })"
+  },
+  {
+    "name": "thread-t08-auto-spotcheck-2x",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t08",
+    "out": "docs/evidence/step-3/thread-t08-auto-spotcheck-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main ol')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "thread-t05-stale-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "out": "docs/evidence/step-3/thread-t05-stale-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "document.querySelector('[data-draft] > p:last-child').textContent"
+  },
+  {
+    "name": "thread-t06-wellbeing-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "out": "docs/evidence/step-3/thread-t06-wellbeing-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main ol')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "({ drafts: document.querySelectorAll('[data-draft]').length, route: document.querySelector('[data-glass=thread-header]').textContent })"
+  },
+  {
+    "name": "thread-t21-long-name-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t21",
+    "out": "docs/evidence/step-3/thread-t21-long-name-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "(() => { const h = document.querySelector('[data-glass=thread-header] h2'); const pill = document.querySelector('[data-glass=thread-header]'); return { nameLines: Math.round(h.getBoundingClientRect().height / parseFloat(getComputedStyle(h).lineHeight)), pillWithinPane: pill.getBoundingClientRect().right <= document.querySelector('main').getBoundingClientRect().right, listNameTruncated: (() => { const n = document.querySelector('#row-t21 .truncate'); return n.scrollWidth > n.clientWidth; })() }; })()"
+  },
+  {
+    "name": "thread-t21-narrow-pane",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t21",
+    "width": 900,
+    "height": 800,
+    "out": "docs/evidence/step-3/thread-t21-narrow-900.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "(() => { const h = document.querySelector('[data-glass=thread-header] h2'); const pill = document.querySelector('[data-glass=thread-header]').getBoundingClientRect(); const main = document.querySelector('main').getBoundingClientRect(); return { mainWidth: main.width, nameLines: Math.round(h.getBoundingClientRect().height / parseFloat(getComputedStyle(h).lineHeight)), pillInside: pill.left >= main.left && pill.right <= main.right, horizontalOverflow: document.querySelector('main ol').parentElement.scrollWidth > document.querySelector('main ol').parentElement.clientWidth }; })()"
+  },
+  {
+    "name": "menu-blocked-t06-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "out": "docs/evidence/step-3/menu-blocked-t06-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[aria-label^=\"More actions\"]')",
+    "actionWaitMs": 600,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[aria-label^=\"More actions\"]').click()"
+    ],
+    "eval": "[...document.querySelectorAll('[role=menuitem]')].map(i => i.textContent + (i.getAttribute('aria-disabled') === 'true' ? ' [disabled]' : ''))"
+  },
+  {
+    "name": "snooze-undo-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-3/snooze-undo-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[aria-label^=\"More actions\"]')",
+    "actionWaitMs": 600,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[aria-label^=\"More actions\"]').click()",
+      "[...document.querySelectorAll('[role=menuitem]')].find(i => i.textContent.startsWith('Snooze')).click()"
+    ],
+    "eval": "({ notice: document.querySelector('[data-list-pane] [role=status]').textContent, draftsCount: document.querySelector('[data-lane-tab=drafts]').getAttribute('aria-label'), open: new URLSearchParams(location.search).get('ticket'), t17InList: !!document.getElementById('row-t17') })"
+  },
+  {
+    "name": "snooze-undo-restores",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[aria-label^=\"More actions\"]')",
+    "actionWaitMs": 600,
+    "actions": [
+      "document.querySelector('[aria-label^=\"More actions\"]').click()",
+      "[...document.querySelectorAll('[role=menuitem]')].find(i => i.textContent.startsWith('Snooze')).click()",
+      "[...document.querySelectorAll('[data-list-pane] [role=status] button')].find(b => b.textContent === 'Undo snooze').click()"
+    ],
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), t17InList: !!document.getElementById('row-t17'), draftsCount: document.querySelector('[data-lane-tab=drafts]').getAttribute('aria-label') })"
+  },
+  {
+    "name": "swap-is-instant-with-fade",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main ol')",
+    "keys": ["j"],
+    "keyWaitMs": 30,
+    "eval": "(() => { const ol = document.querySelector('main ol'); return { headerName: document.querySelector('[data-glass=thread-header] h2').textContent, open: document.querySelector('[role=option][aria-selected=true]').id, swap: ol.dataset.swap, animation: getComputedStyle(ol).animationName + ' ' + getComputedStyle(ol).animationDuration, rowTransition: getComputedStyle(document.querySelector('[role=option][aria-selected=true]')).transitionProperty }; })()"
+  },
+  {
+    "name": "swap-reduced-motion",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "media": { "prefers-reduced-motion": "reduce" },
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main ol')",
+    "keys": ["j"],
+    "keyWaitMs": 30,
+    "eval": "({ swap: document.querySelector('main ol').dataset.swap, animation: getComputedStyle(document.querySelector('main ol')).animationName })"
+  },
+  {
+    "name": "night-thread-t02-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-3/night-thread-t02-2x.png",
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "night-thread-t12-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "out": "docs/evidence/step-3/night-thread-t12-2x.png",
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "header-reduced-transparency-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-3/header-reduced-transparency-2x.png",
+    "scale": 2,
+    "media": { "prefers-reduced-transparency": "reduce" },
+    "selector": "main",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "[...document.querySelectorAll('[data-glass]')].map(e => { const s = getComputedStyle(e); return e.dataset.glass + ': backdrop=' + s.backdropFilter + ' bg=' + s.backgroundColor; })"
+  },
+  {
+    "name": "greyscale-t12-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "out": "docs/evidence/step-3/greyscale-t12-2x.png",
+    "scale": 2,
+    "selector": "main",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ]
+  },
+  {
+    "name": "tokens-contrast",
+    "url": "http://localhost:3000/tokens",
+    "waitFor": "document.querySelectorAll('[data-contrast-summary]').length === 2 && [...document.querySelectorAll('[data-contrast-summary]')].every(e => e.dataset.contrastSummary.includes('/'))",
+    "waitMs": 1200,
+    "eval": "({ summaries: [...document.querySelectorAll('[data-contrast-summary]')].map(e => e.closest('[data-theme-scope]').dataset.themeScope + ' ' + e.dataset.contrastSummary), fails: [...document.querySelectorAll('tr[data-verdict=Fail]')].map(r => r.closest('[data-theme-scope]').dataset.themeScope + ': ' + r.textContent), newPairs: [...document.querySelectorAll('tr[data-ratio]')].filter(r => /draft bubble|sent bubble|Sent label|day separator/.test(r.textContent)).map(r => r.closest('[data-theme-scope]').dataset.themeScope + ' ' + r.cells[0].textContent.trim() + ' ' + r.dataset.ratio) })"
+  }
+]

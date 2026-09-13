@@ -40,10 +40,12 @@ type Seed = {
   slaMinutesLeft: number;
   /** The customer's latest message, which opened this ticket. */
   body: string;
+  bodyEn?: string;
   /** Earlier messages in the same conversation. */
   history?: Message[];
   /** For auto-sent tickets: the reply that went out. */
   autoReply?: string;
+  autoReplyEn?: string;
   triage: Omit<TriageResult, "ticketId" | "steps"> & { steps: [StepKind, string][] };
   routedWhileAutoSendPaused?: boolean;
   spotCheck?: boolean;
@@ -55,10 +57,16 @@ function ticket(seed: Seed): Ticket {
   const steps = seed.triage.steps.map(([kind, text], i) => ({ kind, text, at: iso(start + (i + 1) * 1500) }));
   const messages: Message[] = [
     ...(seed.history ?? []),
-    { id: `${seed.id}-customer`, author: "customer", at: receivedAt, body: seed.body },
+    { id: `${seed.id}-customer`, author: "customer", at: receivedAt, body: seed.body, translationEn: seed.bodyEn },
   ];
   if (seed.autoReply) {
-    messages.push({ id: `${seed.id}-auto`, author: "auto", at: steps.at(-1)?.at ?? receivedAt, body: seed.autoReply });
+    messages.push({
+      id: `${seed.id}-auto`,
+      author: "auto",
+      at: steps.at(-1)?.at ?? receivedAt,
+      body: seed.autoReply,
+      translationEn: seed.autoReplyEn,
+    });
   }
   return {
     id: seed.id,
@@ -378,6 +386,7 @@ export const TICKETS: readonly Ticket[] = [
     receivedMinutesAgo: 41,
     slaMinutesLeft: 19,
     body: "No puedo iniciar sesión desde que cambié de teléfono",
+    bodyEn: "I haven't been able to sign in since I changed phones",
     triage: {
       language: "es-MX",
       category: { primary: "account", secondary: "Sign-in on a new phone" },
@@ -422,6 +431,9 @@ export const TICKETS: readonly Ticket[] = [
     receivedMinutesAgo: 52,
     slaMinutesLeft: 0,
     body: "Como altero meu horário de nascimento?",
+    bodyEn: "How do I change my birth time?",
+    autoReplyEn:
+      "Hi Beatriz. To change your birth time, open Nebula, tap Profile and then Birth details, and adjust the time. Your birth chart and horoscopes update automatically.",
     autoReply:
       "Olá, Beatriz. Para alterar o horário de nascimento, abra o Nebula, toque em Perfil e depois em Dados de nascimento, e ajuste o horário. Seu mapa astral e seus horóscopos são atualizados automaticamente.",
     spotCheck: true,

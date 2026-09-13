@@ -35,6 +35,8 @@ export function commandFor(event: KeyboardEvent): Command | null {
   if (event.defaultPrevented || event.isComposing) return null;
   if (event.ctrlKey || event.metaKey || event.altKey) return null;
   if (isEditable(event.target)) return null;
+  // An open menu or dialog owns the keyboard: J there is typeahead, not "next conversation".
+  if (event.target instanceof Element && event.target.closest("[role=menu], [role=dialog]")) return null;
   const key = event.key.toLowerCase();
   return KEYMAP.find((b) => b.key === key && Boolean(b.shift) === event.shiftKey)?.command ?? null;
 }

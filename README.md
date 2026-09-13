@@ -19,7 +19,7 @@ Open http://localhost:3000.
 | `/tokens` | Colour roles in Day and Night shift with contrast measured in the browser, glass, type scale |
 
 The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&list=loading` or
-`&list=empty` for those list states, or use **Show prototype controls** at the bottom right.
+`&list=empty` for those list states, or use the prototype controls button at the right of the list footer.
 
 ## Use it
 
@@ -38,8 +38,8 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 |---|---|---|
 | 1 | Token page | Done |
 | 2 | List pane: lanes, rows, row states | Done |
-| 3 | Thread: header pill, bubbles, service messages, draft bubble | Next |
-| 4 | Pinned summary, both reading depths | |
+| 3 | Thread: header pill, bubbles, service messages, draft bubble | Done |
+| 4 | Pinned summary, both reading depths | Next |
 | 5 | Decision bar: Approve with undo, Edit, Escalate | |
 | 6 | Context panel | |
 | 7 | Bulk approve, full keymap, command palette, shortcut sheet | |
@@ -53,7 +53,7 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 npm test          # routing matrix and fixture contract
 npm run typecheck
 npm run lint
-node scripts/capture.mjs scripts/plans/step-2.json   # evidence screenshots, needs the dev server
+node scripts/capture.mjs scripts/plans/step-3.json   # evidence screenshots, needs the dev server
 ```
 
 Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from

@@ -366,6 +366,24 @@
     radial-gradient(70% 50% at 50% 100%, var(--field-c), oklch(from var(--field-c) l c h / 0) 72%);
 }
 
+/* Thread swap (brief 10): content renders on the first frame at 0.6 opacity and reaches 1 in 120 ms. */
+@theme {
+  --animate-thread-in: thread-in 120ms var(--ease-out);
+
+  @keyframes thread-in {
+    from {
+      opacity: 0.6;
+    }
+  }
+}
+
+/* Draft fill: the violet wash composited over card, so the bubble is opaque. Its text then measures
+   the same over every wallpaper field, and the draft reads near-white beside the tinted sent bubble. */
+@utility draft-fill {
+  background-color: var(--card);
+  background-image: linear-gradient(var(--brand-wash), var(--brand-wash));
+}
+
 /* Initials avatar (6.6): background oklch(L 0.04 H), text oklch(L 0.06 H), H from the customer id. */
 @utility avatar-tint {
   background-color: oklch(var(--avatar-bg-l) 0.04 var(--avatar-h, 285));

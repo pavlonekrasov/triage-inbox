@@ -20,7 +20,15 @@ const dayKey = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",
 });
 const weekday = new Intl.DateTimeFormat("en-GB", { timeZone: DESK_TIME_ZONE, weekday: "short" });
-const dayMonth = new Intl.DateTimeFormat("en-GB", { timeZone: DESK_TIME_ZONE, day: "numeric", month: "short" });
+/* Month names are fixed here, not left to Intl: ICU builds disagree on en-GB "Sep" versus "Sept",
+   and server and browser must render the same text or hydration fails. */
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const dayMonth = {
+  format(ms: number) {
+    const [, month, day] = dayKey.format(ms).split("-").map(Number);
+    return `${day} ${MONTHS[month - 1]}`;
+  },
+};
 
 function calendarDaysBetween(from: number, to: number) {
   const [fy, fm, fd] = dayKey.format(from).split("-").map(Number);
@@ -36,6 +44,33 @@ export function formatListTime(iso: string, now: number = DEMO_NOW) {
   if (days === 1) return "Yesterday";
   if (days < 7) return weekday.format(at);
   return dayMonth.format(at);
+}
+
+/** Message time on the desk clock: "18:34". */
+export const formatClockTime = (iso: string) => time.format(Date.parse(iso));
+
+/** Calendar day on the desk clock, used to split a timeline into days. */
+export const deskDayKey = (iso: string) => dayKey.format(Date.parse(iso));
+
+/** Timeline day separator: "Today", "Yesterday", then "11 Sep". */
+export function formatDayLabel(iso: string, now: number = DEMO_NOW) {
+  const at = Date.parse(iso);
+  const days = calendarDaysBetween(at, now);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  return dayMonth.format(at);
+}
+
+const localTimeFormats = new Map<string, Intl.DateTimeFormat>();
+
+/** The customer's wall-clock time, so a reply is never written as if it were evening where they are. */
+export function formatLocalTime(now: number, timeZone: string) {
+  let format = localTimeFormats.get(timeZone);
+  if (!format) {
+    format = new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+    localTimeFormats.set(timeZone, format);
+  }
+  return format.format(now);
 }
 
 /** "4:07" for a remaining duration, rounded up so it reads 0:01 until the deadline passes. */

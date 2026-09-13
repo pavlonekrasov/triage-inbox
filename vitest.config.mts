@@ -6,6 +6,6 @@ export default defineConfig({
     alias: [{ find: /^@\//, replacement: fileURLToPath(new URL("./", import.meta.url)) }],
   },
   test: {
-    include: ["lib/**/*.test.ts", "data/**/*.test.ts"],
+    include: ["lib/**/*.test.ts", "data/**/*.test.ts", "components/**/*.test.ts"],
   },
 });

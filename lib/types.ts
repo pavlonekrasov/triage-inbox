@@ -75,6 +75,8 @@ export interface Message {
   author: "customer" | "auto" | "specialist";
   at: string;
   body: string;
+  /** Machine translation shown to the specialist when the message is not in English. */
+  translationEn?: string;
 }
 
 export interface Ticket {

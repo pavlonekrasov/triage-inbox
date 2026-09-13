@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useReducer } from "react";
-import { PrototypeControls } from "@/components/dev/PrototypeControls";
 import { ListPane } from "@/components/inbox/ListPane";
-import { ThreadPlaceholder } from "@/components/thread/ThreadPlaceholder";
+import { ThreadPane } from "@/components/thread/ThreadPane";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import type { DeskInit } from "@/lib/desk-params";
 import { useShortcuts } from "@/lib/shortcuts";
@@ -23,6 +22,14 @@ export function Desk({ initial }: { initial: DeskInit }) {
     const next = `?${params}`;
     if (next !== window.location.search) window.history.replaceState(null, "", next);
   }, [state.lane, state.openId, state.listState]);
+
+  // A notice stays 4 s, or 6 s when it offers Undo; a newer notice restarts the timer.
+  const { notice } = state;
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => dispatch({ type: "clearNotice", id: notice.id }), notice.action ? 6000 : 4000);
+    return () => clearTimeout(timer);
+  }, [notice]);
 
   useShortcuts((command) => {
     // J and K move focus with the selection only when focus is already in the list, or nowhere.
@@ -64,11 +71,10 @@ export function Desk({ initial }: { initial: DeskInit }) {
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel id="thread" minSize={520}>
-            <ThreadPlaceholder />
+            <ThreadPane />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-      <PrototypeControls />
     </DeskContext>
   );
 }

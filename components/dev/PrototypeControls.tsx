@@ -14,15 +14,17 @@ const LIST_STATES: { id: ListState; label: string }[] = [
 
 /**
  * The prototype's dev panel (brief 14): switches to states a live click-through cannot reach on its
- * own. Opaque, bottom right, and hidden from screenshots by the capture plans.
+ * own. It lives in the list footer, so it never covers the thread or its decision bar, and opens
+ * upward. Opaque, and removed from screenshots by the capture plans.
  */
 export function PrototypeControls() {
   const { state, dispatch } = useDesk();
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const label = open ? "Hide prototype controls" : "Show prototype controls";
 
   return (
-    <div data-prototype-controls className="fixed right-4 bottom-4 z-40 flex flex-col items-end gap-2">
+    <div data-prototype-controls className="relative shrink-0">
       {open && (
         <div
           id={panelId}
@@ -33,7 +35,7 @@ export function PrototypeControls() {
             event.preventDefault();
             setOpen(false);
           }}
-          className="w-60 rounded-card border border-border bg-popover p-3 text-popover-foreground"
+          className="absolute right-0 bottom-full z-40 mb-2 w-60 rounded-card border border-border bg-popover p-3 text-popover-foreground"
         >
           <fieldset className="flex flex-col gap-1.5">
             <legend className="mb-1 text-label">List state</legend>
@@ -56,9 +58,15 @@ export function PrototypeControls() {
           </p>
         </div>
       )}
-      <PillButton variant="outline" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((o) => !o)}>
+      <PillButton
+        iconOnly
+        aria-label={label}
+        title={label}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((o) => !o)}
+      >
         <SlidersHorizontal aria-hidden strokeWidth={1.75} />
-        {open ? "Hide prototype controls" : "Show prototype controls"}
       </PillButton>
     </div>
   );

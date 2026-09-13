@@ -21,6 +21,22 @@ function pinRank(ticket: Ticket) {
 
 export const isPinned = (ticket: Ticket) => pinRank(ticket) < 2;
 
+export type DismissKind = "snoozed" | "spam";
+
+/**
+ * Why a ticket cannot leave the queue by snooze or spam, or null. A person in distress or a safety
+ * report must not disappear for an hour, and a privacy request carries a legal deadline.
+ */
+export function dismissBlock(ticket: Ticket, kind: DismissKind): string | null {
+  const rules = ticket.triage.hardRules;
+  if (rules.includes("wellbeing")) return "Wellbeing cases stay in the queue until someone replies.";
+  if (rules.includes("safety_complaint")) return "Safety reports stay in the queue until someone acknowledges them.";
+  if (kind === "spam" && rules.includes("privacy_legal")) {
+    return "Privacy requests have a legal deadline, so they can't be marked as spam.";
+  }
+  return null;
+}
+
 /**
  * Open lanes sort by first-response deadline, soonest first, so the case closest to breaching is
  * never below the fold. Auto-resolved is history, so it reads newest first like a chat list.

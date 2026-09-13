@@ -136,3 +136,65 @@ Reasoning   Reusing the familiar edit-mode header meets "familiar beats clever";
 Trade-off   Until step 7, selection has no action to take, only a count.
 Validation  selection-mode-2x.png.
 ```
+
+## Step 3: thread
+
+### Draft fill composited over card
+
+```
+Problem     The brief fills the draft bubble with --brand-wash, a 6% alpha; over the wallpaper its text contrast would change with every field behind it.
+Decision    The draft fill is the wash composited over --card (the draft-fill utility), so the bubble is opaque and near-white.
+Reasoning   An opaque bubble measures the same everywhere (muted text 5.53:1 Day, 6.50:1 Night), and near-white beside the tinted sent bubble adds a fill difference to the dashed edge and the "not sent" label.
+Trade-off   The wallpaper does not show through the draft, so it reads slightly heavier than a customer bubble.
+Validation  draft-vs-sent-25pct.png: at 360 px wide the white dashed draft and the tinted sent reply are still told apart.
+```
+
+### Status label above every outgoing bubble
+
+```
+Problem     Approving a draft (step 5) turns "Draft · not sent" into "Sent by you · 18:44 ✓✓"; if the two labels lived in different places, the proof of sending would jump.
+Decision    Every outgoing bubble, draft or sent, carries its status line above the bubble, right-aligned; customer bubbles keep Telegram's in-bubble timestamp.
+Reasoning   One slot for "what state is this reply in" means the approve transition changes a line of text in place, next to the bubble whose border and fill change with it.
+Trade-off   Outgoing bubbles take one more line of height than in Telegram.
+Validation  thread-t12-reopened-2x.png shows a sent reply and a draft with their labels in the same slot.
+```
+
+### The AI step log as one block
+
+```
+Problem     Five service-message pills per ticket, one per step, outweighed the customer's message they describe.
+Decision    Consecutive steps render as one quiet block with a line per step. "sent" steps are left out: the sent bubble's label already records the send. Spot-check sampling appears as its own line after the reply.
+Reasoning   One shape instead of five keeps the log as evidence you can read, not a column of chips competing for attention ("calm", brief 1).
+Trade-off   Steps are no longer individually separable pills, so a future per-step action (open the retrieved policy) needs a link inside the block.
+Validation  thread-t02-2x.png after the change; timeline.test.ts proves no "sent" step renders.
+```
+
+### One translation switch, on by default
+
+```
+Problem     Brief 7.4 asks for an "ES → EN" chip and brief 8.4 for an English gloss toggle; separate switches per bubble would multiply controls, and a specialist cannot approve Spanish they cannot read.
+Decision    The header chip is the one switch (aria-pressed). It starts on and shows English under the customer's message, the sent reply and the draft, each labelled "Translated from Spanish" or "English gloss, not sent".
+Reasoning   The original stays first and marked with its lang attribute as the evidence; the translation is what the decision rests on, so it is visible without a click.
+Trade-off   Translated threads are about twice as tall.
+Validation  thread-t07-translated-2x.png; translation-toggle-off reports 0 English blocks after one press.
+```
+
+### Snooze and spam refuse the cases that must not wait
+
+```
+Problem     The header menu offers Snooze and Mark spam; either one would take a person in distress or a safety report out of the queue.
+Decision    Wellbeing and safety tickets cannot be snoozed or marked spam, privacy requests cannot be marked spam; the items stay in the menu, disabled, with the reason written under them. Snooze and spam elsewhere open the next conversation and offer Undo for 6 s.
+Reasoning   A hidden option leaves the specialist guessing; a disabled one with its reason teaches the rule (brief 9.2, "never fails silently").
+Trade-off   A genuinely spam message that trips the wellbeing classifier stays in Needs you until someone replies.
+Validation  menu-blocked-t06-2x.png; desk-store.test.ts covers the blocks and the Undo round trip.
+```
+
+### Lane track uses the strong tint (correction to step 2)
+
+```
+Problem     Step 2 gave the lane track the light glass tint; at 900 px the "Auto-send paused" banner scrolled under it and showed through behind the tab labels.
+Decision    The track uses --glass-tint-strong, as brief 3.2 requires for any glass that carries text.
+Reasoning   The rule exists for this case: text on glass must not compete with text behind it.
+Trade-off   The track refracts less of the list behind it.
+Validation  thread-t21-narrow-900.png after the change.
+```

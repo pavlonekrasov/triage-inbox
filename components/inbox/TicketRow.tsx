@@ -3,6 +3,7 @@
 import { Check, CheckCheck, Pin } from "lucide-react";
 import { memo } from "react";
 import { avatarStyle, initials } from "@/lib/avatar";
+import { isEnglish, languageCode } from "@/lib/language";
 import { isPinned, isResolved } from "@/lib/lanes";
 import type { Ticket, TriageResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -19,10 +20,7 @@ export function glyphKind(triage: TriageResult): RouteGlyphKind {
 }
 
 /** Language chip only when the customer did not write in English: an EN chip on most rows is noise. */
-const foreignLanguage = (bcp47: string) => {
-  const code = bcp47.split("-")[0].toUpperCase();
-  return code === "EN" ? null : code;
-};
+const foreignLanguage = (bcp47: string) => (isEnglish(bcp47) ? null : languageCode(bcp47));
 
 type TicketRowProps = {
   ticket: Ticket;

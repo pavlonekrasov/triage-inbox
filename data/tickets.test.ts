@@ -44,7 +44,7 @@ describe("fixtures", () => {
   it.each(TICKETS.map((t) => [t.id, t] as const))("%s writes every reply in the support voice (brief 8.4)", (_, t) => {
     const replies = [
       ...t.triage.drafts.flatMap((d) => [d.body, d.glossEn ?? ""]),
-      ...t.messages.filter((m) => m.author === "auto").map((m) => m.body),
+      ...t.messages.filter((m) => m.author === "auto").flatMap((m) => [m.body, m.translationEn ?? ""]),
     ].filter(Boolean);
     for (const body of replies) {
       expect(words(body)).toBeLessThanOrEqual(90);
