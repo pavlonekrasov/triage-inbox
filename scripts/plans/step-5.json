@@ -1,0 +1,463 @@
+[
+  {
+    "name": "bar-t17-approve-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/bar-t17-approve-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(() => { const bar = document.querySelector('[data-glass=decision-bar]'); const r = bar.getBoundingClientRect(); const main = document.querySelector('main').getBoundingClientRect(); const draft = document.querySelector('[data-draft]').getBoundingClientRect(); return { glass: [...document.querySelectorAll('[data-glass]')].map(e => e.dataset.glass), buttons: [...bar.querySelectorAll('button')].map(b => b.innerText.replace(/\\n/g, ' ')), width: Math.round(r.width), bottomGap: Math.round(main.bottom - r.bottom), centred: Math.abs((r.left + r.right) / 2 - (main.left + main.right) / 2) < 2, overflow: bar.scrollWidth > bar.clientWidth, kbdVisible: getComputedStyle(bar.querySelector('kbd')).display, draftClearsBar: draft.bottom < r.top, iconSize: bar.querySelector('svg').getBoundingClientRect().width }; })()"
+  },
+  {
+    "name": "bar-t02-variants-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-5/bar-t02-variants-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(() => { const bar = document.querySelector('[data-glass=decision-bar]'); return { width: Math.round(bar.getBoundingClientRect().width), overflow: bar.scrollWidth > bar.clientWidth, primary: bar.querySelector('[data-primary]').textContent, primaryDisabled: bar.querySelector('[data-primary]').getAttribute('aria-disabled'), drafts: [...document.querySelectorAll('[data-draft]')].map(d => d.dataset.draft), checked: [...document.querySelectorAll('[data-variant-choice] input')].map(i => i.checked) }; })()"
+  },
+  {
+    "name": "bar-t02-refused-then-decline-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-5/bar-t02-decline-chosen-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-primary]').click()",
+      "window.__refused = document.querySelector('[data-dock] [role=status]').textContent",
+      "document.querySelector('input[value=t02-decline]').click()"
+    ],
+    "eval": "({ refusedWith: window.__refused, primary: document.querySelector('[data-primary]').textContent, primaryDisabled: document.querySelector('[data-primary]').getAttribute('aria-disabled'), drafts: [...document.querySelectorAll('[data-draft]')].map(d => d.dataset.draft), noticeCleared: document.querySelector('[data-dock] [role=status]').textContent === '' })"
+  },
+  {
+    "name": "keyboard-A",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), focus: document.activeElement.id, t17InList: !!document.getElementById('row-t17'), undoPill: document.querySelector('[data-dock] [role=status]').innerText.replace(/\\n/g, ' ') })"
+  },
+  {
+    "name": "keyboard-A-Z",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a",
+      "z"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), focus: document.activeElement.id, t17InList: !!document.getElementById('row-t17'), draftBack: !!document.querySelector('[data-draft=t17-draft]'), undoPill: document.querySelector('[data-dock] [role=status]').textContent })"
+  },
+  {
+    "name": "keyboard-A-Z-A",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a",
+      "z",
+      "a"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), focus: document.activeElement.id, t17InList: !!document.getElementById('row-t17') })"
+  },
+  {
+    "name": "undo-pill-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/undo-pill-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "a"
+    ],
+    "keyWaitMs": 1200,
+    "eval": "(() => { const line = document.querySelector('[data-dock] [role=status] button span'); const s = getComputedStyle(line); return { animation: s.animationName + ' ' + s.animationDuration + ' ' + s.animationTimingFunction, scaleNow: s.transform }; })()"
+  },
+  {
+    "name": "undo-reduced-motion",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a"
+    ],
+    "keyWaitMs": 1300,
+    "eval": "({ pill: document.querySelector('[data-dock] [role=status]').innerText.replace(/\\n/g, ' '), hairlines: document.querySelectorAll('[data-dock] [role=status] button span[aria-hidden]').length })"
+  },
+  {
+    "name": "morph-midway",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a"
+    ],
+    "keyWaitMs": 300,
+    "eval": "(async () => { const before = document.querySelector('[data-draft]'); const key = before.dataset.draft; document.querySelector('[data-primary]').click(); await new Promise(r => setTimeout(r, 90)); const li = document.querySelector('[data-reply]'); const bubble = li.querySelector(':scope > div'); const fill = bubble.querySelector('span'); const mid = { sameElement: li === before, status: li.dataset.reply, borderStyle: getComputedStyle(bubble).borderTopStyle, borderColor: getComputedStyle(bubble).borderTopColor, fillOpacity: getComputedStyle(fill).opacity }; await new Promise(r => setTimeout(r, 250)); return { key, mid, end: { fillOpacity: getComputedStyle(fill).opacity, borderColor: getComputedStyle(bubble).borderTopColor, label: li.querySelector('p').innerText.replace(/\\n/g, ' '), ticks: li.querySelectorAll('svg path').length }, laneEmpty: !document.querySelector('[role=listbox]') }; })()"
+  },
+  {
+    "name": "morph-sent-last-in-lane-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/sent-last-in-lane-undo-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a"
+    ],
+    "keyWaitMs": 300,
+    "eval": "({ reply: document.querySelector('[data-reply]')?.dataset.reply, label: document.querySelector('[data-reply] p')?.innerText.replace(/\\n/g, ' '), bar: document.querySelector('[data-glass=decision-bar]')?.innerText.replace(/\\n/g, ' '), empty: document.querySelector('[role=tabpanel]').innerText.slice(0, 120) })"
+  },
+  {
+    "name": "sent-delivered-ticks",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a"
+    ],
+    "keyWaitMs": 300,
+    "actionWaitMs": 100,
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 6200)); const li = document.querySelector('[data-reply]'); return { status: li.dataset.reply, label: li.querySelector('p').innerText.replace(/\\n/g, ' '), ticks: li.querySelectorAll('svg path').length }; })()"
+  },
+  {
+    "name": "send-failure-back-in-lane",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/send-failed-list-notice-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actionWaitMs": 300,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()",
+      "document.querySelector('[data-prototype-controls] button').click()",
+      "document.querySelector('input[name=send-failure][value=always]').click(); document.querySelector('[data-prototype-controls] button[aria-expanded]').click()",
+      "document.querySelector('[data-primary]').click()",
+      "new Promise(r => setTimeout(r, 6300))",
+      "document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "({ t17Row: document.getElementById('row-t17')?.innerText.replace(/\\n/g, ' '), notice: document.querySelector('[data-list-pane] [role=status]').innerText.replace(/\\n/g, ' '), draftsCount: document.querySelector('[data-lane-tab=drafts]').getAttribute('aria-label') })"
+  },
+  {
+    "name": "send-failure-bubble-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/send-failed-bubble-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actionWaitMs": 300,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()",
+      "document.querySelector('[data-prototype-controls] button').click()",
+      "document.querySelector('input[name=send-failure][value=always]').click(); document.querySelector('[data-prototype-controls] button[aria-expanded]').click()",
+      "document.querySelector('[data-primary]').click()",
+      "new Promise(r => setTimeout(r, 6300))",
+      "document.getElementById('row-t17').click()",
+      "document.querySelector('[data-prototype-controls]').remove(); document.activeElement.blur()"
+    ],
+    "eval": "({ label: document.querySelector('[data-reply] p').innerText.replace(/\\n/g, ' '), bar: document.querySelector('[data-glass=decision-bar]').innerText.replace(/\\n/g, ' '), row: document.getElementById('row-t17').innerText.split('\\n').slice(0, 3).join(' ') })"
+  },
+  {
+    "name": "send-failure-retry",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actionWaitMs": 300,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()",
+      "document.querySelector('[data-prototype-controls] button').click()",
+      "document.querySelector('input[name=send-failure][value=always]').click(); document.querySelector('[data-prototype-controls] button[aria-expanded]').click()",
+      "document.querySelector('[data-primary]').click()",
+      "new Promise(r => setTimeout(r, 6300))",
+      "document.getElementById('row-t17').click()",
+      "document.querySelector('[data-prototype-controls]').style.visibility = 'hidden'"
+    ],
+    "eval": "(async () => { const failed = { label: document.querySelector('[data-reply]').innerText.split('\\n')[0], status: document.querySelector('[data-reply]').dataset.reply, primary: document.querySelector('[data-primary]').textContent }; document.querySelector('[data-prototype-controls]').style.visibility = ''; document.querySelector('[data-prototype-controls] button').click(); await new Promise(r => setTimeout(r, 100)); document.querySelector('input[name=send-failure][value=off]').click(); document.querySelector('[data-prototype-controls] button[aria-expanded]').click(); await new Promise(r => setTimeout(r, 100)); [...document.querySelectorAll('[data-reply] button')].find(b => b.textContent === 'Retry').click(); await new Promise(r => setTimeout(r, 900)); return { failed, afterRetry: document.querySelector('[data-reply]').dataset.reply, ticks: document.querySelectorAll('[data-reply] svg path').length }; })()"
+  },
+  {
+    "name": "composer-t17-edit-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/composer-t17-edit-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "e"
+    ],
+    "keyWaitMs": 500,
+    "eval": "(() => { const c = document.querySelector('[data-composer]'); const main = document.querySelector('main').getBoundingClientRect(); return { mode: c.dataset.composer, glass: c.dataset.glass, radius: getComputedStyle(c).borderTopLeftRadius, focusInTextarea: document.activeElement.tagName, caretAtEnd: document.activeElement.selectionStart === document.activeElement.value.length, strip: c.querySelector('p').textContent, chips: [...c.querySelectorAll('[data-chip]')].map(b => b.textContent), send: c.querySelector('button[aria-keyshortcuts$=Enter]').innerText.replace(/\\n/g, ' '), draftHidden: !document.querySelector('[data-draft]'), fitsInPane: c.getBoundingClientRect().top > main.top }; })()"
+  },
+  {
+    "name": "composer-shorter-then-edited",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "e"
+    ],
+    "keyWaitMs": 400,
+    "eval": "(async () => { const t = document.querySelector('textarea'); const before = t.value; document.querySelector('[data-chip=shorter]').click(); await new Promise(r => setTimeout(r, 150)); const busy = { readOnly: t.readOnly, status: document.querySelector('[data-composer] [role=status]').textContent }; await new Promise(r => setTimeout(r, 700)); const after = document.querySelector('textarea').value; const status = document.querySelector('[data-composer] [role=status]').textContent; const send = document.querySelector('[data-composer] button[aria-keyshortcuts$=Enter]').textContent; return { busy, shorter: after.split(/\\s+/).length < before.split(/\\s+/).length, status, send }; })()"
+  },
+  {
+    "name": "composer-edit-send-edited-dot-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t22",
+    "out": "docs/evidence/step-5/sent-edited-undo-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "a",
+      "e"
+    ],
+    "keyWaitMs": 300,
+    "eval": "(async () => { const t = document.querySelector('textarea'); const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; setter.call(t, t.value + ' Reply here if anything looks wrong.'); t.dispatchEvent(new Event('input', { bubbles: true })); await new Promise(r => setTimeout(r, 100)); const label = document.querySelector('[data-composer] button[aria-keyshortcuts$=Enter]').textContent; t.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true })); await new Promise(r => setTimeout(r, 400)); const li = document.querySelector('[data-reply]'); return { label, reply: li?.dataset.reply, status: li?.querySelector('p').innerText.replace(/\\n/g, ' ') }; })()"
+  },
+  {
+    "name": "composer-escape-restores-draft",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "e",
+      "Escape"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ composer: !!document.querySelector('[data-composer]'), draft: !!document.querySelector('[data-draft=t17-draft]'), bar: !!document.querySelector('[data-primary]'), focus: document.activeElement.id })"
+  },
+  {
+    "name": "composer-t07-translate-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t07",
+    "out": "docs/evidence/step-5/composer-t07-translated-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "e"
+    ],
+    "keyWaitMs": 400,
+    "eval": "(async () => { const chips = [...document.querySelectorAll('[data-chip]')].map(b => b.getAttribute('aria-label')); const glossShown = !!document.querySelector('[data-composer] p[lang=en]'); document.querySelector('[data-chip=translate]').click(); await new Promise(r => setTimeout(r, 800)); const t = document.querySelector('textarea'); document.querySelector('[data-composer] button[aria-keyshortcuts$=Enter]').click(); await new Promise(r => setTimeout(r, 100)); return { chips, glossShown, lang: t.lang, startsEnglish: t.value.startsWith('Hi Diego'), sendDisabled: document.querySelector('[data-composer] button[aria-keyshortcuts$=Enter]').getAttribute('aria-disabled'), status: document.querySelector('[data-composer] [role=status]').textContent, sent: !!document.querySelector('[data-reply]') }; })()"
+  },
+  {
+    "name": "escalate-t03-popover-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t03",
+    "out": "docs/evidence/step-5/escalate-t03-popover-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "h"
+    ],
+    "keyWaitMs": 600,
+    "eval": "(() => { const p = document.querySelector('[data-escalate-popover]'); const trigger = document.querySelector('[aria-keyshortcuts=H]').getBoundingClientRect(); const r = p.getBoundingClientRect(); return { role: p.getAttribute('role'), focus: document.activeElement.value, team: p.querySelector('input:checked').value, reasons: [...p.querySelectorAll('[aria-pressed=true]')].map(b => b.textContent), note: p.querySelector('textarea').value.slice(0, 60), submit: p.querySelector('button[type=submit]').textContent, aboveTrigger: r.bottom <= trigger.top, origin: getComputedStyle(p).transformOrigin, bg: getComputedStyle(p).backgroundColor, backdrop: getComputedStyle(p).backdropFilter }; })()"
+  },
+  {
+    "name": "escalate-t03-submit",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t03",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "h"
+    ],
+    "keyWaitMs": 600,
+    "actionWaitMs": 500,
+    "eval": "(async () => { document.querySelector('[data-escalate-popover] button[type=submit]').click(); await new Promise(r => setTimeout(r, 500)); return { popover: !!document.querySelector('[data-escalate-popover]'), open: new URLSearchParams(location.search).get('ticket'), t03InList: !!document.getElementById('row-t03'), notice: document.querySelector('[data-list-pane] [role=status]').innerText.replace(/\\n/g, ' ') }; })()"
+  },
+  {
+    "name": "escalate-team-change",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "h"
+    ],
+    "keyWaitMs": 600,
+    "eval": "(async () => { const p = document.querySelector('[data-escalate-popover]'); p.querySelector('input[value=tech]').click(); await new Promise(r => setTimeout(r, 100)); const t = p.querySelector('textarea'); const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set; setter.call(t, ''); t.dispatchEvent(new Event('input', { bubbles: true })); await new Promise(r => setTimeout(r, 50)); p.querySelector('button[type=submit]').click(); await new Promise(r => setTimeout(r, 100)); return { submit: p.querySelector('button[type=submit]').textContent, reasons: [...p.querySelectorAll('fieldset:nth-of-type(2) button')].map(b => b.textContent), blocked: p.querySelector('[role=alert]')?.textContent, stillOpen: !!document.querySelector('[data-escalate-popover]') }; })()"
+  },
+  {
+    "name": "wellbeing-t06-refuse-then-take-over-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "out": "docs/evidence/step-5/take-over-t06-template-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "a"
+    ],
+    "keyWaitMs": 300,
+    "eval": "(async () => { const refused = document.querySelector('[data-dock] [role=status]').textContent; const bar = document.querySelector('[data-glass=decision-bar]').innerText.replace(/\\n/g, ' '); document.querySelector('[data-primary]').click(); await new Promise(r => setTimeout(r, 300)); const empty = document.querySelector('textarea').value; const event = [...document.querySelectorAll('main ol li')].map(li => li.textContent).find(t => t.includes('took over')); [...document.querySelectorAll('[data-composer] button')].find(b => b.textContent.includes('reviewed template')).click(); await new Promise(r => setTimeout(r, 200)); return { refused, bar, emptyOnTakeOver: empty === '', event, templateStart: document.querySelector('textarea').value.slice(0, 60), violet: getComputedStyle(document.querySelector('[data-composer] p')).color }; })()"
+  },
+  {
+    "name": "safety-t03-bar",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t03",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "e"
+    ],
+    "keyWaitMs": 300,
+    "eval": "({ bar: document.querySelector('[data-glass=decision-bar]').innerText.replace(/\\n/g, ' '), overflow: document.querySelector('[data-glass=decision-bar]').scrollWidth > document.querySelector('[data-glass=decision-bar]').clientWidth, notice: document.querySelector('[data-dock] [role=status]').textContent, composer: !!document.querySelector('[data-composer]') })"
+  },
+  {
+    "name": "auto-t01-mark-wrong-2x",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t01",
+    "out": "docs/evidence/step-5/auto-t01-marked-wrong-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "[...document.querySelectorAll('[data-glass=decision-bar] button')].find(b => b.textContent.includes('Mark as wrong')).click()"
+    ],
+    "eval": "({ bar: document.querySelector('[data-glass=decision-bar]').innerText.replace(/\\n/g, ' '), pressed: [...document.querySelectorAll('[data-glass=decision-bar] button')].find(b => b.textContent.includes('Mark as wrong')).getAttribute('aria-pressed'), notice: document.querySelector('[data-dock] [role=status]').innerText.replace(/\\n/g, ' '), event: [...document.querySelectorAll('main ol li')].map(li => li.textContent).find(t => t.includes('wrong')), stillInLane: !!document.getElementById('row-t01') })"
+  },
+  {
+    "name": "rows-still-instant-on-J",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main ol')",
+    "keys": [
+      "j"
+    ],
+    "keyWaitMs": 30,
+    "eval": "(() => { const row = document.querySelector('[role=option][aria-selected=true]'); return { open: row.id, rowTransition: getComputedStyle(row).transitionProperty + ' ' + getComputedStyle(row).transitionDuration, wrapperTransform: getComputedStyle(row.parentElement).transform, swap: document.querySelector('main ol').dataset.swap }; })()"
+  },
+  {
+    "name": "bar-fits-every-ticket-1440",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "eval": "(async () => { const out = []; let checked = 0; for (const lane of ['needs_you', 'drafts', 'auto_resolved']) { document.querySelector(`[data-lane-tab=${lane}]`).click(); await new Promise(r => setTimeout(r, 200)); for (const row of [...document.querySelectorAll('[role=option]')]) { row.click(); await new Promise(r => setTimeout(r, 80)); checked++; const main = document.querySelector('main').getBoundingClientRect(); for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) { const r = el.getBoundingClientRect(); if (el.scrollWidth > el.clientWidth + 1 || r.width > 560.5 || r.left < main.left || r.right > main.right) out.push(`${row.id} ${el.dataset.glass ?? 'choice'} ${el.scrollWidth}/${el.clientWidth}`); } } } return { checked, overflowing: out }; })()"
+  },
+  {
+    "name": "bar-fits-every-ticket-900",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "width": 900,
+    "height": 800,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "eval": "(async () => { const out = []; let checked = 0; for (const lane of ['needs_you', 'drafts', 'auto_resolved']) { document.querySelector(`[data-lane-tab=${lane}]`).click(); await new Promise(r => setTimeout(r, 200)); for (const row of [...document.querySelectorAll('[role=option]')]) { row.click(); await new Promise(r => setTimeout(r, 80)); checked++; const main = document.querySelector('main').getBoundingClientRect(); for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) { const r = el.getBoundingClientRect(); if (el.scrollWidth > el.clientWidth + 1 || r.left < main.left || r.right > main.right) out.push(`${row.id} ${el.dataset.glass ?? 'choice'} ${el.scrollWidth}/${el.clientWidth} in ${Math.round(main.width)}`); } } } return { checked, overflowing: out }; })()"
+  },
+  {
+    "name": "narrow-900-t02-bar",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 900,
+    "height": 800,
+    "out": "docs/evidence/step-5/bar-t02-narrow-900.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(() => { const bar = document.querySelector('[data-glass=decision-bar]').getBoundingClientRect(); const main = document.querySelector('main').getBoundingClientRect(); return { mainWidth: main.width, barWidth: bar.width, inside: bar.left >= main.left && bar.right <= main.right, overflow: document.querySelector('[data-glass=decision-bar]').scrollWidth > document.querySelector('[data-glass=decision-bar]').clientWidth, kbd: getComputedStyle(document.querySelector('[data-glass=decision-bar] kbd') ?? document.body).display }; })()"
+  },
+  {
+    "name": "night-bar-t02-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-5/night-bar-t02-decline-2x.png",
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('input[value=t02-refund]').click()"
+    ]
+  },
+  {
+    "name": "night-composer-t17-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/night-composer-t17-2x.png",
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "e"
+    ],
+    "keyWaitMs": 500
+  },
+  {
+    "name": "bar-reduced-transparency-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "out": "docs/evidence/step-5/bar-reduced-transparency-2x.png",
+    "scale": 2,
+    "media": {
+      "prefers-reduced-transparency": "reduce"
+    },
+    "selector": "[data-dock]",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "[...document.querySelectorAll('[data-glass]')].map(e => { const s = getComputedStyle(e); return e.dataset.glass + ': backdrop=' + s.backdropFilter + ' bg=' + s.backgroundColor; })"
+  },
+  {
+    "name": "greyscale-bar-t02-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-5/greyscale-bar-t02-2x.png",
+    "scale": 2,
+    "selector": "main",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('input[value=t02-refund]').click()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ]
+  },
+  {
+    "name": "tokens-contrast",
+    "url": "http://localhost:3000/tokens",
+    "waitFor": "document.querySelectorAll('[data-contrast-summary]').length === 2 && [...document.querySelectorAll('[data-contrast-summary]')].every(e => e.dataset.contrastSummary.includes('/'))",
+    "waitMs": 1200,
+    "eval": "({ summaries: [...document.querySelectorAll('[data-contrast-summary]')].map(e => e.closest('[data-theme-scope]').dataset.themeScope + ' ' + e.dataset.contrastSummary), fails: [...document.querySelectorAll('tr[data-verdict=Fail]')].map(r => r.closest('[data-theme-scope]').dataset.themeScope + ': ' + r.textContent), newPairs: [...document.querySelectorAll('tr[data-ratio]')].filter(r => /composer|Not sent/.test(r.textContent)).map(r => r.closest('[data-theme-scope]').dataset.themeScope + ' ' + r.cells[0].textContent.trim() + ' ' + r.dataset.ratio) })"
+  }
+]

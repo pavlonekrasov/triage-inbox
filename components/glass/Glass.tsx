@@ -11,6 +11,8 @@ type GlassProps = ComponentProps<"div"> & {
   surface: GlassSurface;
   /** "strong" (0.88 tint) for glass that carries primary text; "light" follows --glass-tint-alpha. */
   tint?: "strong" | "light";
+  /** "pill" for bars and tracks; "card" for the composer the decision bar grows into. */
+  shape?: "pill" | "card";
 };
 
 /*
@@ -28,11 +30,11 @@ const material = (tint: "strong" | "light"): CSSProperties => ({
   boxShadow: "var(--glass-bevel), var(--glass-ring), var(--shadow-glass)",
 });
 
-export function Glass({ surface, tint = "strong", className, style, ...props }: GlassProps) {
+export function Glass({ surface, tint = "strong", shape = "pill", className, style, ...props }: GlassProps) {
   return (
     <div
       data-glass={surface}
-      className={cn("rounded-full", className)}
+      className={cn(shape === "card" ? "rounded-card" : "rounded-full", className)}
       style={{ ...material(tint), ...style }}
       {...props}
     />

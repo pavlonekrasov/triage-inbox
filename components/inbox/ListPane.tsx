@@ -1,10 +1,11 @@
 "use client";
 
 import { CirclePause, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { useCallback, useEffect, type KeyboardEvent } from "react";
 import { PillButton } from "@/components/controls/PillButton";
 import { PrototypeControls } from "@/components/dev/PrototypeControls";
-import { rowsFor, useDesk } from "@/components/desk/desk-store";
+import { hiddenIds, rowsFor, useDesk } from "@/components/desk/desk-store";
 import { ThemeIconToggle } from "@/components/theme/ThemeIconToggle";
 import { formatDuration, formatPercent, TODAY } from "@/data/metrics";
 import { LANES } from "@/lib/lanes";
@@ -15,14 +16,27 @@ import { LaneSwitcher } from "./LaneSwitcher";
 import { SkeletonRows } from "./SkeletonRows";
 import { rowId, TicketRow } from "./TicketRow";
 
+/*
+ * A row leaving its lane (brief 10): the rows below close the gap over 240 ms, and the row itself
+ * fades and scales to 0.98 over 150 ms. Reduced motion keeps the fade only. Selection never moves a
+ * row, so J and K stay instant.
+ */
+const ROW_TRANSITION: Transition = {
+  layout: { duration: 0.24, ease: [0.23, 1, 0.32, 1] },
+  opacity: { duration: 0.15, ease: "easeIn" },
+  scale: { duration: 0.15, ease: "easeIn" },
+};
+
 export function ListPane() {
   const { state, dispatch } = useDesk();
-  const { lane, listState, editMode, checked, cursorId, openId, dismissed, focusRequest } = state;
+  const { lane, listState, editMode, checked, cursorId, openId, focusRequest, outbox } = state;
   const notice = state.notice?.where === "list" ? state.notice : null;
-  const rows = rowsFor(listState, lane, dismissed);
+  const reduced = useReducedMotion();
+  const hidden = hiddenIds(state);
+  const rows = rowsFor(listState, lane, hidden);
 
   const counts = Object.fromEntries(
-    LANES.map((l) => [l.id, listState === "loading" ? null : rowsFor(listState, l.id, dismissed).length]),
+    LANES.map((l) => [l.id, listState === "loading" ? null : rowsFor(listState, l.id, hidden).length]),
   ) as Record<Lane, number | null>;
 
   // Keep the keyboard row in view with no smooth scroll: J/K runs hundreds of times a shift.
@@ -55,7 +69,7 @@ export function ListPane() {
     <section data-list-pane aria-label="Conversations" className="@container flex h-full min-w-0 flex-col bg-sidebar">
       <ListHeader />
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <motion.div layoutScroll className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {/* The lane track floats and the list scrolls under it: glass surface 3 of 4 (brief 6.5). */}
         <div className="sticky top-0 z-10 px-3 pt-1 pb-2">
           <LaneSwitcher lane={lane} counts={counts} onSelect={(next) => dispatch({ type: "selectLane", lane: next })} />
@@ -94,28 +108,42 @@ export function ListPane() {
           ) : rows.length === 0 ? (
             <LaneEmpty lane={lane} />
           ) : (
+            // Keyed by lane, so switching lanes replaces the list at once instead of animating rows out.
             <div
+              key={`${lane}:${listState}`}
               role="listbox"
               aria-label={laneLabel}
               aria-multiselectable={editMode || undefined}
               onKeyDown={onListKeyDown}
+              className="relative"
             >
-              {rows.map((ticket, i) => (
-                <TicketRow
-                  key={ticket.id}
-                  ticket={ticket}
-                  open={ticket.id === openId}
-                  checked={checked.includes(ticket.id)}
-                  editMode={editMode}
-                  tabbable={ticket.id === tabbableId}
-                  last={i === rows.length - 1}
-                  onActivate={activate}
-                />
-              ))}
+              <AnimatePresence initial={false} mode="popLayout">
+                {rows.map((ticket, i) => (
+                  <motion.div
+                    key={ticket.id}
+                    layout={reduced ? false : "position"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
+                    transition={ROW_TRANSITION}
+                  >
+                    <TicketRow
+                      ticket={ticket}
+                      open={ticket.id === openId}
+                      checked={checked.includes(ticket.id)}
+                      editMode={editMode}
+                      tabbable={ticket.id === tabbableId}
+                      last={i === rows.length - 1}
+                      unsent={outbox[ticket.id]?.status === "failed"}
+                      onActivate={activate}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* Metrics live one click away (brief 1); the line becomes the quality sheet's trigger in step 8. */}
       <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-border pr-1 pl-4 text-micro text-muted-foreground tabular-nums">
@@ -132,9 +160,8 @@ export function ListPane() {
 /** Telegram grammar: the title bar becomes the selection bar in edit mode. */
 function ListHeader() {
   const { state, dispatch } = useDesk();
-  const sureIds = rowsFor(state.listState, "drafts", state.dismissed)
-    .filter((t) => isSureLowRiskDraft(t.triage))
-    .map((t) => t.id);
+  const drafts = rowsFor(state.listState, "drafts", hiddenIds(state));
+  const sureIds = drafts.filter((t) => isSureLowRiskDraft(t.triage)).map((t) => t.id);
   const sureCount = sureIds.length;
   // Hidden once exactly the Sure set is selected: pressing it again would change nothing.
   const sureAlreadySelected =
@@ -164,7 +191,7 @@ function ListHeader() {
         <h1 className="text-title">Care Desk</h1>
         <span className="text-micro text-muted-foreground">concept</span>
       </div>
-      {state.lane === "drafts" && state.listState !== "loading" && (
+      {state.lane === "drafts" && drafts.length > 0 && (
         <PillButton title="Select drafts (X)" onClick={() => dispatch({ type: "enterSelection" })}>
           Select drafts
         </PillButton>

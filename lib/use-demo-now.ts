@@ -38,6 +38,12 @@ function subscribe(listener: () => void) {
   };
 }
 
+/** The demo clock's current value for an event handler, without re-rendering the caller every second. */
+export function readDemoNow() {
+  tick();
+  return snapshot;
+}
+
 /** Server and hydration render DEMO_NOW; the browser then advances it. */
 export function useDemoNow() {
   return useSyncExternalStore(

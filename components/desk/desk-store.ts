@@ -3,21 +3,75 @@
 import { createContext, use, type Dispatch } from "react";
 import { TICKETS, TICKETS_BY_ID } from "@/data/tickets";
 import { formatClockTime } from "@/lib/clock";
+import { approveBlocked, decisionFor, editTarget, type DecisionContext, type OutgoingStatus } from "@/lib/decision";
 import type { DeskInit, ListState } from "@/lib/desk-params";
-import { dismissBlock, laneTickets, type DismissKind } from "@/lib/lanes";
+import { teamLabel } from "@/lib/escalation";
+import { dismissBlock, LANES, laneTickets, type DismissKind } from "@/lib/lanes";
+import { composerSendBlock } from "@/lib/rewrite";
 import { approvalBlock, canBulkSelect, isSureLowRiskDraft, laneFor } from "@/lib/route";
-import type { Lane, Ticket } from "@/lib/types";
+import { UNDO_WINDOW_MS, type SendFailure } from "@/lib/send";
+import type { TimelineOverlay } from "@/lib/timeline";
+import type { EscalationTeam, Lane, Ticket } from "@/lib/types";
 
 const SNOOZE_MS = 60 * 60_000;
+const iso = (ms: number) => new Date(ms).toISOString();
+
+function omit<T>(record: Readonly<Record<string, T>>, key: string): Record<string, T> {
+  return Object.fromEntries(Object.entries(record).filter(([k]) => k !== key));
+}
 
 export type Dismissals = Readonly<Record<string, { kind: DismissKind; until?: string }>>;
 
 export interface Notice {
   id: number;
   text: string;
-  /** Feedback appears next to its trigger: list actions under the lane track, thread actions under the header. */
-  where: "list" | "thread";
+  /**
+   * Feedback appears next to its trigger: list actions under the lane track, header actions under
+   * the header, decisions above the decision bar.
+   */
+  where: "list" | "thread" | "bar";
   action?: { label: string; dispatch: DeskAction };
+}
+
+/** Telegram's edit mode: one composer at a time, bound to the ticket it was opened on. */
+export interface Composer {
+  ticketId: string;
+  mode: "edit" | "take-over" | "follow-up" | "write";
+  /** The AI draft being edited; null when the person writes from nothing. */
+  draftId: string | null;
+  /** The text the composer opened with, which tells an edited reply from an unchanged one. */
+  original: string;
+  text: string;
+  language: string;
+  /** An AI chip rewrote the text at least once. */
+  rewritten: boolean;
+}
+
+/** A reply sent from this desk. Approve is optimistic: it waits out the undo window, then commits. */
+export interface Outgoing {
+  ticketId: string;
+  body: string;
+  language: string;
+  draftId: string | null;
+  edited: boolean;
+  /** Demo-clock time of the send, shown on the bubble. */
+  at: string;
+  status: OutgoingStatus;
+  /** Date.now() deadline of the undo window: the window is real time, not demo time. */
+  undoUntil: number;
+  /** Changes on every attempt, so a late result from an earlier attempt is ignored. */
+  attempt: number;
+  /** Service messages the send adds, such as the review a safety acknowledgment opens. */
+  events: string[];
+  /** The composer the reply was sent from, which Undo reopens so no edit is lost. */
+  composer: Composer | null;
+}
+
+export interface Escalation {
+  team: EscalationTeam;
+  reasons: string[];
+  note: string;
+  at: string;
 }
 
 export interface DeskState {
@@ -37,6 +91,20 @@ export interface DeskState {
   notice: Notice | null;
   focusRequest: { id: string; nonce: number } | null;
   seq: number;
+
+  outbox: Readonly<Record<string, Outgoing>>;
+  escalations: Readonly<Record<string, Escalation>>;
+  /** Two-outcome cases: the draft a person chose. */
+  variantChoice: Readonly<Record<string, string>>;
+  /** Wellbeing cases a person took over, with the time. */
+  takenOver: Readonly<Record<string, string>>;
+  /** Auto-sent replies marked wrong, with the time. They feed the quality review. */
+  markedWrong: Readonly<Record<string, string>>;
+  composer: Composer | null;
+  /** The Escalate popover on the open conversation. */
+  escalateOpen: boolean;
+  /** Prototype control: how often the fake send API fails. */
+  sendFailure: SendFailure;
 }
 
 export type DeskAction =
@@ -50,17 +118,94 @@ export type DeskAction =
   | { type: "setListState"; listState: ListState }
   | { type: "dismiss"; id: string; kind: DismissKind; now: number }
   | { type: "restore"; id: string }
+  | { type: "reveal"; id: string }
   | { type: "toggleTranslation" }
   | { type: "notify"; text: string; where: Notice["where"] }
-  | { type: "clearNotice"; id: number };
+  | { type: "clearNotice"; id: number }
+  | { type: "decide"; now: number; wall: number }
+  | { type: "approve"; now: number; wall: number }
+  | { type: "chooseVariant"; draftId: string }
+  | { type: "openComposer" }
+  | { type: "composerInput"; text: string }
+  | { type: "composerRewrite"; text: string; language: string }
+  | { type: "closeComposer" }
+  | { type: "sendComposer"; now: number; wall: number }
+  | { type: "undoSend"; id?: string }
+  | { type: "commitSend"; id: string; attempt: number }
+  | { type: "sendSettled"; id: string; attempt: number; ok: boolean }
+  | { type: "retrySend"; id: string }
+  | { type: "setEscalateOpen"; open: boolean }
+  | { type: "escalate"; team: EscalationTeam; reasons: string[]; note: string; now: number }
+  | { type: "undoEscalation"; id: string }
+  | { type: "toggleMarkWrong"; now: number }
+  | { type: "setSendFailure"; sendFailure: SendFailure };
 
-const NO_DISMISSALS: Dismissals = {};
+/** Tickets out of every lane right now: snoozed, marked spam, escalated, or answered from an open lane. */
+export function hiddenIds(state: Pick<DeskState, "dismissed" | "escalations" | "outbox">): ReadonlySet<string> {
+  const hidden = new Set([...Object.keys(state.dismissed), ...Object.keys(state.escalations)]);
+  for (const outgoing of Object.values(state.outbox)) {
+    const ticket = TICKETS_BY_ID.get(outgoing.ticketId);
+    // A follow-up on an answered ticket leaves it in Auto-resolved; a failed send puts it back.
+    if (ticket && outgoing.status !== "failed" && laneFor(ticket.triage.route) !== "auto_resolved") {
+      hidden.add(outgoing.ticketId);
+    }
+  }
+  return hidden;
+}
+
+const NONE: ReadonlySet<string> = new Set();
 
 /** The rows a lane shows in a given list state. */
-export function rowsFor(listState: ListState, lane: Lane, dismissed: Dismissals = NO_DISMISSALS): Ticket[] {
+export function rowsFor(listState: ListState, lane: Lane, hidden: ReadonlySet<string> = NONE): Ticket[] {
   if (listState === "loading") return [];
   if (listState === "empty" && lane === "needs_you") return [];
-  return laneTickets(TICKETS, lane).filter((t) => !dismissed[t.id]);
+  return laneTickets(TICKETS, lane).filter((t) => !hidden.has(t.id));
+}
+
+export function contextFor(state: DeskState, id: string): DecisionContext {
+  return {
+    chosenDraftId: state.variantChoice[id] ?? null,
+    takenOver: id in state.takenOver,
+    outgoing: state.outbox[id]?.status ?? null,
+  };
+}
+
+export function latestUndoable(outbox: DeskState["outbox"]): Outgoing | null {
+  let latest: Outgoing | null = null;
+  for (const o of Object.values(outbox)) {
+    if (o.status === "undoable" && (!latest || o.undoUntil > latest.undoUntil)) latest = o;
+  }
+  return latest;
+}
+
+/** The desk's own actions on a ticket, for the thread to lay over the fixture. */
+export function threadOverlay(state: DeskState, ticket: Ticket): TimelineOverlay {
+  const events: { at: string; text: string }[] = [];
+  const takenOver = state.takenOver[ticket.id];
+  if (takenOver) events.push({ at: takenOver, text: "You took over the conversation" });
+  const wrong = state.markedWrong[ticket.id];
+  if (wrong) events.push({ at: wrong, text: "Marked as wrong by you, for today's quality review" });
+  const outgoing = state.outbox[ticket.id];
+  for (const text of outgoing?.events ?? []) events.push({ at: outgoing.at, text });
+  const escalation = state.escalations[ticket.id];
+  if (escalation) events.push({ at: escalation.at, text: `Escalated to ${teamLabel(escalation.team)} by you` });
+  const composer = state.composer?.ticketId === ticket.id ? state.composer : null;
+
+  return {
+    reply: outgoing
+      ? {
+          body: outgoing.body,
+          language: outgoing.language,
+          draftId: outgoing.draftId,
+          edited: outgoing.edited,
+          at: outgoing.at,
+          status: outgoing.status,
+        }
+      : null,
+    chosenDraftId: state.variantChoice[ticket.id] ?? null,
+    editingDraftId: composer?.mode === "edit" ? composer.draftId : null,
+    events,
+  };
 }
 
 export function createDeskState({ lane, ticketId, listState }: DeskInit): DeskState {
@@ -74,11 +219,19 @@ export function createDeskState({ lane, ticketId, listState }: DeskInit): DeskSt
     editMode: false,
     checked: [],
     listState,
-    dismissed: NO_DISMISSALS,
+    dismissed: {},
     showTranslation: true,
     notice: null,
     focusRequest: null,
     seq: 0,
+    outbox: {},
+    escalations: {},
+    variantChoice: {},
+    takenOver: {},
+    markedWrong: {},
+    composer: null,
+    escalateOpen: false,
+    sendFailure: "off",
   };
 }
 
@@ -91,6 +244,49 @@ const SELECTION_ELSEWHERE: Record<Lane, string> = {
 function notify(state: DeskState, text: string, where: Notice["where"] = "list", action?: Notice["action"]): DeskState {
   const seq = state.seq + 1;
   return { ...state, seq, notice: { id: seq, text, where, action } };
+}
+
+const openTicket = (state: DeskState) => (state.openId ? TICKETS_BY_ID.get(state.openId) : undefined);
+const clearBarNotice = (state: DeskState) => (state.notice?.where === "bar" ? null : state.notice);
+
+/** Opens a ticket in its own lane with focus on its row: how Undo puts the specialist back. */
+function reveal(state: DeskState, id: string): DeskState {
+  const ticket = TICKETS_BY_ID.get(id);
+  if (!ticket) return state;
+  const seq = state.seq + 1;
+  return {
+    ...state,
+    seq,
+    lane: laneFor(ticket.triage.route),
+    openId: id,
+    cursorId: id,
+    editMode: false,
+    checked: [],
+    notice: null,
+    focusRequest: { id, nonce: seq },
+  };
+}
+
+/**
+ * The ticket leaves the lane and the next conversation opens in its place, as in a mail client: the
+ * row below, else the row above, with keyboard focus on it. `stay` keeps the ticket open when no row
+ * is left, so the specialist sees the outcome of the last case in a lane.
+ */
+function openNext(before: DeskState, id: string, next: DeskState, { stay }: { stay: boolean }): DeskState {
+  if (before.openId !== id) return next;
+  const rows = rowsFor(before.listState, before.lane, hiddenIds(before));
+  const index = rows.findIndex((t) => t.id === id);
+  const neighbour = index < 0 ? undefined : (rows[index + 1] ?? rows[index - 1]);
+  const openId = neighbour?.id ?? (stay ? id : null);
+  const seq = next.seq + 1;
+  return {
+    ...next,
+    seq,
+    openId,
+    cursorId: openId,
+    checked: next.checked.filter((c) => c !== id),
+    focusRequest: neighbour ? { id: neighbour.id, nonce: seq } : next.focusRequest,
+  };
 }
 
 function toggleCheck(state: DeskState, id: string | null): DeskState {
@@ -112,20 +308,8 @@ function dismiss(state: DeskState, { id, kind, now }: { id: string; kind: Dismis
   const blocked = dismissBlock(ticket, kind);
   if (blocked) return notify(state, blocked, "thread");
 
-  // The next conversation opens in its place, as after sending: the row below, else the row above.
-  const rows = rowsFor(state.listState, state.lane, state.dismissed);
-  const index = rows.findIndex((t) => t.id === id);
-  const neighbour = index < 0 ? undefined : (rows[index + 1] ?? rows[index - 1]);
-  const openId = state.openId === id ? (neighbour?.id ?? null) : state.openId;
-  const until = kind === "snoozed" ? new Date(now + SNOOZE_MS).toISOString() : undefined;
-
-  const next: DeskState = {
-    ...state,
-    dismissed: { ...state.dismissed, [id]: { kind, until } },
-    openId,
-    cursorId: openId,
-    checked: state.checked.filter((c) => c !== id),
-  };
+  const until = kind === "snoozed" ? iso(now + SNOOZE_MS) : undefined;
+  const next = openNext(state, id, { ...state, dismissed: { ...state.dismissed, [id]: { kind, until } } }, { stay: false });
   const name = ticket.customer.name;
   return kind === "snoozed"
     ? notify(next, `Snoozed ${name} until ${formatClockTime(until!)}.`, "list", {
@@ -135,11 +319,104 @@ function dismiss(state: DeskState, { id, kind, now }: { id: string; kind: Dismis
     : notify(next, `Marked ${name} as spam.`, "list", { label: "Undo spam", dispatch: { type: "restore", id } });
 }
 
-export function deskReducer(state: DeskState, action: DeskAction): DeskState {
+type ReplyPayload = Pick<Outgoing, "body" | "language" | "draftId" | "edited"> & {
+  events?: string[];
+  composer?: Composer | null;
+};
+
+function send(state: DeskState, ticket: Ticket, reply: ReplyPayload, now: number, wall: number): DeskState {
+  const seq = state.seq + 1;
+  const outgoing: Outgoing = {
+    ticketId: ticket.id,
+    body: reply.body,
+    language: reply.language,
+    draftId: reply.draftId,
+    edited: reply.edited,
+    at: iso(now),
+    status: "undoable",
+    undoUntil: wall + UNDO_WINDOW_MS,
+    attempt: seq,
+    events: reply.events ?? [],
+    composer: reply.composer ?? null,
+  };
+  const next: DeskState = {
+    ...state,
+    seq,
+    outbox: { ...state.outbox, [ticket.id]: outgoing },
+    composer: state.composer?.ticketId === ticket.id ? null : state.composer,
+    escalateOpen: false,
+    notice: clearBarNotice(state),
+  };
+  const leaves = laneFor(ticket.triage.route) !== "auto_resolved" && state.outbox[ticket.id]?.status !== "sent";
+  return leaves ? openNext(state, ticket.id, next, { stay: true }) : next;
+}
+
+function compose(
+  state: DeskState,
+  ticket: Ticket,
+  mode: Composer["mode"],
+  source: { id: string | null; body: string; language: string } | null,
+): DeskState {
+  return {
+    ...state,
+    escalateOpen: false,
+    notice: clearBarNotice(state),
+    composer: {
+      ticketId: ticket.id,
+      mode,
+      draftId: source?.id ?? null,
+      original: source?.body ?? "",
+      text: source?.body ?? "",
+      language: source?.language ?? ticket.triage.language,
+      rewritten: false,
+    },
+  };
+}
+
+function retry(state: DeskState, id: string): DeskState {
+  const outgoing = state.outbox[id];
+  if (outgoing?.status !== "failed") return state;
+  const seq = state.seq + 1;
+  return {
+    ...state,
+    seq,
+    outbox: { ...state.outbox, [id]: { ...outgoing, status: "sending", attempt: seq } },
+    notice: state.notice?.where === "list" || state.notice?.where === "bar" ? null : state.notice,
+  };
+}
+
+/** The primary action of the decision bar for the open conversation (brief 9.1). */
+function decide(state: DeskState, now: number, wall: number): DeskState {
+  const ticket = openTicket(state);
+  if (!ticket) return state;
+  const { primary, draft } = decisionFor(ticket, contextFor(state, ticket.id));
+  if (primary.blocked) return notify(state, primary.blocked, "bar");
+  const fromDraft = draft && { body: draft.body, language: draft.language, draftId: draft.id, edited: false };
+
+  switch (primary.kind) {
+    case "approve":
+    case "send-variant":
+      return fromDraft ? send(state, ticket, fromDraft, now, wall) : state;
+    case "acknowledge":
+      return fromDraft ? send(state, ticket, { ...fromDraft, events: ["Review opened with Trust & Safety"] }, now, wall) : state;
+    case "take-over":
+      return compose({ ...state, takenOver: { ...state.takenOver, [ticket.id]: iso(now) } }, ticket, "take-over", null);
+    case "review-send":
+      return draft ? compose(state, ticket, "edit", draft) : state;
+    case "follow-up":
+      return compose(state, ticket, "follow-up", null);
+    case "write":
+      return compose(state, ticket, "write", null);
+    case "retry":
+      return retry(state, ticket.id);
+  }
+}
+
+function reduce(state: DeskState, action: DeskAction): DeskState {
   switch (action.type) {
     case "selectLane": {
       if (action.lane === state.lane) return state;
-      const rows = rowsFor(state.listState, action.lane, state.dismissed);
+      const rows = rowsFor(state.listState, action.lane, hiddenIds(state));
       const openId =
         state.listState === "loading" || rows.some((t) => t.id === state.openId) ? state.openId : (rows[0]?.id ?? null);
       // A notice is about the lane it was raised in, so it does not follow the specialist elsewhere.
@@ -151,7 +428,7 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
       return { ...state, openId: action.id, cursorId: action.id };
 
     case "move": {
-      const rows = rowsFor(state.listState, state.lane, state.dismissed);
+      const rows = rowsFor(state.listState, state.lane, hiddenIds(state));
       if (rows.length === 0) return state;
       const last = rows.length - 1;
       const index = rows.findIndex((t) => t.id === state.cursorId);
@@ -172,7 +449,7 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
 
     case "selectSureDrafts": {
       if (state.lane !== "drafts") return notify(state, SELECTION_ELSEWHERE[state.lane]);
-      const ids = rowsFor(state.listState, "drafts", state.dismissed)
+      const ids = rowsFor(state.listState, "drafts", hiddenIds(state))
         .filter((t) => isSureLowRiskDraft(t.triage))
         .map((t) => t.id);
       if (ids.length === 0) return notify(state, "No low-risk Sure drafts are waiting.");
@@ -188,7 +465,7 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
       return { ...state, editMode: false, checked: [], cursorId: state.openId };
 
     case "setListState": {
-      const rows = rowsFor(action.listState, state.lane, state.dismissed);
+      const rows = rowsFor(action.listState, state.lane, hiddenIds(state));
       const openId =
         action.listState === "loading" || rows.some((t) => t.id === state.openId)
           ? state.openId
@@ -199,22 +476,12 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
     case "dismiss":
       return dismiss(state, action);
 
-    case "restore": {
-      const ticket = TICKETS_BY_ID.get(action.id);
-      if (!ticket || !state.dismissed[action.id]) return state;
-      const dismissed = Object.fromEntries(Object.entries(state.dismissed).filter(([id]) => id !== action.id));
-      // Undo puts the specialist back exactly where they were: the ticket's lane, with it open.
-      return {
-        ...state,
-        dismissed,
-        lane: laneFor(ticket.triage.route),
-        openId: action.id,
-        cursorId: action.id,
-        editMode: false,
-        checked: [],
-        notice: null,
-      };
-    }
+    case "restore":
+      if (!state.dismissed[action.id]) return state;
+      return reveal({ ...state, dismissed: omit(state.dismissed, action.id) }, action.id);
+
+    case "reveal":
+      return reveal(state, action.id);
 
     case "toggleTranslation":
       return { ...state, showTranslation: !state.showTranslation };
@@ -224,7 +491,164 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
 
     case "clearNotice":
       return state.notice?.id === action.id ? { ...state, notice: null } : state;
+
+    case "decide":
+      return decide(state, action.now, action.wall);
+
+    case "approve": {
+      const ticket = openTicket(state);
+      if (!ticket) return state;
+      const blocked = approveBlocked(ticket, contextFor(state, ticket.id));
+      return blocked ? notify(state, blocked, "bar") : decide(state, action.now, action.wall);
+    }
+
+    case "chooseVariant": {
+      const ticket = openTicket(state);
+      if (!ticket?.triage.drafts.some((d) => d.id === action.draftId)) return state;
+      return {
+        ...state,
+        variantChoice: { ...state.variantChoice, [ticket.id]: action.draftId },
+        notice: clearBarNotice(state),
+      };
+    }
+
+    case "openComposer": {
+      const ticket = openTicket(state);
+      if (!ticket || state.composer?.ticketId === ticket.id) return state;
+      const failed = state.outbox[ticket.id];
+      if (failed?.status === "failed") {
+        return compose(state, ticket, "edit", { id: failed.draftId, body: failed.body, language: failed.language });
+      }
+      const target = editTarget(ticket, contextFor(state, ticket.id));
+      return "blocked" in target ? notify(state, target.blocked, "bar") : compose(state, ticket, "edit", target.draft);
+    }
+
+    case "composerInput":
+      return state.composer ? { ...state, composer: { ...state.composer, text: action.text } } : state;
+
+    case "composerRewrite":
+      return state.composer
+        ? { ...state, composer: { ...state.composer, text: action.text, language: action.language, rewritten: true } }
+        : state;
+
+    case "closeComposer": {
+      if (!state.composer) return state;
+      const seq = state.seq + 1;
+      const onOpen = state.composer.ticketId === state.openId && state.openId;
+      return { ...state, seq, composer: null, focusRequest: onOpen ? { id: onOpen, nonce: seq } : state.focusRequest };
+    }
+
+    case "sendComposer": {
+      const composer = state.composer;
+      const ticket = composer && TICKETS_BY_ID.get(composer.ticketId);
+      if (!composer || !ticket) return state;
+      const blocked = composerSendBlock(composer.text, composer.language, ticket.triage.language);
+      if (blocked) return notify(state, blocked, "bar");
+      const body = composer.text.trim();
+      const edited = composer.mode === "edit" && (body !== composer.original.trim() || Boolean(state.outbox[ticket.id]?.edited));
+      return send(
+        state,
+        ticket,
+        { body, language: composer.language, draftId: composer.draftId, edited, composer },
+        action.now,
+        action.wall,
+      );
+    }
+
+    case "undoSend": {
+      const target = action.id ? state.outbox[action.id] : latestUndoable(state.outbox);
+      if (target?.status !== "undoable") return state;
+      const restored = reveal({ ...state, outbox: omit(state.outbox, target.ticketId) }, target.ticketId);
+      return target.composer ? { ...restored, composer: target.composer, focusRequest: state.focusRequest } : restored;
+    }
+
+    case "commitSend": {
+      const outgoing = state.outbox[action.id];
+      if (outgoing?.status !== "undoable" || outgoing.attempt !== action.attempt) return state;
+      return { ...state, outbox: { ...state.outbox, [action.id]: { ...outgoing, status: "sending" } } };
+    }
+
+    case "sendSettled": {
+      const outgoing = state.outbox[action.id];
+      if (outgoing?.status !== "sending" || outgoing.attempt !== action.attempt) return state;
+      const next = {
+        ...state,
+        outbox: { ...state.outbox, [action.id]: { ...outgoing, status: action.ok ? "sent" : "failed" } as Outgoing },
+      };
+      if (action.ok) return next;
+      const ticket = TICKETS_BY_ID.get(action.id);
+      if (!ticket) return next;
+      if (state.openId === action.id) return notify(next, "Your reply wasn't sent. Retry sending, or edit it first.", "bar");
+      const lane = LANES.find((l) => l.id === laneFor(ticket.triage.route))?.label ?? "its lane";
+      return notify(next, `Your reply to ${ticket.customer.name} wasn't sent. It's back in ${lane}.`, "list", {
+        label: "Open conversation",
+        dispatch: { type: "reveal", id: action.id },
+      });
+    }
+
+    case "retrySend":
+      return retry(state, action.id);
+
+    case "setEscalateOpen": {
+      if (!action.open) return state.escalateOpen ? { ...state, escalateOpen: false } : state;
+      const ticket = openTicket(state);
+      if (!ticket || state.escalations[ticket.id]) return state;
+      const composer = state.composer?.ticketId === ticket.id ? state.composer : null;
+      if (composer && composer.text.trim() !== composer.original.trim()) {
+        return notify(state, "Send or discard your reply before escalating.", "bar");
+      }
+      return { ...state, escalateOpen: true, composer: composer ? null : state.composer, notice: clearBarNotice(state) };
+    }
+
+    case "escalate": {
+      const ticket = openTicket(state);
+      if (!ticket) return state;
+      const next: DeskState = {
+        ...state,
+        escalations: {
+          ...state.escalations,
+          [ticket.id]: { team: action.team, reasons: action.reasons, note: action.note, at: iso(action.now) },
+        },
+        escalateOpen: false,
+        composer: state.composer?.ticketId === ticket.id ? null : state.composer,
+      };
+      return notify(
+        openNext(state, ticket.id, next, { stay: true }),
+        `Escalated ${ticket.customer.name} to ${teamLabel(action.team)}.`,
+        "list",
+        { label: "Undo escalation", dispatch: { type: "undoEscalation", id: ticket.id } },
+      );
+    }
+
+    case "undoEscalation":
+      if (!state.escalations[action.id]) return state;
+      return reveal({ ...state, escalations: omit(state.escalations, action.id) }, action.id);
+
+    case "toggleMarkWrong": {
+      const ticket = openTicket(state);
+      if (!ticket || ticket.triage.route !== "auto_send") return state;
+      if (state.markedWrong[ticket.id]) {
+        return notify({ ...state, markedWrong: omit(state.markedWrong, ticket.id) }, "No longer marked as wrong.", "bar");
+      }
+      return notify(
+        { ...state, markedWrong: { ...state.markedWrong, [ticket.id]: iso(action.now) } },
+        "Marked as wrong. It counts in today's quality review.",
+        "bar",
+        { label: "Undo", dispatch: { type: "toggleMarkWrong", now: action.now } },
+      );
+    }
+
+    case "setSendFailure":
+      return { ...state, sendFailure: action.sendFailure };
   }
+}
+
+export function deskReducer(state: DeskState, action: DeskAction): DeskState {
+  const next = reduce(state, action);
+  if (next.openId === state.openId) return next;
+  // The Escalate popover and decision feedback belong to the conversation they were raised on.
+  const staleBarNotice = next.notice?.where === "bar" && next.notice === state.notice;
+  return { ...next, escalateOpen: false, notice: staleBarNotice ? null : next.notice };
 }
 
 export const DeskContext = createContext<{ state: DeskState; dispatch: Dispatch<DeskAction> } | null>(null);

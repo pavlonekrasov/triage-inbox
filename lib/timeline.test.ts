@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TICKETS, TICKETS_BY_ID } from "@/data/tickets";
+import { DEMO_NOW } from "./clock";
 import { buildTimeline, hasTranslation } from "./timeline";
 
 const ticket = (id: string) => {
@@ -51,8 +52,33 @@ describe("buildTimeline", () => {
     expect(shape("t06")).toEqual(["day:Today", "message:customer", "steps:classified,checked_account,retrieved,routed"]);
   });
 
-  it("holds one draft slot for a two-variant case and records how many variants exist", () => {
-    expect(shape("t02").at(-1)).toBe("draft:2");
+  it("shows both variants of a two-outcome case until one is chosen, then only that one", () => {
+    expect(shape("t02").slice(-2)).toEqual(["draft:2", "draft:2"]);
+    const drafts = buildTimeline(ticket("t02"), undefined, { chosenDraftId: "t02-decline" }).filter((i) => i.kind === "draft");
+    expect(drafts.map((i) => i.key)).toEqual(["t02-decline"]);
+  });
+
+  it("puts a sent reply in the draft's place under the draft's key, so the bubble changes in place", () => {
+    const at = new Date(DEMO_NOW).toISOString();
+    const before = buildTimeline(ticket("t17")).at(-1);
+    const after = buildTimeline(ticket("t17"), undefined, {
+      reply: { body: "Hi Maya", language: "en-US", draftId: "t17-draft", edited: false, at, status: "undoable" },
+    });
+    expect(after.at(-1)).toMatchObject({ kind: "reply", key: before?.key });
+    expect(after.some((i) => i.kind === "draft")).toBe(false);
+  });
+
+  it("does not show the draft that is open in the composer", () => {
+    expect(buildTimeline(ticket("t17"), undefined, { editingDraftId: "t17-draft" }).some((i) => i.kind === "draft")).toBe(false);
+  });
+
+  it("records the specialist's action after the reply it belongs to", () => {
+    const at = new Date(DEMO_NOW).toISOString();
+    const items = buildTimeline(ticket("t03"), undefined, {
+      reply: { body: "Hi Camille", language: "en-GB", draftId: "t03-ack", edited: false, at, status: "sent" },
+      events: [{ at, text: "Review opened with Trust & Safety" }],
+    });
+    expect(items.slice(-2).map((i) => i.kind)).toEqual(["reply", "event"]);
   });
 
   it("never renders a 'sent' step as a service message", () => {

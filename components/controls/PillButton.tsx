@@ -23,9 +23,13 @@ export function pillButtonClass({ variant = "ghost", size = "sm", iconOnly = fal
     "[&_svg]:size-4 [&_svg]:shrink-0",
     size === "sm" && (iconOnly ? "size-8" : "h-8 px-3"),
     size === "md" && (iconOnly ? "size-10" : "h-10 px-4"),
-    variant === "primary" && "bg-primary text-primary-foreground hover:bg-primary/90",
-    variant === "ghost" && "text-foreground hover:bg-accent data-popup-open:bg-accent",
-    variant === "outline" && "border border-border bg-card text-foreground hover:bg-accent",
+    // aria-disabled keeps a refused action focusable and pressable, so it can say why (brief 9.2).
+    variant === "primary" &&
+      "bg-primary text-primary-foreground hover:bg-primary/90 aria-disabled:bg-muted aria-disabled:text-muted-foreground aria-disabled:hover:bg-muted",
+    variant === "ghost" &&
+      "text-foreground hover:bg-accent data-popup-open:bg-accent aria-pressed:bg-accent aria-disabled:text-muted-foreground",
+    variant === "outline" &&
+      "border border-border bg-card text-foreground hover:bg-accent aria-pressed:bg-accent aria-disabled:text-muted-foreground",
   );
 }
 

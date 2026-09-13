@@ -260,3 +260,85 @@ Reasoning   The draft is what "Why this route" explains, so it stays in view whi
 Trade-off   With the thread scrolled to its top, the opening card covers the first messages instead of pushing them down.
 Validation  expand-keeps-latest-message-in-view: draft bottom at 868 px before and after, 0 px from the end.
 ```
+
+## Step 5: decision bar
+
+### Approve opens the next case; Undo sits where the result is visible
+
+```
+Problem     Brief 9.1 says Approve opens the next ticket, and also that "the bubble itself shows Sent · Undo for 5 s"; once the next ticket opens, that bubble is off screen.
+Decision    Approve sends optimistically and opens the next conversation at once, with focus on its row. Undo appears in the sent bubble when that conversation is on screen (the last case in a lane), otherwise in a pill directly above the decision bar ("Sent to Maya Ruiz · Undo"). Z undoes the latest send.
+Reasoning   Approving a low-risk draft happens hundreds of times a shift, so it gets no wait (brief 2); sent-then-undo next to the action is the Gmail and Front pattern (brief 4.2), and Z is Gmail's undo key.
+Trade-off   The draft-to-sent crossfade is seen only when a lane empties, after Retry, or on a follow-up; most approvals show the pill instead.
+Validation  keyboard-A, keyboard-A-Z, keyboard-A-Z-A: t17 → t21 with focus on row-t21 → t17 with focus on row-t17 → t21. morph-midway: same element, fill at 0.35 after 90 ms.
+```
+
+### Approve belongs to drafts routed for approval, and nowhere else
+
+```
+Problem     Review gate 9 bans Approve on wellbeing, safety, privacy, conflict and injection cases; brief 9.1 still gives those cases a send path of their own.
+Decision    One-action Approve exists only on approve_draft. Human-led cases get a primary that needs judgment first: choose Refund or Decline (t02), Take over conversation (t06), Acknowledge & open review (t03), or Edit & send reply, which opens the text in the composer (t04, t09, t12, t13). A on any of them explains itself above the bar.
+Reasoning   "The human is the product": the send a person makes on a human-led case is always a separate, readable step, never a keystroke that accepts the AI's words.
+Trade-off   Ticket 12 (reopened, money decision) could technically be approved under gate 9, but it takes the composer path too.
+Validation  decision.test.ts and desk-store.test.ts: A never sends any guarded ticket in any state; approveBlocked is null exactly for approve_draft.
+```
+
+### No default outcome on a money decision
+
+```
+Problem     Ticket 2 has a refund draft and a decline draft; preselecting either one nudges a person toward the AI's first draft on a disputed charge.
+Decision    Both drafts show in the thread until a person chooses. "Reply to send · Refund | Decline" sits in its own opaque pill directly above the bar, and the primary reads "Choose a reply to send" until then, and "Send decline reply" after.
+Reasoning   Brief 9.1, "The human makes the judgment; the AI wrote both outcomes"; a default is a judgment. The choice sits outside the bar because three labelled decisions with key hints already fill 560 px.
+Trade-off   The thread is two drafts taller until a choice is made, and the dock has two layers on this case.
+Validation  bar-t02-variants-2x.png (bar 546 px, no overflow); bar-t02-decline-chosen-2x.png.
+```
+
+### One tick while leaving, two when delivered
+
+```
+Problem     A ✓✓ during the undo window would claim delivery for a reply that has not left, and a send can still fail.
+Decision    Sent by you · 18:44 ✓ during the window and the 600 ms send; ✓✓ once delivered; "Not sent · Retry" in terracotta if the send fails, with the row back in its lane marked "Not sent:". Each tick draws in 160 ms, 60 ms after the bubble begins to change.
+Reasoning   WhatsApp's grammar (one tick sent, two delivered) is already familiar, and it keeps the label true at every moment.
+Trade-off   The brief's label shows ✓✓ at once; this one adds a second visible state.
+Validation  sent-delivered-ticks: 2 paths after 6.2 s; send-failed-bubble-2x.png; send-failure-retry: failed → sent with 2 ticks.
+```
+
+### The composer is the decision bar, grown
+
+```
+Problem     Edit needs a composer (brief 9.1), and a fifth glass surface is ruled out (6.5).
+Decision    Pressing Edit turns the decision bar's own glass into a 14 px-radius composer: "Editing AI draft" strip in violet, the text, Warmer · Shorter · Translate, and "Send edited reply" once the text changes. The draft bubble leaves the thread while it is in the composer; Esc discards and brings it back.
+Reasoning   Telegram's edit mode (brief 4.1): the text moves into the composer, and the glass surface count stays at four.
+Trade-off   While the composer is open, Approve and Escalate are one Esc away.
+Validation  composer-t17-edit-2x.png; composer-escape-restores-draft: draft back, focus on row-t17.
+```
+
+### The AI chips are deterministic stand-ins
+
+```
+Problem     Live model calls are out of scope (brief 14), but Warmer · Shorter · Translate must do something honest.
+Decision    Shorter drops the last sentence without a figure; Warmer adds one acknowledgment after the greeting unless the reply already thanks or apologises; Translate swaps the AI's wording with its English gloss. Each takes 600 ms and marks the text "Rewritten by AI · read it before sending". An English reply to a customer who wrote Spanish is held until translated back.
+Reasoning   A chip that refuses in words ("The reply already thanks or reassures the customer") is better than one that invents text a fixture cannot back.
+Trade-off   Rewrites are mechanical and cannot handle a person's own edits; Translate refuses edited text.
+Validation  rewrite.test.ts keeps every rewrite of every draft within the voice rules (90 words, no "!", no em dash); composer-t07-translate: send held with the reason.
+```
+
+### Safety acknowledgments get no Edit button
+
+```
+Problem     Ticket 3's bar ("Acknowledge & open review", Edit draft, Escalate case, key hints) measured 573 px, over the 560 px cap, and its Edit could only ever refuse.
+Decision    The safety bar shows the primary and Escalate; E still answers "The acknowledgment is fixed wording". Bar buttons use 14 px sides.
+Reasoning   A control that can never act spends width on a refusal; the explanation stays one key away.
+Trade-off   The three decisions are not in the same positions on this one case.
+Validation  bar-fits-every-ticket-1440 and -900 open all 22 tickets and report no overflowing bar.
+```
+
+### Day terracotta at L 0.52
+
+```
+Problem     "Not sent" in terracotta over wallpaper field B measured 4.44:1 in Day.
+Decision    Day --risk-high and --destructive move from oklch(0.53 0.15 35) to oklch(0.52 0.15 35).
+Reasoning   WCAG 1.4.3; the smallest change that clears the pair, with hue and chroma untouched.
+Trade-off   Terracotta is marginally darker everywhere in Day, including SLA countdowns.
+Validation  /tokens: 41/41 pairs in both themes; "Not sent label on wallpaper field B" 4.62:1.
+```

@@ -10,10 +10,18 @@ export type Command =
   | "lane-auto-resolved"
   | "toggle-select"
   | "select-sure-drafts"
-  | "exit-selection";
+  | "exit-selection"
+  | "approve"
+  | "edit"
+  | "escalate"
+  | "undo";
 
-/** The desk's one keymap. Delivery step 7 adds A, E, H, ], ⌘K and ? to this table. */
+/** The desk's one keymap. Delivery step 7 adds ], ⌘K and ? to this table. */
 export const KEYMAP: readonly { key: string; shift?: boolean; command: Command; label: string }[] = [
+  { key: "a", command: "approve", label: "Approve & send the open draft" },
+  { key: "e", command: "edit", label: "Edit the open draft" },
+  { key: "h", command: "escalate", label: "Escalate the case to a team" },
+  { key: "z", command: "undo", label: "Undo the last send" },
   { key: "j", command: "next", label: "Next conversation" },
   { key: "k", command: "previous", label: "Previous conversation" },
   { key: "1", command: "lane-needs-you", label: "Needs you" },

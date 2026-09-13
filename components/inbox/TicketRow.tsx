@@ -29,6 +29,8 @@ type TicketRowProps = {
   editMode: boolean;
   tabbable: boolean;
   last: boolean;
+  /** A reply to this ticket failed to send, so it is back in its lane. */
+  unsent?: boolean;
   onActivate: (id: string) => void;
 };
 
@@ -44,6 +46,7 @@ export const TicketRow = memo(function TicketRow({
   editMode,
   tabbable,
   last,
+  unsent = false,
   onActivate,
 }: TicketRowProps) {
   const { customer, triage } = ticket;
@@ -131,6 +134,7 @@ export const TicketRow = memo(function TicketRow({
             <CategoryGlyph category={triage.category.primary} />
             {/* Telegram's "Draft:" preview prefix: a word in ink weight, so the marker costs the name no width. */}
             <span className="truncate">
+              {unsent && <span className="font-medium text-risk-high">Not sent: </span>}
               {ticket.spotCheck && <span className="font-medium text-foreground">Spot-check: </span>}
               {triage.summary}
             </span>
