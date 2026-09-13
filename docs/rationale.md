@@ -74,3 +74,65 @@ Reasoning   Its measured card anatomy (28px radius, 6% light fill, 12px gutters,
 Trade-off   Controls feel firmer than bencho's, since no motion overshoots.
 Validation  DESIGN.md names the adopted rules; later steps are checked against them in the same screenshots.
 ```
+
+## Step 2: list pane
+
+### Stale source raises risk instead of forcing a person
+
+```
+Problem     Brief 11 puts ticket 5 (retrieved policy v3, v4 exists) in Drafts, but brief 8.3 says any hard rule, stale_source included, forces human_led.
+Decision    The agent reports staleness through the source (supersededBy) and raises risk to medium; hardRules stays empty, so the matrix routes it to a draft.
+Reasoning   The matrix stays exceptionless ("any hard rule forces a person"), and a stale help article needs a second look, not a full human-led case.
+Trade-off   stale_source remains in the HardRule type but no fixture uses it; a real agent must be told not to emit it for this case.
+Validation  data/tickets.test.ts checks every fixture's route against routeFor, and ticket 5's source points at a registered v4.
+```
+
+### Open lanes sort by deadline
+
+```
+Problem     A chat list sorts newest first, which puts the oldest waiting case, the one closest to breaching, at the bottom of a 150-row queue.
+Decision    Needs you and Drafts sort by first-response deadline, soonest first, under the pinned wellbeing and safety rows; Auto-resolved stays newest first.
+Reasoning   The four questions start with "how risky is it"; a deadline is risk the specialist can act on, while Auto-resolved is history, where recency is the convention.
+Trade-off   Timestamps in open lanes are not in chronological order, which a Telegram user does not expect.
+Validation  inbox-needs-you-2x.png: Jordan (4:29 left) sits directly under the two pinned rows.
+```
+
+### Language chip only for non-English
+
+```
+Problem     Brief 7.3 puts a language chip on line one; with most customers writing in English, an EN chip on nearly every row answers none of the four questions.
+Decision    The chip appears only when the customer wrote in another language (ES, PT); the thread header still shows the language for every ticket.
+Reasoning   A chip that differs from the default is the signal; a chip that never varies is noise at 13px density (Linear's inbox shows exceptions, not defaults).
+Trade-off   A specialist cannot confirm "English" from the list; they infer it from the absence of a chip.
+Validation  drafts-lane-2x.png: only Diego Ramírez carries a chip in a lane of 11.
+```
+
+### Lane thumb width is a named motion exception
+
+```
+Problem     The sliding thumb must resize between lanes of different label widths, and brief 3.1 limits motion to transform, opacity and filter.
+Decision    The thumb's x moves by transform; its width animates on the same spring (stiffness 520, damping 42, mass 1).
+Reasoning   The thumb is an absolutely positioned leaf, so a width change never reflows the tabs or the list; scaleX would stretch its rounded ends.
+Trade-off   Width is a layout property, so each frame runs layout for one element.
+Validation  With prefers-reduced-motion the thumb moves instantly; the spring's damping ratio is 0.92, under 0.1% overshoot.
+```
+
+### Selection only in Drafts, with an explanation elsewhere
+
+```
+Problem     X enters selection mode, but Needs you holds only human-led cases and Auto-resolved holds sent replies: there is nothing to bulk-approve in either.
+Decision    Selection mode exists only in Drafts. X or ⇧X in another lane shows a 4-second notice under the lane track saying why, and the reducer refuses any ticket canBulkSelect rejects.
+Reasoning   A shortcut that does nothing fails silently (brief 9.2); the guard lives in one function so click, X and ⇧X cannot disagree (review gate 9).
+Trade-off   A specialist who wants to tick cases in Needs you for a future bulk action cannot.
+Validation  selection-blocked-notice-2x.png shows the notice; route.test.ts proves every no-approval rule refuses bulk selection.
+```
+
+### Selection bar replaces the title bar
+
+```
+Problem     Selection mode needs a count, a way out and a way to select the Sure drafts, in a 360px pane.
+Decision    As in Telegram's edit mode, the title bar becomes "6 selected", "Select 6 Sure drafts" and an Exit selection icon button; the glass bulk bar with Approve arrives in step 7 with sending.
+Reasoning   Reusing the familiar edit-mode header meets "familiar beats clever"; no Approve button ships before there is a send pipeline behind it.
+Trade-off   Until step 7, selection has no action to take, only a count.
+Validation  selection-mode-2x.png.
+```

@@ -1,0 +1,137 @@
+[
+  {
+    "name": "inbox-needs-you-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-2/inbox-needs-you-2x.png",
+    "scale": 2,
+    "waitFor": "document.querySelector('[role=tablist]') && !document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "({ rows: [...document.querySelectorAll('[role=option]')].map(r => r.id + (r.getAttribute('aria-selected') === 'true' ? ' (open)' : '')), rowHeight: document.getElementById('row-t02').getBoundingClientRect().height, textColumnLeft: document.querySelector('#row-t02 .avatar-tint').nextElementSibling.getBoundingClientRect().left - document.getElementById('row-t02').getBoundingClientRect().left, selectionTransition: getComputedStyle(document.getElementById('row-t02')).transitionDuration, glass: [...document.querySelectorAll('[data-glass]')].map(e => e.dataset.glass + ' clip=' + getComputedStyle(e).clipPath + ' backdrop=' + getComputedStyle(e).backdropFilter), hoverMedia: matchMedia('(hover: hover) and (pointer: fine)').matches })"
+  },
+  {
+    "name": "countdown-ticks",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "eval": "(async () => { const read = () => document.querySelector('#row-t02 .text-risk-high')?.textContent; const before = read(); await new Promise(r => setTimeout(r, 2200)); return { before, after: read() }; })()"
+  },
+  {
+    "name": "row-states-focus-hover-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-2/row-states-focus-hover-2x.png",
+    "scale": 2,
+    "selector": "[data-list-pane]",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "keys": ["j"],
+    "hover": "#row-t09",
+    "eval": "({ open: document.querySelector('[role=option][aria-selected=true]')?.id, focused: document.activeElement.id, focusVisible: document.activeElement.matches(':focus-visible'), outline: getComputedStyle(document.activeElement).outlineWidth + ' ' + getComputedStyle(document.activeElement).outlineStyle + ' offset ' + getComputedStyle(document.activeElement).outlineOffset, hoverOverlayOpacity: getComputedStyle(document.getElementById('row-t09'), '::before').opacity })"
+  },
+  {
+    "name": "keyboard-walk",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "keys": ["j", "j", "k", "2", "j", "j"],
+    "eval": "({ url: location.search, open: document.querySelector('[role=option][aria-selected=true]')?.id, focused: document.activeElement.id || document.activeElement.tagName })"
+  },
+  {
+    "name": "drafts-lane-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t10",
+    "out": "docs/evidence/step-2/drafts-lane-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "({ count: document.querySelectorAll('[role=option]').length, t21NameTruncated: (() => { const n = document.querySelector('#row-t21 .truncate'); return n.scrollWidth > n.clientWidth; })() })"
+  },
+  {
+    "name": "selection-mode-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t10",
+    "out": "docs/evidence/step-2/selection-mode-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "keys": ["Shift+X"],
+    "keyWaitMs": 500,
+    "eval": "({ header: document.querySelector('[data-list-pane] header').textContent, checked: [...document.querySelectorAll('[role=option][aria-selected=true]')].map(r => r.id), multiselectable: document.querySelector('[role=listbox]').getAttribute('aria-multiselectable'), contentShift: getComputedStyle(document.querySelector('#row-t17 > span:nth-child(2)')).translate })"
+  },
+  {
+    "name": "selection-blocked-notice-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "out": "docs/evidence/step-2/selection-blocked-notice-2x.png",
+    "scale": 2,
+    "selector": "[data-list-pane]",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "keys": ["x"],
+    "eval": "({ editMode: !!document.querySelector('[aria-multiselectable]'), notice: document.querySelector('[role=status]').textContent })"
+  },
+  {
+    "name": "auto-resolved-2x",
+    "url": "http://localhost:3000/?lane=auto_resolved",
+    "out": "docs/evidence/step-2/auto-resolved-2x.png",
+    "scale": 2,
+    "selector": "[data-list-pane]",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "empty-needs-you-2x",
+    "url": "http://localhost:3000/?list=empty",
+    "out": "docs/evidence/step-2/empty-needs-you-2x.png",
+    "scale": 2,
+    "selector": "[data-list-pane]",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "loading-2x",
+    "url": "http://localhost:3000/?list=loading",
+    "out": "docs/evidence/step-2/loading-2x.png",
+    "scale": 2,
+    "selector": "[data-list-pane]",
+    "media": { "prefers-reduced-motion": "reduce" },
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "({ skeletonRowHeight: document.querySelector('[aria-busy] .h-18').getBoundingClientRect().height, pulse: getComputedStyle(document.querySelector('[aria-busy] [aria-hidden]')).animationName })"
+  },
+  {
+    "name": "night-inbox-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-2/night-inbox-2x.png",
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"]
+  },
+  {
+    "name": "greyscale-needs-you-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-2/greyscale-needs-you-2x.png",
+    "scale": 2,
+    "selector": "[data-list-pane]",
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ]
+  },
+  {
+    "name": "reduced-motion",
+    "url": "http://localhost:3000/?lane=drafts",
+    "media": { "prefers-reduced-motion": "reduce" },
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "keys": ["Shift+X"],
+    "eval": "({ matches: matchMedia('(prefers-reduced-motion: reduce)').matches, rowShiftDuration: getComputedStyle(document.querySelector('#row-t17 > span:nth-child(2)')).transitionDuration, checkboxDuration: getComputedStyle(document.querySelector('#row-t17 > span:first-child')).transitionDuration, pressScale: getComputedStyle(document.documentElement).getPropertyValue('--press-scale').trim() })"
+  },
+  {
+    "name": "narrow-860",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "width": 860,
+    "height": 700,
+    "out": "docs/evidence/step-2/narrow-860.png",
+    "selector": "[data-list-pane]",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "({ paneWidth: document.querySelector('[data-list-pane]').getBoundingClientRect().width, tabsOverflow: [...document.querySelectorAll('[data-lane-tab]')].map(t => t.scrollWidth > t.clientWidth) })"
+  }
+]

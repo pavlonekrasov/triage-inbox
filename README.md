@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Care Desk · concept
 
-## Getting Started
+A clickable, high-fidelity prototype of a triage inbox for an AI support agent. The AI classifies,
+checks the account, retrieves policy, assesses risk and routes each request; the specialist decides.
+Fixtures stand in for the agent, typed as the `TriageResult` contract in [lib/types.ts](lib/types.ts).
 
-First, run the development server:
+## Run it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | What it is |
+|---|---|
+| `/` | The inbox |
+| `/tokens` | Colour roles in Day and Night shift with contrast measured in the browser, glass, type scale |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&list=loading` or
+`&list=empty` for those list states, or use **Show prototype controls** at the bottom right.
 
-## Learn More
+## Use it
 
-To learn more about Next.js, take a look at the following resources:
+| Key | Action |
+|---|---|
+| `J` / `K` | Next / previous conversation |
+| `↓` / `↑`, `Home` / `End` | Move within the focused list |
+| `1` `2` `3` | Needs you · Drafts · Auto-resolved |
+| `X` | Select or unselect the focused draft (Drafts only) |
+| `⇧X` | Select every low-risk Sure draft |
+| `Esc` | Exit selection |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Delivery status
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Step | Scope | State |
+|---|---|---|
+| 1 | Token page | Done |
+| 2 | List pane: lanes, rows, row states | Done |
+| 3 | Thread: header pill, bubbles, service messages, draft bubble | Next |
+| 4 | Pinned summary, both reading depths | |
+| 5 | Decision bar: Approve with undo, Edit, Escalate | |
+| 6 | Context panel | |
+| 7 | Bulk approve, full keymap, command palette, shortcut sheet | |
+| 8 | States catalogue, responsive, Night shift pass | |
+| 9 | Slide routes | |
+| 10 | Slide screenshots | |
 
-## Deploy on Vercel
+## Checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm test          # routing matrix and fixture contract
+npm run typecheck
+npm run lint
+node scripts/capture.mjs scripts/plans/step-2.json   # evidence screenshots, needs the dev server
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from
+the brief is argued in [docs/rationale.md](docs/rationale.md), and screenshots are in
+[docs/evidence](docs/evidence).

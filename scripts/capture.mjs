@@ -17,9 +17,12 @@
 //   "media": { "prefers-reduced-transparency": "reduce" },
 //   "selector": "section[aria-labelledby=contrast]",                  (clip to this element)
 //   "fullPage": false,
-//   "waitMs": 1500,
+//   "waitFor": "!document.querySelector('[data-ssr]')",               (poll until truthy: hydration)
+//   "waitMs": 300,                                                    (extra settle time after waitFor)
 //   "actions": ["document.querySelector('button').click()"],          (run in order before capture)
-//   "eval": "document.title"                                          (printed after actions)
+//   "keys": ["j", "Shift+X", "Escape"],                               (real key presses, after actions)
+//   "hover": "#row-t04",                                              (move the pointer to its centre)
+//   "eval": "document.title"                                          (printed after input)
 // }
 
 import { spawn } from "node:child_process";
@@ -121,6 +124,60 @@ async function evaluate(cdp, expression) {
   return result.value;
 }
 
+async function waitFor(cdp, expression, timeoutMs = 20_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await evaluate(cdp, `Boolean(${expression})`)) return;
+    await sleep(100);
+  }
+  throw new Error(`waitFor timed out after ${timeoutMs} ms: ${expression}`);
+}
+
+const NAMED_KEYS = {
+  Escape: ["Escape", 27],
+  Enter: ["Enter", 13],
+  Tab: ["Tab", 9],
+  ArrowDown: ["ArrowDown", 40],
+  ArrowUp: ["ArrowUp", 38],
+  ArrowLeft: ["ArrowLeft", 37],
+  ArrowRight: ["ArrowRight", 39],
+  Home: ["Home", 36],
+  End: ["End", 35],
+};
+
+/** A trusted key press through the input pipeline, so :focus-visible and real listeners respond. */
+async function pressKey(cdp, combo) {
+  const parts = combo.split("+");
+  const name = parts.pop();
+  const modifiers =
+    (parts.includes("Alt") ? 1 : 0) |
+    (parts.includes("Control") ? 2 : 0) |
+    (parts.includes("Meta") ? 4 : 0) |
+    (parts.includes("Shift") ? 8 : 0);
+  let key = name;
+  let code;
+  let keyCode;
+  let text;
+  if (NAMED_KEYS[name]) {
+    [code, keyCode] = NAMED_KEYS[name];
+  } else if (/^[a-z]$/i.test(name)) {
+    const upper = name.toUpperCase();
+    key = modifiers & 8 ? upper : name.toLowerCase();
+    code = `Key${upper}`;
+    keyCode = upper.charCodeAt(0);
+    text = key;
+  } else if (/^\d$/.test(name)) {
+    code = `Digit${name}`;
+    keyCode = name.charCodeAt(0);
+    text = name;
+  } else {
+    throw new Error(`Unsupported key: ${combo}`);
+  }
+  const base = { key, code, windowsVirtualKeyCode: keyCode, nativeVirtualKeyCode: keyCode, modifiers };
+  await cdp.send("Input.dispatchKeyEvent", { type: text ? "keyDown" : "rawKeyDown", text, ...base });
+  await cdp.send("Input.dispatchKeyEvent", { type: "keyUp", ...base });
+}
+
 async function shoot(port, shot) {
   const target = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: "PUT" })).json();
   const cdp = await connect(target.webSocketDebuggerUrl);
@@ -129,6 +186,9 @@ async function shoot(port, shot) {
 
   await cdp.send("Page.enable");
   await cdp.send("Runtime.enable");
+  // Background targets report no document focus, which drops key events and :focus-visible.
+  await cdp.send("Page.bringToFront");
+  await cdp.send("Emulation.setFocusEmulationEnabled", { enabled: true });
   await cdp.send("Emulation.setDeviceMetricsOverride", {
     width,
     height,
@@ -149,11 +209,32 @@ async function shoot(port, shot) {
   const loaded = cdp.once("Page.loadEventFired");
   await cdp.send("Page.navigate", { url: shot.url });
   await loaded;
-  await sleep(shot.waitMs ?? 1500);
+  if (shot.waitFor) await waitFor(cdp, shot.waitFor);
+  await sleep(shot.waitMs ?? (shot.waitFor ? 300 : 1500));
 
   for (const action of shot.actions ?? []) {
     await evaluate(cdp, action);
     await sleep(shot.actionWaitMs ?? 400);
+  }
+
+  for (const key of shot.keys ?? []) {
+    await pressKey(cdp, key);
+    await sleep(shot.keyWaitMs ?? 250);
+  }
+
+  if (shot.hover) {
+    const point = await evaluate(
+      cdp,
+      `(() => {
+        const el = document.querySelector(${JSON.stringify(shot.hover)});
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      })()`,
+    );
+    if (!point) throw new Error(`[${shot.name}] hover target not found: ${shot.hover}`);
+    await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", ...point });
+    await sleep(400);
   }
 
   if (shot.eval) {

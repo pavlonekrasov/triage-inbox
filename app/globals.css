@@ -173,6 +173,8 @@
   --glass-sheen-top: oklch(1 0 0 / 0.3);
   --shadow-glass:
     0 1px 1px oklch(0.16 0.02 285 / 0.05), 0 8px 24px -8px oklch(0.16 0.02 285 / 0.18);
+  /* The lane thumb reads as a raised ink key: a top specular hairline and a short cast (portfolio 3.1). */
+  --shadow-thumb: inset 0 1px 0 oklch(1 0 0 / 0.14), 0 1px 2px oklch(0.16 0.02 285 / 0.18);
 
   /* Avatar initials: lightness per theme, hue from the customer id (lib/avatar.ts). */
   --avatar-bg-l: 0.9;
@@ -227,6 +229,8 @@
   /* A hue-285 shadow at 18% disappears on an L 0.17 ground. Black at 0.4 is in the range
      bencho.dev casts on its near-black ground (0 12px 28px -10px, black at 0.28). */
   --shadow-glass: 0 1px 1px oklch(0 0 0 / 0.2), 0 12px 28px -10px oklch(0 0 0 / 0.4);
+  /* The Night thumb is light ink, so its rim is a darker hairline instead of a white highlight. */
+  --shadow-thumb: inset 0 0 0 0.5px oklch(0 0 0 / 0.25), 0 1px 2px oklch(0 0 0 / 0.35);
 
   --avatar-bg-l: 0.34;
   --avatar-fg-l: 0.9;
