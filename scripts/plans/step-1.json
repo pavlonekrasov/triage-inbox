@@ -1,0 +1,116 @@
+[
+  {
+    "name": "glass-2x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/glass-2x.png",
+    "scale": 2,
+    "selector": "section[aria-labelledby='glass-over-the-thread-wallpaper']",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "eval": "[...document.querySelectorAll('[data-glass]')].map(e => { const s = getComputedStyle(e); return `${e.closest('[data-theme-scope]').dataset.themeScope}/${e.dataset.glass}: backdrop=${s.backdropFilter} | bg=${s.backgroundColor} | radius=${s.borderRadius} | clip=${s.clipPath}`; })"
+  },
+  {
+    "name": "glass-reduced-transparency-2x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/glass-reduced-transparency-2x.png",
+    "scale": 2,
+    "media": {
+      "prefers-reduced-transparency": "reduce"
+    },
+    "selector": "section[aria-labelledby='glass-over-the-thread-wallpaper']",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "eval": "({ matches: matchMedia('(prefers-reduced-transparency: reduce)').matches, glass: [...document.querySelectorAll('[data-glass]')].map(e => { const s = getComputedStyle(e); return `${e.closest('[data-theme-scope]').dataset.themeScope}/${e.dataset.glass}: backdrop=${s.backdropFilter} | bg=${s.backgroundColor}`; }) })"
+  },
+  {
+    "name": "reduced-motion",
+    "url": "http://localhost:3000/tokens",
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "eval": "(() => { const r = getComputedStyle(document.documentElement); return { matches: matchMedia('(prefers-reduced-motion: reduce)').matches, motion: r.getPropertyValue('--motion').trim(), pressScale: r.getPropertyValue('--press-scale').trim() }; })()"
+  },
+  {
+    "name": "contrast-more",
+    "url": "http://localhost:3000/tokens",
+    "media": {
+      "prefers-contrast": "more"
+    },
+    "eval": "(() => { const pick = (sel) => { const s = getComputedStyle(document.querySelector(sel)); return { glassEdge: s.getPropertyValue('--glass-edge').trim(), border: s.getPropertyValue('--border').trim(), highlight: s.getPropertyValue('--glass-highlight').trim() }; }; return { matches: matchMedia('(prefers-contrast: more)').matches, day: pick('[data-theme-scope=light]'), night: pick('[data-theme-scope=dark]') }; })()"
+  },
+  {
+    "name": "night-shift-top-2x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/tokens-night-top-2x.png",
+    "theme": "night",
+    "scale": 2,
+    "height": 900,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "eval": "({ htmlDark: document.documentElement.classList.contains('dark'), bodyBg: getComputedStyle(document.body).backgroundColor, toggleLabel: [...document.querySelectorAll('button')].find(b => b.textContent.includes('Switch'))?.textContent })"
+  },
+  {
+    "name": "toggle-roundtrip",
+    "url": "http://localhost:3000/tokens",
+    "theme": "day",
+    "actions": [
+      "[...document.querySelectorAll('button')].find(b => b.textContent.includes('Switch to Night shift')).click()"
+    ],
+    "eval": "({ htmlDark: document.documentElement.classList.contains('dark'), stored: localStorage.getItem('care-desk-theme'), toggleLabel: [...document.querySelectorAll('button')].find(b => b.textContent.includes('Switch'))?.textContent })"
+  },
+  {
+    "name": "contrast-1x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/contrast.png",
+    "selector": "section[aria-labelledby='contrast']",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "eval": "[...document.querySelectorAll('[data-contrast-summary]')].map(e => `${e.closest('[data-theme-scope]').dataset.themeScope}: ${e.textContent}`)"
+  },
+  {
+    "name": "route-glyphs-2x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/route-glyphs-2x.png",
+    "scale": 2,
+    "selector": "section[aria-labelledby='route-glyphs']",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ]
+  },
+  {
+    "name": "surfaces-2x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/surfaces-2x.png",
+    "scale": 2,
+    "selector": "section[aria-labelledby='surfaces-and-bubbles']",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ]
+  },
+  {
+    "name": "roles-1x",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/colour-roles.png",
+    "selector": "section[aria-labelledby='colour-roles']",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "eval": "[...document.querySelectorAll('[data-computed]')].filter((_, i) => [0, 3, 11, 12, 20, 31].includes(i)).map(e => `${e.closest('[data-theme-scope]').dataset.themeScope} ${e.dataset.computed} = ${e.textContent}`)"
+  },
+  {
+    "name": "tokens-full-1440",
+    "url": "http://localhost:3000/tokens",
+    "out": "docs/evidence/step-1/tokens-full-1440.png",
+    "width": 1440,
+    "height": 900,
+    "fullPage": true,
+    "actions": [
+      "document.querySelector(\"nextjs-portal\")?.remove()"
+    ],
+    "eval": "document.querySelector(\"section[aria-labelledby=colour-roles] p\").textContent"
+  }
+]
