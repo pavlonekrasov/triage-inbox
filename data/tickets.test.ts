@@ -65,6 +65,15 @@ describe("fixtures", () => {
     }
   });
 
+  it("states what a source establishes instead of repeating its name, which the citation shows", () => {
+    for (const t of TICKETS) {
+      for (const reason of t.triage.reasons) {
+        const source = t.triage.sources.find((s) => s.id === reason.sourceId);
+        if (source) expect(reason.evidence, `${t.id} → ${reason.label}`).not.toContain(source.title);
+      }
+    }
+  });
+
   it("points every superseded source at a registered newer version", () => {
     for (const source of SOURCE_REGISTRY.values()) {
       if (source.supersededBy) expect(SOURCE_REGISTRY.has(source.supersededBy)).toBe(true);

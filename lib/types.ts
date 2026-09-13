@@ -45,9 +45,12 @@ export interface TriageResult {
   risk: Risk;
   confidence: Confidence;
   confidenceScore: number; // 0..1, shown only inside "Why this route"
+  /** Why this confidence, in words, without the level: "intent is explicit; account data is partial". */
+  confidenceNote: string;
   route: Route;
   hardRules: HardRule[]; // any hit forces human_led, even when confidence is "sure"
-  reasons: { label: string; evidence: string; sourceId?: string }[]; // 2 to 4 lines
+  /** 2 to 4 lines. `caution` marks a reason that holds the case back from sending on its own. */
+  reasons: { label: string; evidence: string; sourceId?: string; caution?: boolean }[];
   sources: Source[];
   steps: { at: string; kind: StepKind; text: string }[];
   drafts: { id: string; variant?: string; language: string; body: string; glossEn?: string }[]; // 0..2

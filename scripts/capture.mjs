@@ -133,9 +133,12 @@ async function waitFor(cdp, expression, timeoutMs = 20_000) {
   throw new Error(`waitFor timed out after ${timeoutMs} ms: ${expression}`);
 }
 
+// [code, keyCode, text]. Enter and Space carry text: Chromium activates a focused button from the
+// keypress that text generates, so a text-less Enter never clicks.
 const NAMED_KEYS = {
   Escape: ["Escape", 27],
-  Enter: ["Enter", 13],
+  Enter: ["Enter", 13, "\r"],
+  Space: ["Space", 32, " "],
   Tab: ["Tab", 9],
   ArrowDown: ["ArrowDown", 40],
   ArrowUp: ["ArrowUp", 38],
@@ -159,7 +162,8 @@ async function pressKey(cdp, combo) {
   let keyCode;
   let text;
   if (NAMED_KEYS[name]) {
-    [code, keyCode] = NAMED_KEYS[name];
+    [code, keyCode, text] = NAMED_KEYS[name];
+    if (name === "Space") key = " ";
   } else if (/^[a-z]$/i.test(name)) {
     const upper = name.toUpperCase();
     key = modifiers & 8 ? upper : name.toLowerCase();

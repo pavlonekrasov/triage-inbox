@@ -39,8 +39,8 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 | 1 | Token page | Done |
 | 2 | List pane: lanes, rows, row states | Done |
 | 3 | Thread: header pill, bubbles, service messages, draft bubble | Done |
-| 4 | Pinned summary, both reading depths | Next |
-| 5 | Decision bar: Approve with undo, Edit, Escalate | |
+| 4 | Pinned summary, both reading depths | Done |
+| 5 | Decision bar: Approve with undo, Edit, Escalate | Next |
 | 6 | Context panel | |
 | 7 | Bulk approve, full keymap, command palette, shortcut sheet | |
 | 8 | States catalogue, responsive, Night shift pass | |
@@ -53,7 +53,7 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 npm test          # routing matrix and fixture contract
 npm run typecheck
 npm run lint
-node scripts/capture.mjs scripts/plans/step-3.json   # evidence screenshots, needs the dev server
+node scripts/capture.mjs scripts/plans/step-4.json   # evidence screenshots, needs the dev server
 ```
 
 Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from

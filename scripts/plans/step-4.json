@@ -1,0 +1,171 @@
+[
+  {
+    "name": "summary-t02-collapsed-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "out": "docs/evidence/step-4/summary-t02-collapsed-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actions": ["document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); const panel = document.getElementById(card.querySelector('[aria-controls]').getAttribute('aria-controls')); return { text: card.firstElementChild.innerText, height: Math.round(card.getBoundingClientRect().height), panelHeight: panel.getBoundingClientRect().height, inert: panel.inert, bg: getComputedStyle(card).backgroundColor, glass: [...document.querySelectorAll('[data-glass]')].map(e => e.dataset.glass) }; })()"
+  },
+  {
+    "name": "summary-t04-why-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "out": "docs/evidence/step-4/summary-t04-why-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); const panel = document.getElementById(card.querySelector('[aria-controls]').getAttribute('aria-controls')); return { expanded: card.querySelector('[aria-expanded]').getAttribute('aria-expanded'), inert: panel.inert, flags: [...card.querySelectorAll('[data-flag]')].map(f => f.dataset.flag + ': ' + f.textContent), reasons: [...card.querySelectorAll('[data-caution]')].map(r => (r.dataset.caution === 'true' ? 'caution ' : 'check ') + r.querySelector('p').textContent), rules: [...card.querySelectorAll('[aria-label=\"Hard rules hit\"] li')].map(l => l.textContent), confidence: card.querySelector('dd').textContent, fitsViewport: card.getBoundingClientRect().bottom < innerHeight }; })()"
+  },
+  {
+    "name": "summary-t05-stale-why-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "out": "docs/evidence/step-4/summary-t05-stale-why-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); return { flags: [...card.querySelectorAll('[data-flag]')].map(f => f.textContent), citation: card.querySelector('[data-source]').textContent, struck: getComputedStyle(card.querySelector('[data-source] .line-through')).textDecorationLine, route: [...card.querySelectorAll('dd')].at(-1).textContent }; })()"
+  },
+  {
+    "name": "summary-t06-wellbeing-why-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "out": "docs/evidence/step-4/summary-t06-wellbeing-why-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ],
+    "eval": "document.querySelector('[data-pinned-summary]').innerText"
+  },
+  {
+    "name": "summary-t17-paused-why",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actions": ["document.querySelector('[data-pinned-summary] [aria-expanded]').click()"],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); return { headline: card.querySelector('p').textContent, confidence: card.querySelector('[data-confidence]').textContent, route: [...card.querySelectorAll('dd')].at(-1).textContent, rules: [...card.querySelectorAll('dd')][1].textContent }; })()"
+  },
+  {
+    "name": "summary-t08-auto-why-2x",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t08",
+    "out": "docs/evidence/step-4/summary-t08-auto-why-2x.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ],
+    "eval": "[...document.querySelectorAll('[data-pinned-summary] dd')].map(d => d.textContent)"
+  },
+  {
+    "name": "expand-transition",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 60,
+    "actions": ["document.querySelector('[data-pinned-summary] [aria-expanded]').click()"],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); const panel = document.getElementById(card.querySelector('[aria-controls]').getAttribute('aria-controls')); const s = getComputedStyle(panel); const chevron = getComputedStyle(card.querySelector('[aria-expanded] svg')); return { property: s.transitionProperty, duration: s.transitionDuration, easing: s.transitionTimingFunction, midwayHeight: Math.round(panel.getBoundingClientRect().height), fullHeight: panel.firstElementChild.firstElementChild.scrollHeight, chevron: chevron.transitionProperty + ' ' + chevron.transitionDuration }; })()"
+  },
+  {
+    "name": "expand-reduced-motion",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "media": { "prefers-reduced-motion": "reduce" },
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 30,
+    "actions": ["document.querySelector('[data-pinned-summary] [aria-expanded]').click()"],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); const panel = document.getElementById(card.querySelector('[aria-controls]').getAttribute('aria-controls')); return { transition: getComputedStyle(panel).transitionProperty + ' ' + getComputedStyle(panel).transitionDuration, heightAfter30ms: Math.round(panel.getBoundingClientRect().height), fullHeight: panel.firstElementChild.firstElementChild.scrollHeight, chevronDuration: getComputedStyle(card.querySelector('[aria-expanded] svg')).transitionDuration }; })()"
+  },
+  {
+    "name": "keyboard-expand-and-inert",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actions": ["document.querySelector('[data-pinned-summary] [aria-expanded]').focus()"],
+    "keys": ["Enter"],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]'); const button = card.querySelector('[aria-expanded]'); const panel = document.getElementById(button.getAttribute('aria-controls')); return { focusOnToggle: document.activeElement === button, focusVisible: button.matches(':focus-visible'), expanded: button.getAttribute('aria-expanded'), inert: panel.inert, j_still_moves_list: null }; })()"
+  },
+  {
+    "name": "expand-keeps-latest-message-in-view",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-draft]')",
+    "actionWaitMs": 600,
+    "actions": [
+      "window.__before = (() => { const s = document.querySelector('main ol').parentElement; return { gap: s.scrollHeight - s.clientHeight - s.scrollTop, draftBottom: Math.round(document.querySelector('[data-draft]').getBoundingClientRect().bottom) }; })()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ],
+    "eval": "(() => { const s = document.querySelector('main ol').parentElement; return { before: window.__before, after: { gap: Math.round(s.scrollHeight - s.clientHeight - s.scrollTop), draftBottom: Math.round(document.querySelector('[data-draft]').getBoundingClientRect().bottom), viewport: innerHeight } }; })()"
+  },
+  {
+    "name": "collapse-on-conversation-change",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actions": ["document.querySelector('[data-pinned-summary] [aria-expanded]').click()"],
+    "keys": ["j"],
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), expanded: document.querySelector('[data-pinned-summary] [aria-expanded]').getAttribute('aria-expanded') })"
+  },
+  {
+    "name": "summary-t21-narrow-900-why",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 900,
+    "height": 800,
+    "out": "docs/evidence/step-4/summary-t04-narrow-900-why.png",
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ],
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]').getBoundingClientRect(); const main = document.querySelector('main').getBoundingClientRect(); const ol = document.querySelector('main ol'); const bubble = ol.querySelector('li > div').getBoundingClientRect(); const olBox = ol.getBoundingClientRect(); return { mainWidth: main.width, cardInside: card.left >= main.left && card.right <= main.right, cardLeftInset: Math.round(card.left - main.left), columnLeftInset: Math.round(olBox.left + parseFloat(getComputedStyle(ol).paddingLeft) - main.left), horizontalOverflow: ol.parentElement.scrollWidth > ol.parentElement.clientWidth }; })()"
+  },
+  {
+    "name": "wide-alignment",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1920,
+    "height": 1000,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "eval": "(() => { const card = document.querySelector('[data-pinned-summary]').getBoundingClientRect(); const ol = document.querySelector('main ol'); const o = ol.getBoundingClientRect(); const pad = parseFloat(getComputedStyle(ol).paddingLeft); return { card: [Math.round(card.left), Math.round(card.right)], column: [Math.round(o.left + pad), Math.round(o.right - pad)] }; })()"
+  },
+  {
+    "name": "night-summary-t04-why-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "out": "docs/evidence/step-4/night-summary-t04-why-2x.png",
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()"
+    ]
+  },
+  {
+    "name": "greyscale-summary-t04-why-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "out": "docs/evidence/step-4/greyscale-summary-t04-why-2x.png",
+    "scale": 2,
+    "selector": "[data-pinned-summary]",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-pinned-summary]')",
+    "actionWaitMs": 500,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] [aria-expanded]').click()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ]
+  },
+  {
+    "name": "tokens-contrast",
+    "url": "http://localhost:3000/tokens",
+    "waitFor": "document.querySelectorAll('[data-contrast-summary]').length === 2 && [...document.querySelectorAll('[data-contrast-summary]')].every(e => e.dataset.contrastSummary.includes('/'))",
+    "waitMs": 1200,
+    "eval": "({ summaries: [...document.querySelectorAll('[data-contrast-summary]')].map(e => e.closest('[data-theme-scope]').dataset.themeScope + ' ' + e.dataset.contrastSummary), fails: [...document.querySelectorAll('tr[data-verdict=Fail]')].map(r => r.closest('[data-theme-scope]').dataset.themeScope + ': ' + r.textContent) })"
+  }
+]

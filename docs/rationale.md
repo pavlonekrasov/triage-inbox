@@ -198,3 +198,65 @@ Reasoning   The rule exists for this case: text on glass must not compete with t
 Trade-off   The track refracts less of the list behind it.
 Validation  thread-t21-narrow-900.png after the change.
 ```
+
+## Step 4: pinned summary
+
+### The routing display in the pinned card
+
+```
+Problem     A specialist deciding in three seconds needs route, category, confidence and the summary together, without opening anything (PRODUCT.md, "AI hidden behind a click").
+Decision    Collapsed: route glyph with a headline naming what is needed ("Needs your decision", "Draft waiting for approval"), category path, confidence meter, summary, evidence problems. "Why this route" opens the reasons, the confidence note, hard-rule chips, the matrix row as a sentence, and the model score.
+Reasoning   Brief 8.1's two reading depths. The matrix sentence checks rules in the order lib/route.ts does, so the explanation cannot disagree with the router.
+Trade-off   The card takes 126 px of thread height collapsed and about 440 px open at 1440 × 900.
+Validation  summary-t02-collapsed-2x.png, summary-t04-why-2x.png; summary.test.ts covers every matrix row.
+```
+
+### Confidence in words, a meter by shape
+
+```
+Problem     A percentage invites false precision (8.2), and a colour-coded meter fails greyscale and colour blindness (review gate 6).
+Decision    The word leads (Sure, Likely, Unsure); three ink bars follow, filled solid or drawn as an outline. The model score appears once, small, after the confidence note inside "Why this route".
+Reasoning   Confidence is not risk, so the meter borrows no risk hue ("risk is never decoration"); solid against outline survives greyscale.
+Trade-off   Filled and empty bars differ by fill alone, which reads slower than colour; the word carries the level.
+Validation  greyscale-summary-t04-why-2x.png.
+```
+
+### Two fields added to the contract
+
+```
+Problem     Brief 8.1 asks for reasons "with a check or warning glyph" and confidence "explained in words", but the TriageResult in brief 8 carries neither.
+Decision    reasons[].caution?: boolean marks a reason that holds the case back from sending on its own; confidenceNote: string explains the level without naming it ("intent is clear; no error or screen is named").
+Reasoning   Deriving either from label text would be guessing; a real agent can return both, and the type stays the seam where it plugs in (brief 14).
+Trade-off   The contract differs from the brief's by two fields a model evaluation must also score.
+Validation  summary.test.ts: auto-sent tickets carry no caution, every hard-rule ticket at least one, every note at most 14 words and no level word.
+```
+
+### Evidence problems on the collapsed card
+
+```
+Problem     Review gate 15 needs ticket 4's conflict and ticket 5's outdated policy in the pinned card; under "Why this route" they would be a click away at the moment of deciding.
+Decision    "Sources disagree" and "Chat credit refunds v3 is outdated: v4 published 2 Sep" sit under the summary on the collapsed card, in terracotta with a warning triangle.
+Reasoning   They decide whether the draft is usable at all, which is three-second information; the triangle and the words keep them readable without colour.
+Trade-off   Ticket 2's flag repeats a clause of its own summary.
+Validation  summary-t04-why-2x.png, summary-t05-stale-why-2x.png; summary.test.ts flags exactly these two and none on current, agreeing evidence.
+```
+
+### Source citations now, links in step 6
+
+```
+Problem     Brief 8.1 wants each reason's source to link to its highlighted row in the context panel, which arrives in step 6.
+Decision    Each sourced reason shows a citation: title, version, updated date; a superseded version is struck through (not faded to 50%, which would fall below 4.5:1) beside "Newer version exists (v4, 2 Sep)". Evidence lines say what the source establishes, since the citation names it.
+Reasoning   A link to a panel that does not exist yet would be a control that does nothing; the citation carries the audit value now.
+Trade-off   Until step 6 the citation cannot be followed to the policy text.
+Validation  tickets.test.ts: no evidence line repeats its source's title; summary-t05-stale-why-2x.png.
+```
+
+### Opening "Why this route" keeps the latest message in place
+
+```
+Problem     The card floats at the top of the thread, so opening it pushed the draft 218 px below the viewport when the thread sat at its latest message.
+Decision    A ResizeObserver on the floating strip moves the scroll position by the strip's growth each frame, with browser scroll anchoring off so nothing corrects twice. Each conversation opens collapsed.
+Reasoning   The draft is what "Why this route" explains, so it stays in view while the reasons open; Safari has no scroll anchoring, so the correction cannot rely on it.
+Trade-off   With the thread scrolled to its top, the opening card covers the first messages instead of pushing them down.
+Validation  expand-keeps-latest-message-in-view: draft bottom at 868 px before and after, 0 px from the end.
+```

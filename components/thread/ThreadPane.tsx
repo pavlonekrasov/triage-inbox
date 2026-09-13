@@ -8,6 +8,7 @@ import { buildTimeline } from "@/lib/timeline";
 import type { Ticket } from "@/lib/types";
 import { CustomerBubble, SentBubble } from "./Bubble";
 import { DraftBubble } from "./DraftBubble";
+import { PinnedSummary } from "./PinnedSummary";
 import { DaySeparator, ServiceGroup } from "./ServiceMessage";
 import { ThreadHeader } from "./ThreadHeader";
 
@@ -26,6 +27,25 @@ export function ThreadPane() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [state.openId]);
 
+  // The floating strip grows when "Why this route" opens. Its growth pushes the timeline down, so the
+  // scroll position moves by the same amount each frame and the message in view stays where it was.
+  // Browser scroll anchoring is off so it cannot add a second correction (and Safari has none).
+  const strip = useRef<HTMLDivElement>(null);
+  const hasTicket = ticket !== undefined;
+  useLayoutEffect(() => {
+    const el = strip.current;
+    const pane = scroller.current;
+    if (!el || !pane) return;
+    let height = el.offsetHeight;
+    const observer = new ResizeObserver(() => {
+      const next = el.offsetHeight;
+      pane.scrollTop += next - height;
+      height = next;
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasTicket]);
+
   if (!ticket) {
     return (
       <main aria-label="Conversation" className="wallpaper flex h-full min-w-0 flex-col items-center justify-center gap-2 p-8">
@@ -39,11 +59,16 @@ export function ThreadPane() {
 
   return (
     <main aria-label={`Conversation with ${ticket.customer.name}`} className="wallpaper h-full min-w-0">
-      <div ref={scroller} className="flex h-full flex-col overflow-y-auto overscroll-contain">
-        {/* The header floats and the thread scrolls under it; the strip itself lets clicks through. */}
-        <div className="pointer-events-none sticky top-0 z-10 flex shrink-0 flex-col items-center gap-2 px-4 pt-3">
+      <div ref={scroller} className="flex h-full flex-col overflow-y-auto overscroll-contain [overflow-anchor:none]">
+        {/* The header and the pinned summary float and the thread scrolls under them; the strip itself
+            lets clicks through. px-6 and max-w-168 line the card up with the bubble column below. */}
+        <div
+          ref={strip}
+          className="pointer-events-none sticky top-0 z-10 flex shrink-0 flex-col items-center gap-2 px-6 pt-3"
+        >
           <ThreadHeader ticket={ticket} />
           <ThreadNotice />
+          <PinnedSummary key={ticket.id} ticket={ticket} />
         </div>
 
         <ol

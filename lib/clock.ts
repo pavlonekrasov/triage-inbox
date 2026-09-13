@@ -61,6 +61,9 @@ export function formatDayLabel(iso: string, now: number = DEMO_NOW) {
   return dayMonth.format(at);
 }
 
+/** A calendar date on the desk clock: "2 Sep". */
+export const formatShortDate = (iso: string) => dayMonth.format(Date.parse(iso));
+
 const localTimeFormats = new Map<string, Intl.DateTimeFormat>();
 
 /** The customer's wall-clock time, so a reply is never written as if it were evening where they are. */
