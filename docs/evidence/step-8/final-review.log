@@ -1,0 +1,78 @@
+[axe-inbox-day] failed: waitFor timed out after 20000 ms: !document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))
+[axe-drafting-day] failed: waitFor timed out after 20000 ms: !document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))
+[axe-draft-failed-day] {
+ "violations": [],
+ "passes": 29
+}
+[axe-collision-offline-day] {
+ "violations": [],
+ "passes": 29
+}
+[axe-phone-day] {
+ "violations": [],
+ "passes": 27
+}
+[axe-tablet-day] {
+ "violations": [],
+ "passes": 29
+}
+[axe-quality-day] {
+ "violations": [],
+ "passes": 21
+}
+[axe-flow-day] {
+ "violations": [],
+ "passes": 23
+}
+[axe-cases-day] {
+ "violations": [],
+ "passes": 21
+}
+[sidebar-motion-day] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99
+[section-motion-day] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
+    at <anonymous>:10:80
+[sidebar-reduced-day] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99
+[axe-inbox-night] {
+ "violations": [],
+ "passes": 31
+}
+[axe-drafting-night] {
+ "violations": [],
+ "passes": 29
+}
+[axe-draft-failed-night] {
+ "violations": [],
+ "passes": 29
+}
+[axe-collision-offline-night] {
+ "violations": [],
+ "passes": 29
+}
+[axe-phone-night] {
+ "violations": [],
+ "passes": 27
+}
+[axe-tablet-night] {
+ "violations": [],
+ "passes": 29
+}
+[axe-quality-night] {
+ "violations": [],
+ "passes": 21
+}
+[axe-flow-night] {
+ "violations": [],
+ "passes": 23
+}
+[axe-cases-night] {
+ "violations": [],
+ "passes": 21
+}
+[sidebar-motion-night] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99
+[section-motion-night] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
+    at <anonymous>:10:80
+[sidebar-reduced-night] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99

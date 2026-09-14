@@ -5,6 +5,7 @@ import { memo } from "react";
 import { avatarStyle, initials } from "@/lib/avatar";
 import { isEnglish, languageCode } from "@/lib/language";
 import { isPinned, isResolved } from "@/lib/lanes";
+import type { DraftStatus } from "@/lib/decision";
 import type { Ticket, TriageResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CategoryGlyph } from "./CategoryGlyph";
@@ -13,9 +14,10 @@ import { RouteGlyph, type RouteGlyphKind } from "./RouteGlyph";
 
 export const rowId = (ticketId: string) => `row-${ticketId}`;
 
-export function glyphKind(triage: TriageResult): RouteGlyphKind {
+/** A failed draft leaves a person to write the reply, so the case shows Human-led (brief 12). */
+export function glyphKind(triage: TriageResult, draft?: DraftStatus | null): RouteGlyphKind {
   if (triage.route === "auto_send") return "auto";
-  if (triage.route === "approve_draft") return "draft";
+  if (triage.route === "approve_draft" && draft !== "failed") return "draft";
   return triage.hardRules.includes("wellbeing") ? "wellbeing" : "you";
 }
 
@@ -31,6 +33,8 @@ type TicketRowProps = {
   last: boolean;
   /** A reply to this ticket failed to send, so it is back in its lane. */
   unsent?: boolean;
+  /** The AI draft is still generating, or failed. */
+  draft?: DraftStatus | null;
   onActivate: (id: string) => void;
 };
 
@@ -47,6 +51,7 @@ export const TicketRow = memo(function TicketRow({
   tabbable,
   last,
   unsent = false,
+  draft = null,
   onActivate,
 }: TicketRowProps) {
   const { customer, triage } = ticket;
@@ -135,6 +140,8 @@ export const TicketRow = memo(function TicketRow({
             {/* Telegram's "Draft:" preview prefix: a word in ink weight, so the marker costs the name no width. */}
             <span className="truncate">
               {unsent && <span className="font-medium text-risk-high">Not sent: </span>}
+              {draft === "drafting" && <span className="font-medium text-brand">Drafting: </span>}
+              {draft === "failed" && <span className="font-medium text-foreground">No draft: </span>}
               {ticket.spotCheck && <span className="font-medium text-foreground">Spot-check: </span>}
               {triage.summary}
             </span>
@@ -142,7 +149,7 @@ export const TicketRow = memo(function TicketRow({
         </span>
 
         <span className="flex w-4 shrink-0 justify-center transition-opacity duration-[calc(200ms*var(--motion))] group-data-[edit=true]/row:opacity-0">
-          <RouteGlyph route={glyphKind(triage)} showLabel={false} />
+          <RouteGlyph route={glyphKind(triage, draft)} showLabel={false} />
         </span>
       </span>
     </button>

@@ -37,12 +37,15 @@ export function dismissBlock(ticket: Ticket, kind: DismissKind): string | null {
   return null;
 }
 
+const NO_IDS: ReadonlySet<string> = new Set();
+
 /**
  * Open lanes sort by first-response deadline, soonest first, so the case closest to breaching is
  * never below the fold. Auto-resolved is history, so it reads newest first like a chat list.
+ * `fallen` holds conversations whose AI draft failed: the case falls to Needs you (brief 12).
  */
-export function laneTickets(tickets: readonly Ticket[], lane: Lane): Ticket[] {
-  const inLane = tickets.filter((t) => laneFor(t.triage.route) === lane);
+export function laneTickets(tickets: readonly Ticket[], lane: Lane, fallen: ReadonlySet<string> = NO_IDS): Ticket[] {
+  const inLane = tickets.filter((t) => (fallen.has(t.id) ? "needs_you" : laneFor(t.triage.route)) === lane);
   if (lane === "auto_resolved") {
     return inLane.sort((a, b) => lastActivityAt(b).localeCompare(lastActivityAt(a)));
   }

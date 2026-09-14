@@ -30,6 +30,7 @@ import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { setTimeout as sleep } from "node:timers/promises";
 
 const BROWSERS = [
@@ -41,7 +42,7 @@ const BROWSERS = [
   "/usr/bin/google-chrome",
 ].filter(Boolean);
 
-async function launch() {
+export async function launch() {
   const executable = BROWSERS.find((path) => existsSync(path));
   if (!executable) throw new Error("No Chromium browser found. Set BROWSER_PATH.");
   const profile = await mkdtemp(join(tmpdir(), "care-desk-capture-"));
@@ -71,7 +72,7 @@ async function launch() {
   throw new Error("The browser did not open a DevTools port within 15 s.");
 }
 
-function connect(wsUrl) {
+export function connect(wsUrl) {
   return new Promise((resolveConnection, reject) => {
     const ws = new WebSocket(wsUrl);
     const pending = new Map();
@@ -114,7 +115,7 @@ function connect(wsUrl) {
   });
 }
 
-async function evaluate(cdp, expression) {
+export async function evaluate(cdp, expression) {
   const { result, exceptionDetails } = await cdp.send("Runtime.evaluate", {
     expression,
     returnByValue: true,
@@ -124,7 +125,7 @@ async function evaluate(cdp, expression) {
   return result.value;
 }
 
-async function waitFor(cdp, expression, timeoutMs = 20_000) {
+export async function waitFor(cdp, expression, timeoutMs = 20_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await evaluate(cdp, `Boolean(${expression})`)) return;
@@ -251,8 +252,13 @@ async function shoot(port, shot) {
     await sleep(400);
   }
 
+  for (const script of shot.scripts ?? []) await evaluate(cdp, await readFile(script, "utf8"));
   if (shot.eval) {
     const value = await evaluate(cdp, shot.eval);
+    if (shot.report) {
+      await mkdir(dirname(resolve(shot.report)), { recursive: true });
+      await writeFile(shot.report, JSON.stringify(value, null, 2) + "\n");
+    }
     console.log(`[${shot.name}] ${typeof value === "string" ? value : JSON.stringify(value, null, 1)}`);
   }
 
@@ -287,6 +293,8 @@ async function shoot(port, shot) {
   await fetch(`http://127.0.0.1:${port}/json/close/${target.id}`);
 }
 
+// Importing the CDP helpers for accessibility audits does not execute a capture plan.
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
 const planPath = process.argv[2];
 if (!planPath) {
   console.error("Usage: node scripts/capture.mjs <plan.json>");
@@ -311,3 +319,4 @@ try {
   await rm(browser.profile, { recursive: true, force: true }).catch(() => {});
 }
 process.exit(failed ? 1 : 0);
+}

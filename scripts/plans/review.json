@@ -1,0 +1,346 @@
+[
+  {
+    "name": "axe-inbox-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-inbox-day.json"
+  },
+  {
+    "name": "axe-drafting-day",
+    "url": "http://localhost:3000/?ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-drafting-day.json"
+  },
+  {
+    "name": "axe-draft-failed-day",
+    "url": "http://localhost:3000/?ticket=t17&draft=failed",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-draft-failed-day.json"
+  },
+  {
+    "name": "axe-collision-offline-day",
+    "url": "http://localhost:3000/?ticket=t17&viewer=ana&net=offline",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-collision-offline-day.json"
+  },
+  {
+    "name": "axe-phone-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 375,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-phone-day.json"
+  },
+  {
+    "name": "axe-tablet-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 800,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-tablet-day.json"
+  },
+  {
+    "name": "axe-quality-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()",
+      "document.querySelector('[data-quality-trigger]').click()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-quality-day.json"
+  },
+  {
+    "name": "axe-flow-day",
+    "url": "http://localhost:3000/slides/flow",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-flow-day.json"
+  },
+  {
+    "name": "axe-cases-day",
+    "url": "http://localhost:3000/slides/cases",
+    "width": 1440,
+    "height": 900,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-cases-day.json"
+  },
+  {
+    "name": "sidebar-motion-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "eval": "(async () => {\n  const delay = ms => new Promise(r => setTimeout(r, ms));\n  const rail = document.querySelector('[data-context-rail]');\n  const toggle = document.querySelector('[data-context-toggle]');\n  const width = () => Math.round(rail.getBoundingClientRect().width);\n  const initial = width();\n  document.querySelector('[aria-label=\"Hide customer details\"]').click();\n  await delay(50);\n  const closing = width();\n  const closeAnimations = rail.getAnimations().map(a => a.effect.getTiming().duration);\n  await delay(300);\n  const closed = width();\n  const focusReturned = document.activeElement === toggle;\n  const inert = rail.inert;\n  toggle.click();\n  await delay(50);\n  const opening = width();\n  await delay(300);\n  const restored = width();\n  toggle.click(); await delay(60); toggle.click(); await delay(350);\n  const reversed = width();\n  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;\n  if (closed > 1 || Math.abs(restored-initial)>2 || Math.abs(reversed-initial)>2 || !inert) throw new Error('Sidebar did not restore its width/state');\n  if (!reduced && !(closing > 0 && closing < initial && opening > 0 && opening < initial && closeAnimations.length)) throw new Error('Sidebar snapped rather than animating: '+JSON.stringify({initial,closing,opening,closeAnimations}));\n  if (reduced && (closing !== closed || closeAnimations.length)) throw new Error('Reduced motion still animates');\n  return {initial,closing,closed,opening,restored,reversed,focusReturned,inert,reduced,closeAnimations};\n})()",
+    "report": "docs/evidence/step-8/sidebar-motion-day.json"
+  },
+  {
+    "name": "section-motion-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "eval": "(async () => {\n  const delay = ms => new Promise(r => setTimeout(r, ms));\n  const root = document.querySelector('[data-context-section=customer]');\n  const button = root.querySelector('button');\n  const height = () => Math.round(root.getBoundingClientRect().height);\n  const before = height();\n  button.click(); await delay(60); const during = height();\n  await delay(300); const closed = height();\n  button.click(); await delay(350); const after = height();\n  if (!(during > closed && during < before) || Math.abs(after-before)>2) throw new Error('Section expansion is not animated or did not restore: '+JSON.stringify({before,during,closed,after}));\n  return {before,during,closed,after};\n})()",
+    "report": "docs/evidence/step-8/section-motion-day.json"
+  },
+  {
+    "name": "sidebar-reduced-day",
+    "url": "http://localhost:3000/?ticket=t02",
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "eval": "(async () => {\n  const delay = ms => new Promise(r => setTimeout(r, ms));\n  const rail = document.querySelector('[data-context-rail]');\n  const toggle = document.querySelector('[data-context-toggle]');\n  const width = () => Math.round(rail.getBoundingClientRect().width);\n  const initial = width();\n  document.querySelector('[aria-label=\"Hide customer details\"]').click();\n  await delay(50);\n  const closing = width();\n  const closeAnimations = rail.getAnimations().map(a => a.effect.getTiming().duration);\n  await delay(300);\n  const closed = width();\n  const focusReturned = document.activeElement === toggle;\n  const inert = rail.inert;\n  toggle.click();\n  await delay(50);\n  const opening = width();\n  await delay(300);\n  const restored = width();\n  toggle.click(); await delay(60); toggle.click(); await delay(350);\n  const reversed = width();\n  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;\n  if (closed > 1 || Math.abs(restored-initial)>2 || Math.abs(reversed-initial)>2 || !inert) throw new Error('Sidebar did not restore its width/state');\n  if (!reduced && !(closing > 0 && closing < initial && opening > 0 && opening < initial && closeAnimations.length)) throw new Error('Sidebar snapped rather than animating: '+JSON.stringify({initial,closing,opening,closeAnimations}));\n  if (reduced && (closing !== closed || closeAnimations.length)) throw new Error('Reduced motion still animates');\n  return {initial,closing,closed,opening,restored,reversed,focusReturned,inert,reduced,closeAnimations};\n})()",
+    "report": "docs/evidence/step-8/sidebar-reduced-day.json"
+  },
+  {
+    "name": "axe-inbox-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-inbox-night.json"
+  },
+  {
+    "name": "axe-drafting-night",
+    "url": "http://localhost:3000/?ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-drafting-night.json"
+  },
+  {
+    "name": "axe-draft-failed-night",
+    "url": "http://localhost:3000/?ticket=t17&draft=failed",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-draft-failed-night.json"
+  },
+  {
+    "name": "axe-collision-offline-night",
+    "url": "http://localhost:3000/?ticket=t17&viewer=ana&net=offline",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-collision-offline-night.json"
+  },
+  {
+    "name": "axe-phone-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 375,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-phone-night.json"
+  },
+  {
+    "name": "axe-tablet-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 800,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-tablet-night.json"
+  },
+  {
+    "name": "axe-quality-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()",
+      "document.querySelector('[data-quality-trigger]').click()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-quality-night.json"
+  },
+  {
+    "name": "axe-flow-night",
+    "url": "http://localhost:3000/slides/flow",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-flow-night.json"
+  },
+  {
+    "name": "axe-cases-night",
+    "url": "http://localhost:3000/slides/cases",
+    "width": 1440,
+    "height": 900,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove()"
+    ],
+    "scripts": [
+      "node_modules/axe-core/axe.min.js"
+    ],
+    "eval": "(async () => {\n  const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });\n  const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));\n  if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));\n  return { violations, passes: result.passes.length };\n})()",
+    "report": "docs/evidence/step-8/axe-cases-night.json"
+  },
+  {
+    "name": "sidebar-motion-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "eval": "(async () => {\n  const delay = ms => new Promise(r => setTimeout(r, ms));\n  const rail = document.querySelector('[data-context-rail]');\n  const toggle = document.querySelector('[data-context-toggle]');\n  const width = () => Math.round(rail.getBoundingClientRect().width);\n  const initial = width();\n  document.querySelector('[aria-label=\"Hide customer details\"]').click();\n  await delay(50);\n  const closing = width();\n  const closeAnimations = rail.getAnimations().map(a => a.effect.getTiming().duration);\n  await delay(300);\n  const closed = width();\n  const focusReturned = document.activeElement === toggle;\n  const inert = rail.inert;\n  toggle.click();\n  await delay(50);\n  const opening = width();\n  await delay(300);\n  const restored = width();\n  toggle.click(); await delay(60); toggle.click(); await delay(350);\n  const reversed = width();\n  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;\n  if (closed > 1 || Math.abs(restored-initial)>2 || Math.abs(reversed-initial)>2 || !inert) throw new Error('Sidebar did not restore its width/state');\n  if (!reduced && !(closing > 0 && closing < initial && opening > 0 && opening < initial && closeAnimations.length)) throw new Error('Sidebar snapped rather than animating: '+JSON.stringify({initial,closing,opening,closeAnimations}));\n  if (reduced && (closing !== closed || closeAnimations.length)) throw new Error('Reduced motion still animates');\n  return {initial,closing,closed,opening,restored,reversed,focusReturned,inert,reduced,closeAnimations};\n})()",
+    "report": "docs/evidence/step-8/sidebar-motion-night.json"
+  },
+  {
+    "name": "section-motion-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "eval": "(async () => {\n  const delay = ms => new Promise(r => setTimeout(r, ms));\n  const root = document.querySelector('[data-context-section=customer]');\n  const button = root.querySelector('button');\n  const height = () => Math.round(root.getBoundingClientRect().height);\n  const before = height();\n  button.click(); await delay(60); const during = height();\n  await delay(300); const closed = height();\n  button.click(); await delay(350); const after = height();\n  if (!(during > closed && during < before) || Math.abs(after-before)>2) throw new Error('Section expansion is not animated or did not restore: '+JSON.stringify({before,during,closed,after}));\n  return {before,during,closed,after};\n})()",
+    "report": "docs/evidence/step-8/section-motion-night.json"
+  },
+  {
+    "name": "sidebar-reduced-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))",
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "eval": "(async () => {\n  const delay = ms => new Promise(r => setTimeout(r, ms));\n  const rail = document.querySelector('[data-context-rail]');\n  const toggle = document.querySelector('[data-context-toggle]');\n  const width = () => Math.round(rail.getBoundingClientRect().width);\n  const initial = width();\n  document.querySelector('[aria-label=\"Hide customer details\"]').click();\n  await delay(50);\n  const closing = width();\n  const closeAnimations = rail.getAnimations().map(a => a.effect.getTiming().duration);\n  await delay(300);\n  const closed = width();\n  const focusReturned = document.activeElement === toggle;\n  const inert = rail.inert;\n  toggle.click();\n  await delay(50);\n  const opening = width();\n  await delay(300);\n  const restored = width();\n  toggle.click(); await delay(60); toggle.click(); await delay(350);\n  const reversed = width();\n  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;\n  if (closed > 1 || Math.abs(restored-initial)>2 || Math.abs(reversed-initial)>2 || !inert) throw new Error('Sidebar did not restore its width/state');\n  if (!reduced && !(closing > 0 && closing < initial && opening > 0 && opening < initial && closeAnimations.length)) throw new Error('Sidebar snapped rather than animating: '+JSON.stringify({initial,closing,opening,closeAnimations}));\n  if (reduced && (closing !== closed || closeAnimations.length)) throw new Error('Reduced motion still animates');\n  return {initial,closing,closed,opening,restored,reversed,focusReturned,inert,reduced,closeAnimations};\n})()",
+    "report": "docs/evidence/step-8/sidebar-reduced-night.json"
+  }
+]

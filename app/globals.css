@@ -370,6 +370,34 @@
   }
 }
 
+/* Drafting (brief 10): three dots pulse from 0.3 to 1 opacity on a 1.2 s loop, 160 ms apart, only while
+   a draft generates and its bubble is on screen. Reduced motion shows the words "Drafting reply" instead. */
+@theme {
+  --animate-typing-dot: typing-dot 1.2s var(--ease-in-out) infinite;
+
+  @keyframes typing-dot {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+}
+
+/* Phone push (brief 7.2): a conversation slides in over the list from the right edge, 220 ms on the
+   entrance curve, as in Telegram for iOS. Under reduced motion --motion is 0 and it appears in place. */
+@theme {
+  --animate-push-in: push-in var(--dur-ui) var(--ease-out);
+
+  @keyframes push-in {
+    from {
+      translate: calc(100% * var(--motion)) 0;
+    }
+  }
+}
+
 /* Draft fill: the violet wash composited over card, so the bubble is opaque. Its text then measures
    the same over every wallpaper field, and the draft reads near-white beside the tinted sent bubble. */
 @utility draft-fill {
@@ -381,4 +409,46 @@
 @utility avatar-tint {
   background-color: oklch(var(--avatar-bg-l) 0.04 var(--avatar-h, 285));
   color: oklch(var(--avatar-fg-l) 0.06 var(--avatar-h, 285));
+}
+
+/* Customer details: the rail and thread move together. Layout motion is intentional when opening
+   space; content keeps its measured width and is clipped rather than squeezing its typography. */
+[data-context-transition] > [data-panel] {
+  transition: flex-grow var(--dur-ui) var(--ease-soft);
+}
+
+.context-rail-content {
+  transition: opacity var(--dur-ui) var(--ease-out), translate var(--dur-ui) var(--ease-out);
+}
+
+[data-context-rail][data-open="false"] .context-rail-content {
+  opacity: 0;
+  translate: 12px 0;
+}
+
+.context-section-body {
+  height: var(--collapsible-panel-height);
+  overflow: hidden;
+  transition: height var(--dur-ui) var(--ease-out), opacity var(--dur-ui) var(--ease-out);
+}
+
+.context-section-body[data-starting-style],
+.context-section-body[data-ending-style] {
+  height: 0;
+  opacity: 0;
+}
+
+.context-sheet-motion {
+  transition-property: translate, opacity;
+  transition-duration: var(--dur-ui);
+  transition-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-context-transition] > [data-panel],
+  .context-rail-content,
+  .context-section-body,
+  .context-sheet-motion {
+    transition: none;
+  }
 }

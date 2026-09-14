@@ -1,9 +1,19 @@
 "use client";
 
 import { createContext, use, type Dispatch } from "react";
+import { COLLEAGUE } from "@/data/team";
 import { TICKETS, TICKETS_BY_ID } from "@/data/tickets";
 import { formatClockTime } from "@/lib/clock";
-import { approveBlocked, decisionFor, editTarget, type DecisionContext, type OutgoingStatus } from "@/lib/decision";
+import {
+  approveBlocked,
+  canSimulateDraft,
+  decisionFor,
+  DRAFT_RETRY_MS,
+  editTarget,
+  type DecisionContext,
+  type DraftStatus,
+  type OutgoingStatus,
+} from "@/lib/decision";
 import type { DeskInit, ListState } from "@/lib/desk-params";
 import { teamLabel } from "@/lib/escalation";
 import { dismissBlock, LANES, laneTickets, type DismissKind } from "@/lib/lanes";
@@ -123,10 +133,22 @@ export interface DeskState {
 
   /** Selection mode's preview of the replies a bulk approval would send (brief 9.2). */
   bulkPreview: boolean;
-  /** The command palette or the shortcut sheet. One at a time. */
-  overlay: "palette" | "shortcuts" | null;
+  /** The command palette, the shortcut sheet or the quality sheet. One at a time. */
+  overlay: "palette" | "shortcuts" | "quality" | null;
   /** The team the Escalate popover opens on when it was asked for from the palette. */
   escalateTeam: EscalationTeam | null;
+
+  /* The states catalogue (brief 12), driven by the prototype controls, the URL and the browser. */
+  /** AI drafts that are not ready. A retried draft carries the wall time it arrives at. */
+  draftStatus: Readonly<Record<string, { status: DraftStatus; settlesAt?: number }>>;
+  /** Conversations a colleague has open at the same time, with the colleague's id. */
+  viewers: Readonly<Record<string, string>>;
+  /** A send on a conversation a colleague is viewing, asked about once: the next send goes out. */
+  confirmSend: { id: string; notice: number } | null;
+  /** Offline, a reply leaves its undo window as queued and sends on reconnect. */
+  online: boolean;
+  /** Phone layout: the thread is pushed over the list (brief 7.2). */
+  threadPushed: boolean;
 }
 
 export type DeskAction =
@@ -168,7 +190,13 @@ export type DeskAction =
   | { type: "revealEmail"; id: string; now: number }
   | { type: "setBulkPreview"; open: boolean }
   | { type: "bulkApprove"; now: number; wall: number }
-  | { type: "setOverlay"; overlay: DeskState["overlay"] };
+  | { type: "setOverlay"; overlay: DeskState["overlay"] }
+  | { type: "setDraftStatus"; id: string; status: DraftStatus | null }
+  | { type: "retryDraft"; id: string; wall: number }
+  | { type: "draftSettled"; id: string }
+  | { type: "setViewer"; id: string; viewing: boolean }
+  | { type: "setOnline"; online: boolean }
+  | { type: "back" };
 
 /** Tickets out of every lane right now: snoozed, marked spam, escalated, or answered from an open lane. */
 export function hiddenIds(state: Pick<DeskState, "dismissed" | "escalations" | "outbox">): ReadonlySet<string> {
@@ -187,18 +215,32 @@ export function hiddenIds(state: Pick<DeskState, "dismissed" | "escalations" | "
 
 const NONE: ReadonlySet<string> = new Set();
 
+/** Conversations whose AI draft failed: the case falls to Needs you (brief 12). */
+export function fallenIds(state: Pick<DeskState, "draftStatus">): ReadonlySet<string> {
+  return new Set(Object.keys(state.draftStatus).filter((id) => state.draftStatus[id].status === "failed"));
+}
+
 /** The rows a lane shows in a given list state. */
-export function rowsFor(listState: ListState, lane: Lane, hidden: ReadonlySet<string> = NONE): Ticket[] {
+export function rowsFor(
+  listState: ListState,
+  lane: Lane,
+  hidden: ReadonlySet<string> = NONE,
+  fallen: ReadonlySet<string> = NONE,
+): Ticket[] {
   if (listState === "loading") return [];
   if (listState === "empty" && lane === "needs_you") return [];
-  return laneTickets(TICKETS, lane).filter((t) => !hidden.has(t.id));
+  return laneTickets(TICKETS, lane, fallen).filter((t) => !hidden.has(t.id));
 }
+
+/** The rows a lane shows on this desk right now. */
+export const laneRows = (state: DeskState, lane: Lane) => rowsFor(state.listState, lane, hiddenIds(state), fallenIds(state));
 
 export function contextFor(state: DeskState, id: string): DecisionContext {
   return {
     chosenDraftId: state.variantChoice[id] ?? null,
     takenOver: id in state.takenOver,
     outgoing: state.outbox[id]?.status ?? null,
+    draft: state.draftStatus[id]?.status ?? null,
   };
 }
 
@@ -239,12 +281,16 @@ export function threadOverlay(state: DeskState, ticket: Ticket): TimelineOverlay
     })),
     chosenDraftId: state.variantChoice[ticket.id] ?? null,
     editingDraftId: composer?.mode === "edit" ? composer.draftId : null,
+    draft: state.draftStatus[ticket.id]?.status ?? null,
     events,
   };
 }
 
-export function createDeskState({ lane, ticketId, listState }: DeskInit): DeskState {
-  const rows = rowsFor(listState, lane);
+export function createDeskState({ lane: laneParam, ticketId, listState, draft, viewer, offline }: DeskInit): DeskState {
+  // A conversation opened with a failed draft has already fallen to Needs you.
+  const lane: Lane = ticketId && draft === "failed" ? "needs_you" : laneParam;
+  const draftStatus = ticketId && draft ? { [ticketId]: { status: draft } } : {};
+  const rows = rowsFor(listState, lane, NONE, fallenIds({ draftStatus }));
   const openId =
     listState === "loading" ? ticketId : rows.some((t) => t.id === ticketId) ? ticketId : (rows[0]?.id ?? null);
   return {
@@ -274,6 +320,11 @@ export function createDeskState({ lane, ticketId, listState }: DeskInit): DeskSt
     bulkPreview: false,
     overlay: null,
     escalateTeam: null,
+    draftStatus,
+    viewers: ticketId && viewer ? { [ticketId]: COLLEAGUE.id } : {},
+    confirmSend: null,
+    online: !offline,
+    threadPushed: ticketId !== null,
   };
 }
 
@@ -309,8 +360,9 @@ function reveal(state: DeskState, id: string): DeskState {
   return {
     ...state,
     seq,
-    lane: laneFor(ticket.triage.route),
+    lane: fallenIds(state).has(id) ? "needs_you" : laneFor(ticket.triage.route),
     openId: id,
+    threadPushed: true,
     cursorId: id,
     editMode: false,
     checked: [],
@@ -326,7 +378,7 @@ function reveal(state: DeskState, id: string): DeskState {
  */
 function openNext(before: DeskState, id: string, next: DeskState, { stay }: { stay: boolean }): DeskState {
   if (before.openId !== id) return next;
-  const rows = rowsFor(before.listState, before.lane, hiddenIds(before));
+  const rows = laneRows(before, before.lane);
   const index = rows.findIndex((t) => t.id === id);
   const neighbour = index < 0 ? undefined : (rows[index + 1] ?? rows[index - 1]);
   const openId = neighbour?.id ?? (stay ? id : null);
@@ -348,6 +400,8 @@ function toggleCheck(state: DeskState, id: string | null): DeskState {
   if (!canBulkSelect(ticket.triage)) {
     return notify(state, approvalBlock(ticket.triage)?.reason ?? "Only drafts waiting for approval can be selected.");
   }
+  const held = bulkHold(state, ticket.id);
+  if (held) return notify(state, held);
   const checked = state.checked.includes(ticket.id)
     ? state.checked.filter((c) => c !== ticket.id)
     : [...state.checked, ticket.id];
@@ -378,7 +432,7 @@ type ReplyPayload = Pick<Outgoing, "body" | "language" | "draftId" | "edited"> &
 
 function send(state: DeskState, ticket: Ticket, reply: ReplyPayload, now: number, wall: number): DeskState {
   const existing = state.outbox[ticket.id];
-  if (existing?.status === "undoable" || existing?.status === "sending") {
+  if (existing?.status === "undoable" || existing?.status === "sending" || existing?.status === "queued") {
     return notify(state, "Your reply is still sending. Follow up once it's delivered.", "bar");
   }
   // A delivered reply stays under the follow-up. A failed attempt is replaced, keeping what was delivered before it.
@@ -403,6 +457,7 @@ function send(state: DeskState, ticket: Ticket, reply: ReplyPayload, now: number
     ...state,
     seq,
     outbox: { ...state.outbox, [ticket.id]: outgoing },
+    confirmSend: null,
     composers: omit(state.composers, ticket.id),
     escalateOpen: false,
     notice: clearBarNotice(state),
@@ -443,6 +498,34 @@ function escalatedBlock(state: DeskState, id: string): string | null {
   return escalation ? `This case is with ${teamLabel(escalation.team)} now, so there is nothing to decide here.` : null;
 }
 
+/**
+ * Collision (brief 12): a colleague has the conversation open, so a send asks once, inline above the
+ * bar. "Send anyway" or the same action again sends; opening another conversation withdraws the question.
+ */
+function askBeforeSending(state: DeskState, ticket: Ticket, retryAction: DeskAction): DeskState | null {
+  if (!state.viewers[ticket.id] || state.confirmSend?.id === ticket.id) return null;
+  const asked = notify(state, `${COLLEAGUE.firstName} is viewing this conversation too. Send anyway?`, "bar", {
+    label: "Send reply anyway",
+    dispatch: retryAction,
+  });
+  return { ...asked, confirmSend: { id: ticket.id, notice: asked.seq } };
+}
+
+/** Why a draft that bulk selection allows is held out of a bulk send right now, or null. */
+function bulkHold(state: DeskState, id: string): string | null {
+  if (state.draftStatus[id]) return "The AI hasn't finished this draft, so it can't be selected.";
+  if (state.viewers[id]) return `${COLLEAGUE.firstName} is viewing this conversation. Approve it on its own.`;
+  return null;
+}
+
+/** An open conversation whose lane changes takes the lane with it, so the thread stays on screen. */
+function followOpen(state: DeskState, id: string): DeskState {
+  const ticket = TICKETS_BY_ID.get(id);
+  if (!ticket || state.openId !== id || state.editMode) return state;
+  const lane = fallenIds(state).has(id) ? "needs_you" : laneFor(ticket.triage.route);
+  return lane === state.lane ? state : { ...state, lane, cursorId: id, notice: null };
+}
+
 function retry(state: DeskState, id: string): DeskState {
   const outgoing = state.outbox[id];
   if (outgoing?.status !== "failed") return state;
@@ -450,7 +533,7 @@ function retry(state: DeskState, id: string): DeskState {
   return {
     ...state,
     seq,
-    outbox: { ...state.outbox, [id]: { ...outgoing, status: "sending", attempt: seq } },
+    outbox: { ...state.outbox, [id]: { ...outgoing, status: state.online ? "sending" : "queued", attempt: seq } },
     notice: state.notice?.where === "list" || state.notice?.where === "bar" ? null : state.notice,
   };
 }
@@ -464,12 +547,13 @@ function retry(state: DeskState, id: string): DeskState {
 function bulkApprove(state: DeskState, now: number, wall: number): DeskState {
   if (state.lane !== "drafts" || !state.editMode) return state;
   if (!state.bulkPreview) return { ...state, bulkPreview: state.checked.length > 0 };
-  const rows = rowsFor(state.listState, "drafts", hiddenIds(state));
+  const rows = laneRows(state, "drafts");
   // Review gate 9 again, at the moment of sending: the selection alone is never trusted.
   const sendable = rows.filter(
     (t) =>
       state.checked.includes(t.id) &&
       canBulkSelect(t.triage) &&
+      !bulkHold(state, t.id) &&
       !state.escalations[t.id] &&
       approveBlocked(t, contextFor(state, t.id)) === null,
   );
@@ -531,7 +615,7 @@ function undoBatch(state: DeskState, batch: number): DeskState {
   const outbox = Object.fromEntries(Object.entries(state.outbox).filter(([id]) => !ids.includes(id)));
   const seq = state.seq + 1;
   const restored: DeskState = { ...state, seq, outbox, lane: "drafts", editMode: true, checked: ids, bulkPreview: false, notice: null };
-  const first = rowsFor(state.listState, "drafts", hiddenIds(restored)).find((t) => ids.includes(t.id));
+  const first = laneRows(restored, "drafts").find((t) => ids.includes(t.id));
   return first ? { ...restored, cursorId: first.id, focusRequest: { id: first.id, nonce: seq } } : restored;
 }
 
@@ -548,9 +632,15 @@ function decide(state: DeskState, now: number, wall: number): DeskState {
   switch (primary.kind) {
     case "approve":
     case "send-variant":
-      return fromDraft ? send(state, ticket, fromDraft, now, wall) : state;
-    case "acknowledge":
-      return fromDraft ? send(state, ticket, { ...fromDraft, events: ["Review opened with Trust & Safety"] }, now, wall) : state;
+    case "acknowledge": {
+      if (!fromDraft) return state;
+      const asked = askBeforeSending(state, ticket, { type: "decide", now, wall });
+      if (asked) return asked;
+      const events = primary.kind === "acknowledge" ? ["Review opened with Trust & Safety"] : undefined;
+      return send(state, ticket, { ...fromDraft, events }, now, wall);
+    }
+    case "drafting":
+      return state;
     case "take-over":
       return compose({ ...state, takenOver: { ...state.takenOver, [ticket.id]: iso(now) } }, ticket, "take-over", null);
     case "review-send":
@@ -568,7 +658,7 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
   switch (action.type) {
     case "selectLane": {
       if (action.lane === state.lane) return state;
-      const rows = rowsFor(state.listState, action.lane, hiddenIds(state));
+      const rows = laneRows(state, action.lane);
       const openId =
         state.listState === "loading" || rows.some((t) => t.id === state.openId) ? state.openId : (rows[0]?.id ?? null);
       // A notice is about the lane it was raised in, so it does not follow the specialist elsewhere.
@@ -577,10 +667,10 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
 
     case "activate":
       if (state.editMode) return toggleCheck(state, action.id);
-      return { ...state, openId: action.id, cursorId: action.id };
+      return { ...state, openId: action.id, cursorId: action.id, threadPushed: true };
 
     case "move": {
-      const rows = rowsFor(state.listState, state.lane, hiddenIds(state));
+      const rows = laneRows(state, state.lane);
       if (rows.length === 0) return state;
       const last = rows.length - 1;
       const index = rows.findIndex((t) => t.id === state.cursorId);
@@ -601,8 +691,8 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
 
     case "selectSureDrafts": {
       if (state.lane !== "drafts") return notify(state, SELECTION_ELSEWHERE[state.lane]);
-      const ids = rowsFor(state.listState, "drafts", hiddenIds(state))
-        .filter((t) => isSureLowRiskDraft(t.triage))
+      const ids = laneRows(state, "drafts")
+        .filter((t) => isSureLowRiskDraft(t.triage) && !bulkHold(state, t.id))
         .map((t) => t.id);
       if (ids.length === 0) return notify(state, "No low-risk Sure drafts are waiting.");
       return { ...state, editMode: true, checked: ids };
@@ -617,7 +707,7 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       return { ...state, editMode: false, checked: [], cursorId: state.openId };
 
     case "setListState": {
-      const rows = rowsFor(action.listState, state.lane, hiddenIds(state));
+      const rows = rowsFor(action.listState, state.lane, hiddenIds(state), fallenIds(state));
       const openId =
         action.listState === "loading" || rows.some((t) => t.id === state.openId)
           ? state.openId
@@ -642,7 +732,9 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       return notify(state, action.text, action.where);
 
     case "clearNotice":
-      return state.notice?.id === action.id ? { ...state, notice: null } : state;
+      if (state.notice?.id !== action.id) return state;
+      // A collision question that times out is withdrawn with its notice.
+      return { ...state, notice: null, confirmSend: state.confirmSend?.notice === action.id ? null : state.confirmSend };
 
     case "decide":
       return decide(state, action.now, action.wall);
@@ -709,6 +801,8 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       const blocked =
         escalatedBlock(state, ticket.id) ?? composerSendBlock(composer.text, composer.language, ticket.triage.language);
       if (blocked) return notify(state, blocked, "bar");
+      const asked = askBeforeSending(state, ticket, action);
+      if (asked) return asked;
       const body = composer.text.trim();
       const edited = composer.mode === "edit" && (body !== composer.original.trim() || Boolean(state.outbox[ticket.id]?.edited));
       return send(
@@ -739,7 +833,8 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
     case "commitSend": {
       const outgoing = state.outbox[action.id];
       if (outgoing?.status !== "undoable" || outgoing.attempt !== action.attempt) return state;
-      return { ...state, outbox: { ...state.outbox, [action.id]: { ...outgoing, status: "sending" } } };
+      const status = state.online ? "sending" : "queued";
+      return { ...state, outbox: { ...state.outbox, [action.id]: { ...outgoing, status } } };
     }
 
     case "sendSettled": {
@@ -763,7 +858,8 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       }
       if (state.openId === action.id) return notify(next, "Your reply wasn't sent. Retry sending, or edit it first.", "bar");
       const name = ticket.customer.name;
-      const lane = LANES.find((l) => l.id === laneFor(ticket.triage.route))?.label ?? "its lane";
+      const currentLane = fallenIds(next).has(ticket.id) ? "needs_you" : laneFor(ticket.triage.route);
+      const lane = LANES.find((l) => l.id === currentLane)?.label ?? "its lane";
       const text = outgoing.previous
         ? `Your follow-up to ${name} wasn't sent. Open the conversation to retry.`
         : `Your reply to ${name} wasn't sent. It's back in ${lane}.`;
@@ -847,6 +943,61 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
     case "setOverlay":
       return state.overlay === action.overlay ? state : { ...state, overlay: action.overlay };
 
+    case "setDraftStatus": {
+      const ticket = TICKETS_BY_ID.get(action.id);
+      if (!ticket || !canSimulateDraft(ticket) || state.outbox[action.id]) return state;
+      const draftStatus =
+        action.status === null ? omit(state.draftStatus, action.id) : { ...state.draftStatus, [action.id]: { status: action.status } };
+      // A draft that is not ready takes the edit of the old one with it, and leaves any selection.
+      const next: DeskState = {
+        ...state,
+        draftStatus,
+        checked: action.status === null ? state.checked : state.checked.filter((c) => c !== action.id),
+        composers:
+          action.status !== null && state.composers[action.id]?.mode === "edit" ? omit(state.composers, action.id) : state.composers,
+      };
+      return followOpen(next, action.id);
+    }
+
+    case "retryDraft": {
+      if (state.draftStatus[action.id]?.status !== "failed") return state;
+      const draftStatus = { ...state.draftStatus, [action.id]: { status: "drafting" as const, settlesAt: action.wall + DRAFT_RETRY_MS } };
+      return followOpen({ ...state, draftStatus }, action.id);
+    }
+
+    case "draftSettled":
+      // Only a retried draft arrives on its own; a state set from the prototype controls stays until changed.
+      if (state.draftStatus[action.id]?.settlesAt === undefined) return state;
+      return { ...state, draftStatus: omit(state.draftStatus, action.id) };
+
+    case "setViewer":
+      return {
+        ...state,
+        viewers: action.viewing ? { ...state.viewers, [action.id]: COLLEAGUE.id } : omit(state.viewers, action.id),
+        confirmSend: state.confirmSend?.id === action.id ? null : state.confirmSend,
+      };
+
+    case "setOnline": {
+      if (state.online === action.online) return state;
+      if (!action.online) return { ...state, online: false };
+      // Reconnecting sends everything that was queued.
+      const queued = Object.values(state.outbox).filter((o) => o.status === "queued");
+      if (queued.length === 0) return { ...state, online: true };
+      const outbox = { ...state.outbox };
+      for (const o of queued) outbox[o.ticketId] = { ...o, status: "sending" };
+      const count = queued.length;
+      return notify(
+        { ...state, online: true, outbox },
+        `Back online. ${count} queued ${count === 1 ? "reply is" : "replies are"} sending.`,
+      );
+    }
+
+    case "back": {
+      if (!state.threadPushed) return state;
+      const seq = state.seq + 1;
+      return { ...state, seq, threadPushed: false, focusRequest: state.openId ? { id: state.openId, nonce: seq } : state.focusRequest };
+    }
+
     case "setContextOpen":
       return { ...state, contextPanel: action.open ? "open" : "closed" };
 
@@ -892,7 +1043,29 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
   const staleBarNotice = next.notice?.where === "bar" && next.notice === state.notice;
   // A request to show a panel row was raised for the conversation that was open.
   const contextFocus = next.contextFocus === state.contextFocus ? null : next.contextFocus;
-  return { ...next, escalateOpen: false, escalateTeam: null, notice: staleBarNotice ? null : next.notice, contextFocus };
+  return {
+    ...next,
+    escalateOpen: false,
+    escalateTeam: null,
+    notice: staleBarNotice ? null : next.notice,
+    contextFocus,
+    confirmSend: null,
+  };
+}
+
+/** A notice action run later carries the clock of the moment it runs, not of the moment it was offered. */
+export function restamp(action: DeskAction, now: number, wall: number): DeskAction {
+  switch (action.type) {
+    case "decide":
+    case "approve":
+    case "sendComposer":
+    case "bulkApprove":
+      return { ...action, now, wall };
+    case "toggleMarkWrong":
+      return { ...action, now };
+    default:
+      return action;
+  }
 }
 
 export const DeskContext = createContext<{ state: DeskState; dispatch: Dispatch<DeskAction> } | null>(null);

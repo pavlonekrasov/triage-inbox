@@ -82,7 +82,7 @@ function Item({
       disabled={blocked !== null}
       label={label}
       onClick={onClick}
-      className="flex cursor-default gap-2.5 rounded-input px-2.5 py-2 outline-none select-none data-disabled:text-muted-foreground data-highlighted:bg-accent [&_svg]:mt-px [&_svg]:size-4 [&_svg]:shrink-0"
+      className="flex cursor-default gap-2.5 rounded-input px-2.5 py-2 outline-none max-md:min-h-11 max-md:items-center select-none data-disabled:text-muted-foreground data-highlighted:bg-accent [&_svg]:mt-px [&_svg]:size-4 [&_svg]:shrink-0"
     >
       {icon}
       <span className="flex flex-col gap-0.5">

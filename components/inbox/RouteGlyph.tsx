@@ -31,7 +31,8 @@ export function RouteGlyph({
   className,
 }: {
   route: RouteGlyphKind;
-  showLabel?: boolean;
+  /** "md" shows the label from 768 px and keeps it for screen readers only on a phone. */
+  showLabel?: boolean | "md";
   /** "list" = 16px (lists, header pill); "bar" = 18px (decision bar). */
   size?: "list" | "bar";
   className?: string;
@@ -54,7 +55,7 @@ export function RouteGlyph({
       ) : (
         <Icon aria-hidden className={cn("shrink-0", box)} strokeWidth={1.75} />
       )}
-      <span className={showLabel ? undefined : "sr-only"}>{LABEL[route]}</span>
+      <span className={showLabel === "md" ? "max-md:sr-only" : showLabel ? undefined : "sr-only"}>{LABEL[route]}</span>
     </span>
   );
 }

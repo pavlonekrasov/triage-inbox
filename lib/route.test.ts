@@ -68,7 +68,7 @@ describe("approval blocks", () => {
     expect(isSureLowRiskDraft(triage)).toBe(false);
   });
 
-  it("allows bulk selection of a clean draft and limits ⇧X to low risk and Sure", () => {
+  it("allows bulk selection of a draft with no hard rules and limits ⇧X to low risk and Sure", () => {
     const base = { route: "approve_draft" as const, hardRules: [], drafts: [draft] };
     expect(isSureLowRiskDraft({ ...base, risk: "low", confidence: "sure" })).toBe(true);
     expect(canBulkSelect({ ...base, risk: "medium", confidence: "sure" })).toBe(true);

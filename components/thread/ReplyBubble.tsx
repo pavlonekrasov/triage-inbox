@@ -1,12 +1,13 @@
 "use client";
 
-import { TriangleAlert } from "lucide-react";
+import { Clock3, RotateCw, TriangleAlert } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/controls/Button";
 import { formatClockTime } from "@/lib/clock";
 import type { TimelineDraft, TimelineReply } from "@/lib/timeline";
 import type { Source } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Translation } from "./Bubble";
-import { Button } from "@/components/controls/Button";
 
 type ReplyBubbleProps = { showTranslation: boolean } & (
   | {
@@ -18,7 +19,16 @@ type ReplyBubbleProps = { showTranslation: boolean } & (
       /** Opens the source's row in the context panel. */
       onShowSources: (sourceId: string) => void;
     }
-  | { kind: "reply"; reply: TimelineReply; gloss?: string; undoUntil?: number; onUndo: () => void; onRetry: () => void }
+  | {
+      kind: "reply";
+      reply: TimelineReply;
+      gloss?: string;
+      undoUntil?: number;
+      /** Offline, a reply in its undo window is already labelled as queued. */
+      offline: boolean;
+      onUndo: () => void;
+      onRetry: () => void;
+    }
 );
 
 /**
@@ -41,7 +51,13 @@ export function ReplyBubble(props: ReplyBubbleProps) {
       className="flex flex-col items-end gap-1 pl-12"
     >
       {sent ? (
-        <ReplyStatus reply={props.reply} undoUntil={props.undoUntil} onUndo={props.onUndo} onRetry={props.onRetry} />
+        <ReplyStatus
+          reply={props.reply}
+          undoUntil={props.undoUntil}
+          offline={props.offline}
+          onUndo={props.onUndo}
+          onRetry={props.onRetry}
+        />
       ) : (
         <p className="text-micro text-brand">
           {props.variantCount > 1 && props.draft.variant
@@ -82,11 +98,13 @@ export function ReplyBubble(props: ReplyBubbleProps) {
 function ReplyStatus({
   reply,
   undoUntil,
+  offline,
   onUndo,
   onRetry,
 }: {
   reply: TimelineReply;
   undoUntil?: number;
+  offline: boolean;
   onUndo: () => void;
   onRetry: () => void;
 }) {
@@ -102,13 +120,23 @@ function ReplyStatus({
     );
   }
 
+  // Offline (brief 12), a reply waits in a queue and never claims to be sent: a clock replaces the ticks.
+  const queued = reply.status === "queued" || (offline && reply.status === "undoable");
+  const spoken =
+    reply.status === "sent" ? ", delivered"
+    : reply.status === "sending" ? ", sending"
+    : queued ? ", sends when you reconnect"
+    : ", sends when the undo window closes";
+
   return (
     <p className="flex items-center gap-1 text-micro text-muted-foreground tabular-nums">
-      Sent by you · <time dateTime={reply.at}>{formatClockTime(reply.at)}</time>
-      <Ticks delivered={reply.status === "sent"} />
-      <span className="sr-only">
-        {reply.status === "sent" ? ", delivered" : reply.status === "sending" ? ", sending" : ", sends when the undo window closes"}
-      </span>
+      {queued ? "Queued" : "Sent by you"} · <time dateTime={reply.at}>{formatClockTime(reply.at)}</time>
+      {queued ? (
+        <Clock3 aria-hidden className="size-3.5" strokeWidth={1.75} />
+      ) : (
+        <Ticks delivered={reply.status === "sent"} />
+      )}
+      <span className="sr-only">{spoken}</span>
       {reply.edited && (
         <>
           <span aria-hidden className="ml-0.5 size-1.5 rounded-full bg-muted-foreground" />
@@ -122,6 +150,68 @@ function ReplyStatus({
         </>
       )}
     </p>
+  );
+}
+
+/**
+ * Drafting (brief 12): the AI is still writing, so the reply slot holds a typing indicator in the draft
+ * treatment. The dots pulse only while the bubble is on screen (Weightless parking, brief 3.3); under
+ * reduced motion the words "Drafting reply" stand in for them.
+ */
+export function DraftingBubble() {
+  const bubble = useRef<HTMLDivElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
+
+  useEffect(() => {
+    const el = bubble.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <li data-drafting className="flex flex-col items-end gap-1 pl-12">
+      <p className="text-micro text-brand">Drafting · not sent · written by AI</p>
+      <div
+        ref={bubble}
+        role="status"
+        className="draft-fill rounded-bubble rounded-br-tail border border-dashed border-brand-edge px-3.5 py-2"
+      >
+        <span className="sr-only">The AI is drafting a reply</span>
+        <span aria-hidden className="flex h-5.5 items-center gap-1 motion-reduce:hidden">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="size-1.5 animate-typing-dot rounded-full bg-brand"
+              style={{ animationDelay: `${i * 160}ms`, animationPlayState: onScreen ? "running" : "paused" }}
+            />
+          ))}
+        </span>
+        <span aria-hidden className="hidden text-body text-brand motion-reduce:inline">
+          Drafting reply
+        </span>
+      </div>
+    </li>
+  );
+}
+
+/**
+ * Draft failed (brief 12): nothing machine-written is waiting, so the slot drops the violet treatment and
+ * says the case is ready for a person. The case falls to Needs you; Retry asks the AI once more.
+ */
+export function DraftFailedBubble({ onRetry }: { onRetry: () => void }) {
+  return (
+    <li data-draft-failed className="flex flex-col items-end gap-1 pl-12">
+      <p className="text-micro text-muted-foreground">No draft · needs you</p>
+      <div className="max-w-bubble rounded-bubble rounded-br-tail border border-dashed border-border bg-card px-3.5 py-2">
+        <p className="text-body">Couldn&rsquo;t draft a reply. The case is ready for you to write one.</p>
+        <Button variant="text" onClick={onRetry} className="mt-1 gap-1 text-body-s [&_svg]:size-3.5">
+          <RotateCw aria-hidden strokeWidth={1.75} />
+          Retry drafting
+        </Button>
+      </div>
+    </li>
   );
 }
 

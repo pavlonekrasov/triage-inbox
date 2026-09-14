@@ -12,9 +12,9 @@ const byId = (id: string) => {
 };
 
 describe("fixtures", () => {
-  it("holds 22 tickets with unique ids", () => {
-    expect(TICKETS).toHaveLength(22);
-    expect(new Set(TICKETS.map((t) => t.id)).size).toBe(22);
+  it("holds 23 tickets with unique ids", () => {
+    expect(TICKETS).toHaveLength(23);
+    expect(new Set(TICKETS.map((t) => t.id)).size).toBe(23);
   });
 
   it.each(TICKETS.map((t) => [t.id, t] as const))("%s carries the route the matrix gives it", (_, t) => {
@@ -23,7 +23,7 @@ describe("fixtures", () => {
   });
 
   it("fills the lanes 7 / 11 / 4", () => {
-    expect(laneTickets(TICKETS, "needs_you")).toHaveLength(7);
+    expect(laneTickets(TICKETS, "needs_you")).toHaveLength(8);
     expect(laneTickets(TICKETS, "drafts")).toHaveLength(11);
     expect(laneTickets(TICKETS, "auto_resolved")).toHaveLength(4);
   });
@@ -104,5 +104,11 @@ describe("fixtures", () => {
 
   it("includes a 48-character customer name for the truncation state", () => {
     expect(byId("t21").customer.name).toHaveLength(48);
+  });
+
+  it("includes a complaint of about 1,200 words for the long-content state", () => {
+    const words = byId("t23").messages.at(-1)!.body.split(/\s+/).length;
+    expect(words).toBeGreaterThanOrEqual(1150);
+    expect(words).toBeLessThanOrEqual(1300);
   });
 });

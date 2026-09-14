@@ -1,9 +1,9 @@
 "use client";
 
-import { Flag, HandHeart, Pencil, Reply, RotateCw, Send, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
+import { Flag, HandHeart, Pencil, PenLine, Reply, RotateCw, Send, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/controls/Button";
 import { KeyHint } from "@/components/controls/KeyHint";
-import { contextFor, latestUndoable, useDesk } from "@/components/desk/desk-store";
+import { contextFor, latestUndoable, restamp, useDesk } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { TICKETS_BY_ID } from "@/data/tickets";
 import { formatClockTime } from "@/lib/clock";
@@ -22,6 +22,7 @@ export const PRIMARY_ICON: Record<PrimaryKind, LucideIcon> = {
   "follow-up": Reply,
   retry: RotateCw,
   write: Pencil,
+  drafting: PenLine,
 };
 
 /** 18 px icons in the decision bar (brief 6.6), and 14 px sides so three labelled decisions with key hints fit 560 px. */
@@ -76,7 +77,7 @@ export function DecisionBar({ ticket }: { ticket: Ticket }) {
                   onChange={() => dispatch({ type: "chooseVariant", draftId: variant.id })}
                   className="peer sr-only"
                 />
-                <span className="flex h-7 cursor-default items-center rounded-full px-3 text-label text-muted-foreground peer-checked:bg-card peer-checked:text-foreground peer-checked:shadow-(--shadow-thumb) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-solid peer-focus-visible:outline-ring">
+                <span className="flex h-7 cursor-default items-center rounded-full px-3 text-label max-md:h-11 text-muted-foreground peer-checked:bg-card peer-checked:text-foreground peer-checked:shadow-(--shadow-thumb) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-solid peer-focus-visible:outline-ring">
                   {variant.label}
                 </span>
               </label>
@@ -89,21 +90,26 @@ export function DecisionBar({ ticket }: { ticket: Ticket }) {
         surface="decision-bar"
         role="group"
         aria-label={`Decide on the conversation with ${ticket.customer.name}`}
-        className="pointer-events-auto flex max-w-[min(35rem,100%)] items-center gap-1 p-1.5"
+        // Three labelled decisions need about 36rem. In a narrower thread column (a phone, or a tablet from
+        // 768 to about 900 px) the bar docks as a card: the primary on its own row, the others sharing the second.
+        className="pointer-events-auto flex max-w-[min(35rem,100%)] items-center gap-1 p-1.5 @max-[36rem]/thread:w-full @max-[36rem]/thread:flex-wrap @max-[36rem]/thread:rounded-card @max-[36rem]/thread:*:grow"
       >
-        <Button
-          variant="primary"
-          size="md"
-          data-primary={primary.kind}
-          aria-disabled={primary.blocked ? true : undefined}
-          aria-keyshortcuts={primary.kind === "approve" ? "A" : undefined}
-          className={BAR_BUTTON}
-          onClick={() => dispatch({ type: "decide", now: readDemoNow(), wall: Date.now() })}
-        >
-          <PrimaryIcon aria-hidden strokeWidth={1.75} />
-          {primary.label}
-          {primary.kind === "approve" && <KeyHint onPrimary>A</KeyHint>}
-        </Button>
+        {/* While the AI drafts, the bar offers Escalate only (brief 12); A and E still say why. */}
+        {primary.kind !== "drafting" && (
+          <Button
+            variant="primary"
+            size="md"
+            data-primary={primary.kind}
+            aria-disabled={primary.blocked ? true : undefined}
+            aria-keyshortcuts={primary.kind === "approve" ? "A" : undefined}
+            className={`${BAR_BUTTON} @max-[36rem]/thread:basis-full`}
+            onClick={() => dispatch({ type: "decide", now: readDemoNow(), wall: Date.now() })}
+          >
+            <PrimaryIcon aria-hidden strokeWidth={1.75} />
+            {primary.label}
+            {primary.kind === "approve" && <KeyHint onPrimary>A</KeyHint>}
+          </Button>
+        )}
 
         {edit && (
           <Button
@@ -156,7 +162,7 @@ export function BarFeedback({ ticket }: { ticket: Ticket }) {
         <p className="pointer-events-auto flex max-w-md items-center gap-3 rounded-card border border-border bg-card px-3 py-1.5 text-body-s">
           <span>{notice.text}</span>
           {notice.action && (
-            <Button variant="text" onClick={() => dispatch(notice.action!.dispatch)}>
+            <Button variant="text" onClick={() => dispatch(restamp(notice.action!.dispatch, readDemoNow(), Date.now()))}>
               {notice.action.label}
             </Button>
           )}

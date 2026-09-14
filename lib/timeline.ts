@@ -1,5 +1,5 @@
 import { DEMO_NOW, deskDayKey, formatDayLabel } from "./clock";
-import type { OutgoingStatus } from "./decision";
+import type { DraftStatus, OutgoingStatus } from "./decision";
 import type { Message, Ticket, TriageResult } from "./types";
 
 export type TimelineStep = TriageResult["steps"][number];
@@ -26,6 +26,8 @@ export interface TimelineOverlay {
   chosenDraftId?: string | null;
   /** The draft open in the composer is not shown a second time in the thread. */
   editingDraftId?: string | null;
+  /** The AI draft is still generating or failed, so the reply slot holds that state instead of a draft. */
+  draft?: DraftStatus | null;
   /** Service messages recording the specialist's actions. */
   events?: readonly { at: string; text: string }[];
 }
@@ -37,6 +39,8 @@ export type TimelineItem =
   | { kind: "spot-check"; key: string }
   | { kind: "draft"; key: string; draft: TimelineDraft; variantCount: number }
   | { kind: "reply"; key: string; reply: TimelineReply }
+  | { kind: "drafting"; key: string }
+  | { kind: "draft-failed"; key: string }
   | { kind: "event"; key: string; at: string; text: string };
 
 type Entry =
@@ -45,6 +49,7 @@ type Entry =
   | { at: string; rank: number; kind: "spot-check" }
   | { at: string; rank: number; kind: "draft"; draft: TimelineDraft; variantCount: number }
   | { at: string; rank: number; kind: "reply"; reply: TimelineReply }
+  | { at: string; rank: number; kind: "draft-slot"; status: DraftStatus }
   | { at: string; rank: number; kind: "event"; text: string; index: number };
 
 /*
@@ -78,12 +83,16 @@ export function buildTimeline(ticket: Ticket, now: number = DEMO_NOW, overlay: T
   }
 
   for (const step of triage.steps) {
-    if (step.kind !== "sent") entries.push({ at: step.at, rank: RANK.step, kind: "step", step });
+    // "Drafted reply" is not true while the draft generates or after it failed.
+    if (step.kind === "sent" || (step.kind === "drafted" && overlay.draft)) continue;
+    entries.push({ at: step.at, rank: RANK.step, kind: "step", step });
   }
 
   const replies = overlay.replies ?? [];
   if (replies.length > 0) {
     for (const reply of replies) entries.push({ at: reply.at, rank: RANK.draft, kind: "reply", reply });
+  } else if (overlay.draft) {
+    entries.push({ at: triage.steps.at(-1)?.at ?? ticket.receivedAt, rank: RANK.draft, kind: "draft-slot", status: overlay.draft });
   } else {
     // A two-outcome case shows both drafts until a person chooses; the choice then stands alone.
     const chosen = triage.drafts.find((d) => d.id === overlay.chosenDraftId);
@@ -126,6 +135,13 @@ export function buildTimeline(ticket: Ticket, now: number = DEMO_NOW, overlay: T
         break;
       case "draft":
         items.push({ kind: "draft", key: entry.draft.id, draft: entry.draft, variantCount: entry.variantCount });
+        break;
+      case "draft-slot":
+        items.push(
+          entry.status === "drafting"
+            ? { kind: "drafting", key: `drafting-${ticket.id}` }
+            : { kind: "draft-failed", key: `draft-failed-${ticket.id}` },
+        );
         break;
       case "reply":
         items.push({ kind: "reply", key: entry.reply.draftId ?? `reply-${entry.reply.id}`, reply: entry.reply });

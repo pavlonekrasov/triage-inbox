@@ -115,7 +115,7 @@ export function ContextSheet({
         data-context-sheet
         data-pass-shortcut="toggle-context"
         aria-label={`Details for ${ticket.customer.name}`}
-        className="gap-0 border-border p-0 data-[side=right]:w-[min(22rem,100vw)] data-[side=right]:sm:max-w-none"
+        className="context-sheet-motion gap-0 border-border p-0 data-[side=right]:w-[min(22rem,100vw)] data-[side=right]:sm:max-w-none"
       >
         <ContextPanel key={ticket.id} ticket={ticket} onClose={() => onOpenChange(false)} />
       </SheetContent>
@@ -144,9 +144,14 @@ function Section({
       data-context-section={id}
       className="shrink-0 rounded-card border border-border bg-card"
     >
-      {/* Open, the header sits on the panel body, so its hover fill squares off at the bottom. */}
+      {/* Open, the header sits on the panel body, so its hover fill squares off at the bottom. It fills
+          the card edge to edge, so a press scale would pull the fill off the border: no scale here. */}
       <CollapsibleTrigger
-        render={<Button className={cn("h-10 w-full justify-start gap-2 rounded-[inherit] px-3", open && "rounded-b-none")} />}
+        render={
+          <Button
+            className={cn("h-10 w-full justify-start gap-2 rounded-[inherit] px-3 active:scale-100", open && "rounded-b-none")}
+          />
+        }
       >
         <ChevronRight
           aria-hidden
@@ -160,7 +165,9 @@ function Section({
           {status.text}
         </span>
       </CollapsibleTrigger>
-      <CollapsibleContent className="border-t border-border px-3 pt-2.5 pb-3">{children}</CollapsibleContent>
+      <CollapsibleContent className="context-section-body">
+        <div className="border-t border-border px-3 pt-2.5 pb-3">{children}</div>
+      </CollapsibleContent>
     </Collapsible>
   );
 }

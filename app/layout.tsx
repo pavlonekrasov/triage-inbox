@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeSync } from "@/components/theme/ThemeSync";
 import { themeScript } from "@/lib/theme";
@@ -17,6 +17,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "Care Desk · concept", template: "%s · Care Desk" },
   description: "Triage inbox concept for an AI support agent. The AI prepares each case; a person decides.",
+};
+
+/* "cover" lets the page reach under a phone's home indicator, so the docked decision bar can pad itself
+   with env(safe-area-inset-bottom) instead of floating above a blank strip (brief 7.2). */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

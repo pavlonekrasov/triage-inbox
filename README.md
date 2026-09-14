@@ -19,7 +19,12 @@ Open http://localhost:3000.
 | `/tokens` | Colour roles in Day and Night shift with contrast measured in the browser, glass, type scale |
 
 The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&list=loading` or
-`&list=empty` for those list states, or use the prototype controls button at the right of the list footer.
+`&list=empty` for those list states, `&draft=drafting` or `&draft=failed` for the opened conversation's
+AI draft, `&viewer=ana` for a colleague viewing it, and `&net=offline` for the offline desk. The
+prototype controls button at the right of the list footer switches the same states.
+
+Below 1280 px the customer details open as a sheet; below 768 px the desk is a phone layout, where the
+list is the first screen and a conversation slides in over it with a back chevron.
 
 ## Use it
 
@@ -41,7 +46,12 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 | `?` | Keyboard shortcuts |
 
 The prototype controls in the list footer also set the fake send API to succeed, fail 1 in 20, or
-fail every send, so the "Not sent · Retry" state is real.
+fail every send, so the "Not sent · Retry" state is real, and take the desk offline, where replies
+queue and send on reconnect. The browser's own offline and online events do the same.
+
+The footer line "Today 68% auto · 1m 40s first response · 2.1% reopened" opens the quality sheet:
+each metric with today's value, a 14-day sparkline and what moves it, with auto-resolution beside its
+reopen rate. "Mark as wrong" on an automatic reply counts in it.
 
 The customer details panel shows what the agent read: customer, subscription, billing timeline, sources
 used, the advisor session on conduct reports, and previous contacts. The evidence flags on the summary
@@ -59,8 +69,8 @@ email is logged in the thread.
 | 5 | Decision bar: Approve with undo, Edit, Escalate | Done |
 | 6 | Context panel | Done |
 | 7 | Bulk approve, full keymap, command palette, shortcut sheet | Done |
-| 8 | States catalogue, responsive, Night shift pass | Next |
-| 9 | Slide routes | |
+| 8 | States catalogue, quality sheet, tablet and phone, Night shift, review gate | Done |
+| 9 | Slide routes | Next |
 | 10 | Slide screenshots | |
 
 ## Checks
@@ -69,7 +79,7 @@ email is logged in the thread.
 npm test          # routing matrix, fixtures, accounts, decisions, rewrites, desk reducer
 npm run typecheck
 npm run lint
-node scripts/capture.mjs scripts/plans/step-7.json   # evidence screenshots, needs the dev server
+node scripts/plans/make-step-8.mjs && node scripts/capture.mjs scripts/plans/step-8.json   # evidence screenshots, needs the dev server
 ```
 
 Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from

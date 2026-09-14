@@ -1,0 +1,210 @@
+[
+  {
+    "name": "s2-flow",
+    "url": "http://localhost:3000/slides/flow",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "day",
+    "waitFor": "document.querySelector('[data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]') && !f.contentDocument.querySelector('[data-ssr]'))",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s2-flow.png"
+  },
+  {
+    "name": "s3-inbox",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s3-inbox.png"
+  },
+  {
+    "name": "s4-cases",
+    "url": "http://localhost:3000/slides/cases",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "day",
+    "waitFor": "document.querySelector('[data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]') && !f.contentDocument.querySelector('[data-ssr]'))",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready",
+      "for (const f of document.querySelectorAll('iframe')) f.contentDocument.querySelector('main > div').scrollTop = 0"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s4-cases.png"
+  },
+  {
+    "name": "s5-safeguards",
+    "url": "http://localhost:3000/slides/safeguards",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "day",
+    "waitFor": "document.querySelector('[data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]') && !f.contentDocument.querySelector('[data-ssr]'))",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready",
+      "(() => { const d = document.querySelector('[data-case=t04]').contentDocument; [...d.querySelectorAll('button')].find(b => b.textContent.includes('Why this route')).click(); })()",
+      "(() => { const d = document.querySelector('[data-case=t03]').contentDocument; [...d.querySelectorAll('button')].find(b => b.textContent.includes('Escalate case')).click(); })()"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s5-safeguards.png"
+  },
+  {
+    "name": "s5-metrics",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready",
+      "document.querySelector('[data-quality-trigger]').click()"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s5-metrics.png"
+  },
+  {
+    "name": "s5-bulk-preview",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "day",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready"
+    ],
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s5-bulk-preview.png"
+  },
+  {
+    "name": "s2-flow-night",
+    "url": "http://localhost:3000/slides/flow",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "document.querySelector('[data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]') && !f.contentDocument.querySelector('[data-ssr]'))",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s2-flow-night.png"
+  },
+  {
+    "name": "s3-inbox-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s3-inbox-night.png"
+  },
+  {
+    "name": "s4-cases-night",
+    "url": "http://localhost:3000/slides/cases",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "document.querySelector('[data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]') && !f.contentDocument.querySelector('[data-ssr]'))",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready",
+      "for (const f of document.querySelectorAll('iframe')) f.contentDocument.querySelector('main > div').scrollTop = 0"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s4-cases-night.png"
+  },
+  {
+    "name": "s5-safeguards-night",
+    "url": "http://localhost:3000/slides/safeguards",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "document.querySelector('[data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]') && !f.contentDocument.querySelector('[data-ssr]'))",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready",
+      "(() => { const d = document.querySelector('[data-case=t04]').contentDocument; [...d.querySelectorAll('button')].find(b => b.textContent.includes('Why this route')).click(); })()",
+      "(() => { const d = document.querySelector('[data-case=t03]').contentDocument; [...d.querySelectorAll('button')].find(b => b.textContent.includes('Escalate case')).click(); })()"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s5-safeguards-night.png"
+  },
+  {
+    "name": "s5-metrics-night",
+    "url": "http://localhost:3000/?ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready",
+      "document.querySelector('[data-quality-trigger]').click()"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s5-metrics-night.png"
+  },
+  {
+    "name": "s5-bulk-preview-night",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "theme": "night",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')",
+    "waitMs": 700,
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove(); document.querySelector('[data-slide-controls]')?.setAttribute('hidden', ''); for (const f of document.querySelectorAll('iframe')) { f.contentDocument.querySelector('nextjs-portal')?.remove(); }",
+      "document.fonts.ready"
+    ],
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "eval": "(() => { if (document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight) throw new Error('Export exceeds the slide bounds'); return { width: innerWidth, height: innerHeight, theme: document.documentElement.classList.contains('dark') ? 'night' : 'day' }; })()",
+    "out": "docs/evidence/slides/s5-bulk-preview-night.png"
+  }
+]

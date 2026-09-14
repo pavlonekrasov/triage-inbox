@@ -1,0 +1,955 @@
+[
+  {
+    "name": "lane-empty-2x",
+    "url": "http://localhost:3000/?lane=needs_you&list=empty",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/lane-empty-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ title: document.querySelector('[data-list-pane] h2')?.innerText, body: document.querySelector('[data-list-pane] h2 + p')?.innerText, action: ([...document.querySelectorAll('[data-list-pane] button')].find((b) => b.innerText.includes('spot-checks'))?.innerText ?? '').split(String.fromCharCode(10)).join(' ') })"
+  },
+  {
+    "name": "night-lane-empty-2x",
+    "url": "http://localhost:3000/?lane=needs_you&list=empty",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-lane-empty-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ title: document.querySelector('[data-list-pane] h2')?.innerText, body: document.querySelector('[data-list-pane] h2 + p')?.innerText, action: ([...document.querySelectorAll('[data-list-pane] button')].find((b) => b.innerText.includes('spot-checks'))?.innerText ?? '').split(String.fromCharCode(10)).join(' ') })"
+  },
+  {
+    "name": "loading-2x",
+    "url": "http://localhost:3000/?lane=needs_you&list=loading",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/loading-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ rowHeights: [...new Set([...document.querySelectorAll('#lane-panel *')].map((e) => Math.round(e.getBoundingClientRect().height)).filter((h) => h >= 60 && h <= 80))], spinner: !!document.querySelector('.animate-spin, [role=progressbar]'), busy: document.querySelector('#lane-panel')?.getAttribute('aria-busy') })"
+  },
+  {
+    "name": "night-loading-2x",
+    "url": "http://localhost:3000/?lane=needs_you&list=loading",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-loading-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ rowHeights: [...new Set([...document.querySelectorAll('#lane-panel *')].map((e) => Math.round(e.getBoundingClientRect().height)).filter((h) => h >= 60 && h <= 80))], spinner: !!document.querySelector('.animate-spin, [role=progressbar]'), busy: document.querySelector('#lane-panel')?.getAttribute('aria-busy') })"
+  },
+  {
+    "name": "drafting-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/drafting-2x.png",
+    "waitMs": 600,
+    "eval": "({ typing: !!document.querySelector('[data-drafting]'), dots: getComputedStyle(document.querySelector('[data-drafting] .animate-typing-dot')).animationName, draft: !!document.querySelector('[data-draft]'), bar: [...(document.querySelector('[data-glass=decision-bar]')?.querySelectorAll('button') ?? [])].map((b) => b.innerText.trim()), row: (document.querySelector('#row-t17 .truncate + span, #row-t17 span.truncate:last-of-type')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') })"
+  },
+  {
+    "name": "night-drafting-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-drafting-2x.png",
+    "waitMs": 600,
+    "eval": "({ typing: !!document.querySelector('[data-drafting]'), dots: getComputedStyle(document.querySelector('[data-drafting] .animate-typing-dot')).animationName, draft: !!document.querySelector('[data-draft]'), bar: [...(document.querySelector('[data-glass=decision-bar]')?.querySelectorAll('button') ?? [])].map((b) => b.innerText.trim()), row: (document.querySelector('#row-t17 .truncate + span, #row-t17 span.truncate:last-of-type')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') })"
+  },
+  {
+    "name": "drafting-reduced-motion",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "eval": "(() => { const bubble = document.querySelector('[data-drafting] [role=status]'); const dots = bubble.querySelector('.animate-typing-dot').parentElement; const words = [...bubble.querySelectorAll('span')].find((s) => s.innerText === 'Drafting reply'); return { dotsShown: getComputedStyle(dots).display !== 'none', wordsShown: !!words && getComputedStyle(words).display !== 'none' }; })()"
+  },
+  {
+    "name": "drafting-refuses-a",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "a",
+      "e"
+    ],
+    "eval": "({ notice: (document.querySelector('[data-dock] [role=status]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), composer: !!document.querySelector('[data-composer]'), replies: document.querySelectorAll('[data-reply]').length })"
+  },
+  {
+    "name": "draft-failed-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=failed",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/draft-failed-2x.png",
+    "waitMs": 600,
+    "eval": "({ lane: (document.querySelector('[role=tab][aria-selected=true]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), inNeedsYou: !!document.querySelector('#row-t17'), bubble: (document.querySelector('[data-draft-failed]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), primary: document.querySelector('[data-primary]')?.innerText, route: (document.querySelector('[data-glass=thread-header]')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') })"
+  },
+  {
+    "name": "night-draft-failed-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=failed",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-draft-failed-2x.png",
+    "waitMs": 600,
+    "eval": "({ lane: (document.querySelector('[role=tab][aria-selected=true]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), inNeedsYou: !!document.querySelector('#row-t17'), bubble: (document.querySelector('[data-draft-failed]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), primary: document.querySelector('[data-primary]')?.innerText, route: (document.querySelector('[data-glass=thread-header]')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') })"
+  },
+  {
+    "name": "draft-retry-arrives",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=failed",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "[...document.querySelectorAll('button')].find((b) => b.innerText.includes(\"Retry drafting\")).click()"
+    ],
+    "eval": "(async () => { const during = { typing: !!document.querySelector('[data-drafting]'), lane: (document.querySelector('[role=tab][aria-selected=true]')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') }; await new Promise(r => setTimeout(r, 2800)); return { during, after: { draft: !!document.querySelector('[data-draft]'), primary: document.querySelector('[data-primary]')?.innerText } }; })()"
+  },
+  {
+    "name": "send-failed-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('[data-prototype-controls] button').click()",
+      "[...document.querySelectorAll('[data-prototype-controls] label')].find((l) => l.innerText.includes(\"Fail every send\")).querySelector('input').click()",
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/send-failed-2x.png",
+    "keys": [
+      "a"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 6800)); document.querySelector('#row-t17').click(); await new Promise(r => setTimeout(r, 500)); return { status: (document.querySelector('[data-reply]')?.querySelector('p')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), inDrafts: !!document.querySelector('#row-t17'), primary: document.querySelector('[data-primary]')?.innerText }; })()"
+  },
+  {
+    "name": "night-send-failed-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('[data-prototype-controls] button').click()",
+      "[...document.querySelectorAll('[data-prototype-controls] label')].find((l) => l.innerText.includes(\"Fail every send\")).querySelector('input').click()",
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-send-failed-2x.png",
+    "keys": [
+      "a"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 6800)); document.querySelector('#row-t17').click(); await new Promise(r => setTimeout(r, 500)); return { status: (document.querySelector('[data-reply]')?.querySelector('p')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), inDrafts: !!document.querySelector('#row-t17'), primary: document.querySelector('[data-primary]')?.innerText }; })()"
+  },
+  {
+    "name": "sources-disagree-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/sources-disagree-2x.png",
+    "eval": "({ panel: document.querySelector('[data-context-panel]')?.innerText.includes('Sources disagree'), restricted: document.querySelector('[data-context-panel]')?.innerText.includes('Restricted') })"
+  },
+  {
+    "name": "night-sources-disagree-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-sources-disagree-2x.png",
+    "eval": "({ panel: document.querySelector('[data-context-panel]')?.innerText.includes('Sources disagree'), restricted: document.querySelector('[data-context-panel]')?.innerText.includes('Restricted') })"
+  },
+  {
+    "name": "stale-source-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/stale-source-2x.png",
+    "eval": "({ panel: document.querySelector('[data-context-panel]')?.innerText.match(/Newer version[^\\n]*/)?.[0], chip: !!document.querySelector('[data-draft]')?.parentElement?.innerText.includes('outdated') })"
+  },
+  {
+    "name": "night-stale-source-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-stale-source-2x.png",
+    "eval": "({ panel: document.querySelector('[data-context-panel]')?.innerText.match(/Newer version[^\\n]*/)?.[0], chip: !!document.querySelector('[data-draft]')?.parentElement?.innerText.includes('outdated') })"
+  },
+  {
+    "name": "collision-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&viewer=ana",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/collision-2x.png",
+    "keys": [
+      "a"
+    ],
+    "waitMs": 500,
+    "eval": "({ viewer: (document.querySelector('[data-viewer]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), notice: (document.querySelector('[data-dock] [role=status]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), sentYet: document.querySelectorAll('[data-reply]').length })"
+  },
+  {
+    "name": "night-collision-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&viewer=ana",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-collision-2x.png",
+    "keys": [
+      "a"
+    ],
+    "waitMs": 500,
+    "eval": "({ viewer: (document.querySelector('[data-viewer]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), notice: (document.querySelector('[data-dock] [role=status]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), sentYet: document.querySelectorAll('[data-reply]').length })"
+  },
+  {
+    "name": "collision-second-a-sends",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&viewer=ana",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "a",
+      "a"
+    ],
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), drafts: document.querySelector('[data-lane-tab=drafts]').innerText.replace(/[^0-9]/g, '') })"
+  },
+  {
+    "name": "offline-2x",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t01&net=offline",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-primary]').click()"
+    ],
+    "out": "docs/evidence/step-8/offline-2x.png",
+    "keys": [
+      "t",
+      "h",
+      "a",
+      "n",
+      "k",
+      "s",
+      "Control+Enter"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 5800)); return { bar: (document.querySelector('[data-offline]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), status: ([...document.querySelectorAll('[data-reply]')].at(-1)?.querySelector('p')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') }; })()"
+  },
+  {
+    "name": "night-offline-2x",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t01&net=offline",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-primary]').click()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-offline-2x.png",
+    "keys": [
+      "t",
+      "h",
+      "a",
+      "n",
+      "k",
+      "s",
+      "Control+Enter"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 5800)); return { bar: (document.querySelector('[data-offline]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), status: ([...document.querySelectorAll('[data-reply]')].at(-1)?.querySelector('p')?.innerText ?? '').split(String.fromCharCode(10)).join(' ') }; })()"
+  },
+  {
+    "name": "offline-reconnect-sends",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t01&net=offline",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-primary]').click()"
+    ],
+    "keys": [
+      "t",
+      "h",
+      "a",
+      "n",
+      "k",
+      "s",
+      "Control+Enter"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 5800)); window.dispatchEvent(new Event('online')); await new Promise(r => setTimeout(r, 1200)); return { bar: !!document.querySelector('[data-offline]'), notice: (document.querySelector('[data-list-pane] [role=status] p')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), status: [...document.querySelectorAll('[data-reply]')].at(-1)?.dataset.reply }; })()"
+  },
+  {
+    "name": "long-complaint-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t23",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/long-complaint-2x.png",
+    "eval": "(() => { const li = document.querySelector('[data-long]'); li.scrollIntoView({ block: 'center' }); const p = li.querySelector('p[lang]'); return { lines: Math.round(p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)), words: p.textContent.split(/\\s+/).length, toggle: li.querySelector('button')?.innerText }; })()"
+  },
+  {
+    "name": "night-long-complaint-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t23",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-long-complaint-2x.png",
+    "eval": "(() => { const li = document.querySelector('[data-long]'); li.scrollIntoView({ block: 'center' }); const p = li.querySelector('p[lang]'); return { lines: Math.round(p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)), words: p.textContent.split(/\\s+/).length, toggle: li.querySelector('button')?.innerText }; })()"
+  },
+  {
+    "name": "long-complaint-expands",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t23",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "[...document.querySelectorAll('button')].find((b) => b.innerText.includes(\"Show full message\")).click()"
+    ],
+    "eval": "(() => { const p = document.querySelector('[data-long] p[lang]'); return { lines: Math.round(p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)), toggle: document.querySelector('[data-long] button')?.innerText, expanded: document.querySelector('[data-long] button')?.getAttribute('aria-expanded') }; })()"
+  },
+  {
+    "name": "long-name-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t21",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/long-name-2x.png",
+    "eval": "({ listTruncated: (() => { const s = document.querySelector('#row-t21 span.truncate'); return s.scrollWidth > s.clientWidth; })(), headerLines: (() => { const h = document.querySelector('[data-glass=thread-header] h2'); return Math.round(h.clientHeight / parseFloat(getComputedStyle(h).lineHeight)); })() })"
+  },
+  {
+    "name": "night-long-name-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t21",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-long-name-2x.png",
+    "eval": "({ listTruncated: (() => { const s = document.querySelector('#row-t21 span.truncate'); return s.scrollWidth > s.clientWidth; })(), headerLines: (() => { const h = document.querySelector('[data-glass=thread-header] h2'); return Math.round(h.clientHeight / parseFloat(getComputedStyle(h).lineHeight)); })() })"
+  },
+  {
+    "name": "quality-sheet-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[data-quality-trigger]\").click()"
+    ],
+    "out": "docs/evidence/step-8/quality-sheet-2x.png",
+    "waitMs": 400,
+    "selector": "[data-quality-sheet]",
+    "eval": "(() => { const sheet = document.querySelector('[data-quality-sheet]'); const lines = [...sheet.querySelectorAll('polyline')]; return { pair: [...sheet.querySelectorAll('[data-quality-pair] [data-metric]')].map((e) => e.dataset.metric), rows: [...sheet.querySelectorAll('[data-metric]')].map((e) => e.dataset.metric), sparklines: lines.length, strokes: [...new Set(lines.map((l) => getComputedStyle(l).stroke))], mutedInk: getComputedStyle(sheet).color, clippedValues: [...sheet.querySelectorAll('.text-heading')].some((v) => v.scrollWidth > v.clientWidth) }; })()"
+  },
+  {
+    "name": "night-quality-sheet-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[data-quality-trigger]\").click()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-quality-sheet-2x.png",
+    "waitMs": 400,
+    "selector": "[data-quality-sheet]",
+    "eval": "(() => { const sheet = document.querySelector('[data-quality-sheet]'); const lines = [...sheet.querySelectorAll('polyline')]; return { pair: [...sheet.querySelectorAll('[data-quality-pair] [data-metric]')].map((e) => e.dataset.metric), rows: [...sheet.querySelectorAll('[data-metric]')].map((e) => e.dataset.metric), sparklines: lines.length, strokes: [...new Set(lines.map((l) => getComputedStyle(l).stroke))], mutedInk: getComputedStyle(sheet).color, clippedValues: [...sheet.querySelectorAll('.text-heading')].some((v) => v.scrollWidth > v.clientWidth) }; })()"
+  },
+  {
+    "name": "quality-sparkline-hover-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[data-quality-trigger]\").click()"
+    ],
+    "hover": "[data-metric=auto] svg",
+    "selector": "[data-metric=auto]",
+    "out": "docs/evidence/step-8/quality-sparkline-hover-2x.png",
+    "eval": "({ tooltip: [...document.querySelectorAll('[data-metric=auto] span[aria-hidden]')].map((s) => s.innerText).filter(Boolean), crosshair: !!document.querySelector('[data-metric=auto] svg line') })"
+  },
+  {
+    "name": "quality-table-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[data-quality-trigger]\").click()",
+      "[...document.querySelectorAll('button')].find((b) => b.innerText.includes(\"Show as a table\")).click()"
+    ],
+    "selector": "[data-quality-sheet]",
+    "out": "docs/evidence/step-8/quality-table-2x.png",
+    "eval": "({ rows: document.querySelectorAll('[data-quality-sheet] tbody tr').length, columns: document.querySelectorAll('[data-quality-sheet] thead th').length })"
+  },
+  {
+    "name": "quality-counts-mark-as-wrong",
+    "url": "http://localhost:3000/?lane=auto_resolved&ticket=t01",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "[...document.querySelectorAll('button')].find((b) => b.innerText.includes(\"Mark as wrong\")).click()",
+      "document.querySelector(\"[data-quality-trigger]\").click()"
+    ],
+    "eval": "document.querySelector('[data-metric=reopen]')?.innerText.match(/\\d+ repl\\w+ marked wrong today/)?.[0]"
+  },
+  {
+    "name": "tablet-1024-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1024,
+    "height": 768,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/tablet-1024-2x.png",
+    "eval": "({ width: innerWidth, overflowX: document.documentElement.scrollWidth > innerWidth, list: Math.round(document.querySelector('[data-list-pane]').getBoundingClientRect().width), thread: Math.round(document.querySelector('main').getBoundingClientRect().width), panelOpen: !!document.querySelector('[data-context-panel]'), barOverflow: (() => { const b = document.querySelector('[data-glass=decision-bar]'); return b.scrollWidth > b.clientWidth + 1; })() })"
+  },
+  {
+    "name": "tablet-800-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 800,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/tablet-800-2x.png",
+    "eval": "({ width: innerWidth, overflowX: document.documentElement.scrollWidth > innerWidth, list: Math.round(document.querySelector('[data-list-pane]').getBoundingClientRect().width), thread: Math.round(document.querySelector('main').getBoundingClientRect().width), panelOpen: !!document.querySelector('[data-context-panel]'), barOverflow: (() => { const b = document.querySelector('[data-glass=decision-bar]'); return b.scrollWidth > b.clientWidth + 1; })() })"
+  },
+  {
+    "name": "tablet-768-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 768,
+    "height": 1024,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/tablet-768-2x.png",
+    "eval": "({ width: innerWidth, overflowX: document.documentElement.scrollWidth > innerWidth, list: Math.round(document.querySelector('[data-list-pane]').getBoundingClientRect().width), thread: Math.round(document.querySelector('main').getBoundingClientRect().width), panelOpen: !!document.querySelector('[data-context-panel]'), barOverflow: (() => { const b = document.querySelector('[data-glass=decision-bar]'); return b.scrollWidth > b.clientWidth + 1; })() })"
+  },
+  {
+    "name": "tablet-details-sheet-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1024,
+    "height": 768,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "]"
+    ],
+    "waitMs": 400,
+    "out": "docs/evidence/step-8/tablet-details-sheet-2x.png",
+    "eval": "({ sheet: !!document.querySelector('[data-context-panel]'), width: Math.round(document.querySelector('[data-context-panel]')?.getBoundingClientRect().width ?? 0) })"
+  },
+  {
+    "name": "phone-list-2x",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "out": "docs/evidence/step-8/phone-list-2x.png",
+    "eval": "({ overflowX: document.documentElement.scrollWidth > innerWidth, thread: !!document.querySelector('main'), rowHeight: Math.round(document.querySelector('[role=option]').getBoundingClientRect().height), smallTargets: [...document.querySelectorAll('button, [role=tab], [role=option], a[href], [tabindex=\"0\"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 1 && r.height > 1 && (r.width < 44 || r.height < 44); }).map((e) => (e.getAttribute('aria-label') || e.innerText || e.tagName).trim().slice(0, 32)) })"
+  },
+  {
+    "name": "phone-thread-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "out": "docs/evidence/step-8/phone-thread-2x.png",
+    "eval": "({ overflowX: document.documentElement.scrollWidth > innerWidth, listHidden: !!document.querySelector('[data-list-pane]')?.closest('[hidden]'), back: document.querySelector('[aria-label=\"Back to conversations\"]')?.getBoundingClientRect().height, bar: [...(document.querySelector('[data-glass=decision-bar]')?.querySelectorAll('button') ?? [])].map((b) => b.innerText.trim()), barRows: new Set([...document.querySelector('[data-glass=decision-bar]').querySelectorAll('button')].map((b) => Math.round(b.getBoundingClientRect().top))).size, dockBottom: Math.round(innerHeight - document.querySelector('[data-glass=decision-bar]').getBoundingClientRect().bottom), smallTargets: [...document.querySelectorAll('button, [role=tab], [role=option], a[href], [tabindex=\"0\"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 1 && r.height > 1 && (r.width < 44 || r.height < 44); }).map((e) => (e.getAttribute('aria-label') || e.innerText || e.tagName).trim().slice(0, 32)) })"
+  },
+  {
+    "name": "phone-refund-decision-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "out": "docs/evidence/step-8/phone-refund-decision-2x.png",
+    "eval": "({ overflowX: document.documentElement.scrollWidth > innerWidth, bar: [...(document.querySelector('[data-glass=decision-bar]')?.querySelectorAll('button') ?? [])].map((b) => b.innerText.trim()), smallTargets: [...document.querySelectorAll('button, [role=tab], [role=option], a[href], [tabindex=\"0\"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 1 && r.height > 1 && (r.width < 44 || r.height < 44); }).map((e) => (e.getAttribute('aria-label') || e.innerText || e.tagName).trim().slice(0, 32)) })"
+  },
+  {
+    "name": "phone-back-to-list",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 375,
+    "height": 812,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[aria-label=\\\"Back to conversations\\\"]\").click()"
+    ],
+    "mobile": true,
+    "eval": "({ thread: !!document.querySelector('main'), listShown: !document.querySelector('[data-list-pane]').closest('[hidden]'), focus: document.activeElement?.id })"
+  },
+  {
+    "name": "phone-composer-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "keys": [
+      "e"
+    ],
+    "out": "docs/evidence/step-8/phone-composer-2x.png",
+    "eval": "({ overflowX: document.documentElement.scrollWidth > innerWidth, composer: !!document.querySelector('[data-composer]'), smallTargets: [...document.querySelectorAll('button, [role=tab], [role=option], a[href], [tabindex=\"0\"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 1 && r.height > 1 && (r.width < 44 || r.height < 44); }).map((e) => (e.getAttribute('aria-label') || e.innerText || e.tagName).trim().slice(0, 32)) })"
+  },
+  {
+    "name": "phone-bulk-preview-2x",
+    "url": "http://localhost:3000/?lane=drafts",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "waitMs": 500,
+    "out": "docs/evidence/step-8/phone-bulk-preview-2x.png",
+    "eval": "({ overflowX: document.documentElement.scrollWidth > innerWidth, items: document.querySelectorAll('[data-preview-item]').length, send: (document.querySelector('[data-bulk-send]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), smallTargets: [...document.querySelectorAll('button, [role=tab], [role=option], a[href], [tabindex=\"0\"]')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 1 && r.height > 1 && (r.width < 44 || r.height < 44); }).map((e) => (e.getAttribute('aria-label') || e.innerText || e.tagName).trim().slice(0, 32)) })"
+  },
+  {
+    "name": "phone-palette-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "keys": [
+      "Control+K"
+    ],
+    "waitMs": 400,
+    "out": "docs/evidence/step-8/phone-palette-2x.png",
+    "eval": "(() => { const r = document.querySelector('[data-command-palette]').getBoundingClientRect(); return { left: Math.round(r.left), right: Math.round(innerWidth - r.right), itemHeights: [...new Set([...document.querySelectorAll('[cmdk-item]')].map((i) => Math.round(i.getBoundingClientRect().height)))] }; })()"
+  },
+  {
+    "name": "phone-quality-2x",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[data-quality-trigger]\").click()"
+    ],
+    "mobile": true,
+    "waitMs": 400,
+    "out": "docs/evidence/step-8/phone-quality-2x.png",
+    "eval": "(() => { const r = document.querySelector('[data-quality-sheet]').getBoundingClientRect(); return { left: Math.round(r.left), right: Math.round(innerWidth - r.right), overflowX: document.documentElement.scrollWidth > innerWidth, sheetOverflowX: [...document.querySelectorAll('[data-quality-sheet] [data-metric]')].some((m) => m.scrollWidth > m.clientWidth + 1) }; })()"
+  },
+  {
+    "name": "night-phone-thread-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t06",
+    "width": 375,
+    "height": 812,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-phone-thread-2x.png",
+    "eval": "({ overflowX: document.documentElement.scrollWidth > innerWidth, bar: [...(document.querySelector('[data-glass=decision-bar]')?.querySelectorAll('button') ?? [])].map((b) => b.innerText.trim()) })"
+  },
+  {
+    "name": "recheck-keyboard-A",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), focus: document.activeElement.id, t17InList: !!document.getElementById('row-t17'), undoPill: document.querySelector('[data-dock] [role=status]').innerText.replace(/\\n/g, ' ') })"
+  },
+  {
+    "name": "recheck-keyboard-A-Z",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a",
+      "z"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), focus: document.activeElement.id, t17InList: !!document.getElementById('row-t17'), draftBack: !!document.querySelector('[data-draft=t17-draft]'), undoPill: document.querySelector('[data-dock] [role=status]').textContent })"
+  },
+  {
+    "name": "recheck-keyboard-A-Z-A",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "keys": [
+      "a",
+      "z",
+      "a"
+    ],
+    "keyWaitMs": 400,
+    "eval": "({ open: new URLSearchParams(location.search).get('ticket'), focus: document.activeElement.id, t17InList: !!document.getElementById('row-t17') })"
+  },
+  {
+    "name": "recheck-bar-fits-every-ticket-1440",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "eval": "(async () => { const out = []; let checked = 0; for (const lane of ['needs_you', 'drafts', 'auto_resolved']) { document.querySelector(`[data-lane-tab=${lane}]`).click(); await new Promise(r => setTimeout(r, 200)); for (const row of [...document.querySelectorAll('[role=option]')]) { row.click(); await new Promise(r => setTimeout(r, 80)); checked++; const main = document.querySelector('main').getBoundingClientRect(); for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) { const r = el.getBoundingClientRect(); if (el.scrollWidth > el.clientWidth + 1 || r.width > 560.5 || r.left < main.left || r.right > main.right) out.push(`${row.id} ${el.dataset.glass ?? 'choice'} ${el.scrollWidth}/${el.clientWidth}`); } } } return { checked, overflowing: out }; })()"
+  },
+  {
+    "name": "recheck-bar-fits-every-ticket-900",
+    "url": "http://localhost:3000/?lane=needs_you",
+    "width": 900,
+    "height": 800,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=decision-bar]')",
+    "eval": "(async () => { const out = []; let checked = 0; for (const lane of ['needs_you', 'drafts', 'auto_resolved']) { document.querySelector(`[data-lane-tab=${lane}]`).click(); await new Promise(r => setTimeout(r, 200)); for (const row of [...document.querySelectorAll('[role=option]')]) { row.click(); await new Promise(r => setTimeout(r, 80)); checked++; const main = document.querySelector('main').getBoundingClientRect(); for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) { const r = el.getBoundingClientRect(); if (el.scrollWidth > el.clientWidth + 1 || r.left < main.left || r.right > main.right) out.push(`${row.id} ${el.dataset.glass ?? 'choice'} ${el.scrollWidth}/${el.clientWidth} in ${Math.round(main.width)}`); } } } return { checked, overflowing: out }; })()"
+  },
+  {
+    "name": "recheck-panel-fits-every-ticket-1440",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(async () => {\n  const problems = []; let checked = 0;\n  for (const lane of ['needs_you', 'drafts', 'auto_resolved']) {\n    document.querySelector('[data-lane-tab=' + lane + ']').click(); await new Promise(r => setTimeout(r, 200));\n    for (const row of [...document.querySelectorAll('[role=option]')]) {\n      row.click(); await new Promise(r => setTimeout(r, 120)); checked++;\n      const panel = document.querySelector('[data-context-panel]');\n      if (!panel) { problems.push(row.id + ' no panel'); continue; }\n      const body = panel.querySelector('.overflow-y-auto');\n      if (body.scrollWidth > body.clientWidth + 1) problems.push(row.id + ' panel overflows ' + body.scrollWidth + '/' + body.clientWidth);\n      const records = [...panel.querySelectorAll('[data-conflict-record]')].map(e => e.getBoundingClientRect());\n      if (records.length && (records.length !== 2 || Math.abs(records[0].top - records[1].top) > 1)) problems.push(row.id + ' conflict records not side by side');\n      const main = document.querySelector('main').getBoundingClientRect();\n      for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) {\n        const r = el.getBoundingClientRect();\n        if (el.scrollWidth > el.clientWidth + 1 || r.left < main.left || r.right > main.right) problems.push(row.id + ' bar ' + Math.round(r.width) + ' in main ' + Math.round(main.width));\n      }\n    }\n  }\n  return { checked, threadWidth: Math.round(document.querySelector('main').getBoundingClientRect().width), panelWidth: Math.round(document.querySelector('[data-context-panel]').getBoundingClientRect().width), problems };\n})()"
+  },
+  {
+    "name": "recheck-panel-fits-every-ticket-1280",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1280,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(async () => {\n  const problems = []; let checked = 0;\n  for (const lane of ['needs_you', 'drafts', 'auto_resolved']) {\n    document.querySelector('[data-lane-tab=' + lane + ']').click(); await new Promise(r => setTimeout(r, 200));\n    for (const row of [...document.querySelectorAll('[role=option]')]) {\n      row.click(); await new Promise(r => setTimeout(r, 120)); checked++;\n      const panel = document.querySelector('[data-context-panel]');\n      if (!panel) { problems.push(row.id + ' no panel'); continue; }\n      const body = panel.querySelector('.overflow-y-auto');\n      if (body.scrollWidth > body.clientWidth + 1) problems.push(row.id + ' panel overflows ' + body.scrollWidth + '/' + body.clientWidth);\n      const records = [...panel.querySelectorAll('[data-conflict-record]')].map(e => e.getBoundingClientRect());\n      if (records.length && (records.length !== 2 || Math.abs(records[0].top - records[1].top) > 1)) problems.push(row.id + ' conflict records not side by side');\n      const main = document.querySelector('main').getBoundingClientRect();\n      for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) {\n        const r = el.getBoundingClientRect();\n        if (el.scrollWidth > el.clientWidth + 1 || r.left < main.left || r.right > main.right) problems.push(row.id + ' bar ' + Math.round(r.width) + ' in main ' + Math.round(main.width));\n      }\n    }\n  }\n  return { checked, threadWidth: Math.round(document.querySelector('main').getBoundingClientRect().width), panelWidth: Math.round(document.querySelector('[data-context-panel]').getBoundingClientRect().width), problems };\n})()"
+  },
+  {
+    "name": "reduced-transparency-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/reduced-transparency-2x.png",
+    "media": {
+      "prefers-reduced-transparency": "reduce"
+    },
+    "keys": [
+      "Shift+X"
+    ],
+    "waitMs": 500,
+    "eval": "({ matches: matchMedia('(prefers-reduced-transparency: reduce)').matches, glass: [...document.querySelectorAll('[data-glass]')].map((e) => { const s = getComputedStyle(e); return e.dataset.glass + ': backdrop=' + s.backdropFilter + ' bg=' + s.backgroundColor; }) })"
+  },
+  {
+    "name": "night-reduced-transparency-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-8/night-reduced-transparency-2x.png",
+    "media": {
+      "prefers-reduced-transparency": "reduce"
+    },
+    "keys": [
+      "Shift+X"
+    ],
+    "waitMs": 500,
+    "eval": "({ matches: matchMedia('(prefers-reduced-transparency: reduce)').matches, glass: [...document.querySelectorAll('[data-glass]')].map((e) => { const s = getComputedStyle(e); return e.dataset.glass + ': backdrop=' + s.backdropFilter + ' bg=' + s.backgroundColor; }) })"
+  },
+  {
+    "name": "draft-vs-sent-25pct",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "width": 1440,
+    "height": 900,
+    "scale": 0.25,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/draft-vs-sent-25pct.png",
+    "eval": "({ draft: !!document.querySelector('[data-draft]'), sent: document.querySelectorAll('[data-state=sent], li:has(> div.bg-bubble-out)').length })"
+  },
+  {
+    "name": "drafting-vs-sent-25pct",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "scale": 0.25,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-8/drafting-vs-sent-25pct.png",
+    "eval": "({ drafting: !!document.querySelector('[data-drafting]'), draft: !!document.querySelector('[data-draft]') })"
+  },
+  {
+    "name": "greyscale-needs-you-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ],
+    "selector": "[data-list-pane]",
+    "out": "docs/evidence/step-8/greyscale-needs-you-2x.png"
+  },
+  {
+    "name": "greyscale-decision-t02-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('input[value=t02-refund]').click()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ],
+    "selector": "main",
+    "out": "docs/evidence/step-8/greyscale-decision-t02-2x.png"
+  },
+  {
+    "name": "greyscale-drafting-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=drafting",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ],
+    "out": "docs/evidence/step-8/greyscale-drafting-2x.png"
+  },
+  {
+    "name": "greyscale-draft-failed-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&draft=failed",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ],
+    "out": "docs/evidence/step-8/greyscale-draft-failed-2x.png"
+  },
+  {
+    "name": "greyscale-collision-offline-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17&viewer=ana&net=offline",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ],
+    "out": "docs/evidence/step-8/greyscale-collision-offline-2x.png"
+  },
+  {
+    "name": "greyscale-quality-sheet-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector(\"[data-quality-trigger]\").click()",
+      "document.documentElement.style.filter = 'grayscale(1)'"
+    ],
+    "selector": "[data-quality-sheet]",
+    "out": "docs/evidence/step-8/greyscale-quality-sheet-2x.png"
+  },
+  {
+    "name": "bulk-preview-scrim",
+    "url": "http://localhost:3000/?lane=drafts",
+    "width": 375,
+    "height": 812,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main, [data-list-pane]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "mobile": true,
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "waitMs": 500,
+    "eval": "(async () => { const scrim = document.querySelector('[data-bulk-scrim]'); await new Promise(r => setTimeout(r, 300)); const shown = getComputedStyle(scrim).opacity; scrim.click(); await new Promise(r => setTimeout(r, 400)); return { shown, previewOpenAfterTap: document.querySelector('[data-bulk-preview]')?.closest('[data-open]')?.dataset.open, stillSelecting: !!document.querySelector('[data-glass=bulk-bar]'), scrimAfterTap: getComputedStyle(scrim).opacity }; })()"
+  }
+]

@@ -48,6 +48,21 @@ describe("decisionFor", () => {
   it("turns a taken-over wellbeing case into a reply of the specialist's own", () => {
     expect(decisionFor(ticket("t06"), { takenOver: true }).primary).toMatchObject({ kind: "write", label: "Write a reply" });
   });
+
+  it("holds a follow-up behind a reply queued offline", () => {
+    expect(decisionFor(ticket("t17"), { outgoing: "queued" }).primary.blocked).toBe(
+      "Your reply is queued until you reconnect. Follow up once it's delivered.",
+    );
+  });
+
+  it("offers Escalate only while the AI drafts, and writing once the draft failed (brief 12)", () => {
+    const drafting = decisionFor(ticket("t17"), { draft: "drafting" });
+    expect(drafting.primary.kind).toBe("drafting");
+    expect(drafting.edit).toBeNull();
+    expect(drafting.draft).toBeNull();
+    expect(decisionFor(ticket("t17"), { draft: "failed" }).primary).toMatchObject({ kind: "write", label: "Write a reply" });
+    expect(approveBlocked(ticket("t17"), { draft: "failed" })).toBe("The AI couldn't draft this reply. Write one yourself instead.");
+  });
 });
 
 describe("editTarget", () => {

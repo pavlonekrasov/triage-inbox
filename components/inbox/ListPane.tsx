@@ -1,11 +1,11 @@
 "use client";
 
-import { CirclePause, X } from "lucide-react";
+import { CirclePause, WifiOff, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { useCallback, useEffect, type KeyboardEvent } from "react";
 import { Button } from "@/components/controls/Button";
 import { PrototypeControls } from "@/components/dev/PrototypeControls";
-import { hiddenIds, rowsFor, useDesk } from "@/components/desk/desk-store";
+import { fallenIds, hiddenIds, laneRows, rowsFor, useDesk } from "@/components/desk/desk-store";
 import { ThemeIconToggle } from "@/components/theme/ThemeIconToggle";
 import { cn } from "@/lib/utils";
 import { formatDuration, formatPercent, TODAY } from "@/data/metrics";
@@ -31,14 +31,15 @@ const ROW_TRANSITION: Transition = {
 
 export function ListPane() {
   const { state, dispatch } = useDesk();
-  const { lane, listState, editMode, checked, cursorId, openId, focusRequest, outbox } = state;
+  const { lane, listState, editMode, checked, cursorId, openId, focusRequest, outbox, draftStatus } = state;
   const notice = state.notice?.where === "list" ? state.notice : null;
   const reduced = useReducedMotion();
   const hidden = hiddenIds(state);
-  const rows = rowsFor(listState, lane, hidden);
+  const fallen = fallenIds(state);
+  const rows = rowsFor(listState, lane, hidden, fallen);
 
   const counts = Object.fromEntries(
-    LANES.map((l) => [l.id, listState === "loading" ? null : rowsFor(listState, l.id, hidden).length]),
+    LANES.map((l) => [l.id, listState === "loading" ? null : rowsFor(listState, l.id, hidden, fallen).length]),
   ) as Record<Lane, number | null>;
 
   // Keep the keyboard row in view with no smooth scroll: J/K runs hundreds of times a shift.
@@ -70,6 +71,18 @@ export function ListPane() {
   return (
     <section data-list-pane aria-label="Conversations" className="@container relative flex h-full min-w-0 flex-col bg-sidebar">
       <ListHeader />
+      {/* Offline (brief 12): a thin bar under the header. Decisions still work; replies queue. */}
+      <div role="status" aria-live="polite">
+        {!state.online && (
+          <p
+            data-offline
+            className="flex h-8 items-center gap-2 border-y border-border bg-muted px-4 text-body-s text-muted-foreground"
+          >
+            <WifiOff aria-hidden className="size-4 shrink-0" strokeWidth={1.75} />
+            <span className="truncate">Offline · actions will send when you reconnect</span>
+          </p>
+        )}
+      </div>
 
       <motion.div
         layoutScroll
@@ -151,6 +164,7 @@ export function ListPane() {
                       tabbable={ticket.id === tabbableId}
                       last={i === rows.length - 1}
                       unsent={outbox[ticket.id]?.status === "failed"}
+                      draft={draftStatus[ticket.id]?.status ?? null}
                       onActivate={activate}
                     />
                   </motion.div>
@@ -163,12 +177,21 @@ export function ListPane() {
 
       <BulkBar />
 
-      {/* Metrics live one click away (brief 1); the line becomes the quality sheet's trigger in step 8. */}
-      <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-border pr-1 pl-4 text-micro text-muted-foreground tabular-nums">
-        <p className="min-w-0 flex-1 truncate">
-          Today {formatPercent(TODAY.autoResolutionRate)} auto · {formatDuration(TODAY.firstResponseMedianSeconds)} first
-          response · {formatPercent(TODAY.reopenRate)} reopened
-        </p>
+      {/* Metrics live one click away (brief 1): the footer line opens the quality sheet (brief 13). */}
+      <footer className="box-content flex h-10 shrink-0 items-center gap-2 border-t border-border pr-1 pb-[env(safe-area-inset-bottom)] pl-2 text-micro text-muted-foreground tabular-nums max-md:h-12">
+        <Button
+          variant="text"
+          data-quality-trigger
+          aria-haspopup="dialog"
+          title="Open the quality view"
+          onClick={() => dispatch({ type: "setOverlay", overlay: "quality" })}
+          className="h-8 min-w-0 flex-1 justify-start px-2 font-normal"
+        >
+          <span className="truncate">
+            Today {formatPercent(TODAY.autoResolutionRate)} auto · {formatDuration(TODAY.firstResponseMedianSeconds)} first
+            response · {formatPercent(TODAY.reopenRate)} reopened
+          </span>
+        </Button>
         <PrototypeControls />
       </footer>
     </section>
@@ -178,7 +201,7 @@ export function ListPane() {
 /** Telegram grammar: the title bar becomes the selection bar in edit mode. */
 function ListHeader() {
   const { state, dispatch } = useDesk();
-  const drafts = rowsFor(state.listState, "drafts", hiddenIds(state));
+  const drafts = laneRows(state, "drafts");
   const sureIds = drafts.filter((t) => isSureLowRiskDraft(t.triage)).map((t) => t.id);
   const sureCount = sureIds.length;
   // Hidden once exactly the Sure set is selected: pressing it again would change nothing.

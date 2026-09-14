@@ -4,7 +4,7 @@ import { ChevronDown, ListChecks, Send, X } from "lucide-react";
 import { useId } from "react";
 import { Button } from "@/components/controls/Button";
 import { KeyHint } from "@/components/controls/KeyHint";
-import { hiddenIds, rowsFor, useDesk } from "@/components/desk/desk-store";
+import { laneRows, useDesk } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { readDemoNow } from "@/lib/use-demo-now";
 
@@ -22,12 +22,26 @@ export function BulkBar() {
   const previewId = useId();
   if (!state.editMode || state.lane !== "drafts") return null;
 
-  const selected = rowsFor(state.listState, "drafts", hiddenIds(state)).filter((t) => state.checked.includes(t.id));
+  const selected = laneRows(state, "drafts").filter((t) => state.checked.includes(t.id));
   const count = selected.length;
   const open = state.bulkPreview && count > 0;
 
   return (
-    <div data-bulk className="pointer-events-none absolute inset-x-0 bottom-10 z-20 flex flex-col gap-2 px-3 pb-3">
+    <>
+      {/* While the preview is open a scrim dims the list behind it, so rows showing between the card and the
+          bar read as background, and a tap on them closes the preview as Esc does. Same token as dialogs (6.5). */}
+      <div
+        aria-hidden
+        data-bulk-scrim
+        data-open={open}
+        onClick={() => dispatch({ type: "setBulkPreview", open: false })}
+        className="pointer-events-none absolute inset-0 z-20 bg-scrim opacity-0 transition-opacity duration-(--dur-ui) ease-(--ease-soft) data-[open=true]:pointer-events-auto data-[open=true]:opacity-100 motion-reduce:transition-none"
+      />
+    {/* Clears the list footer, which is 48 px on a phone and sits above the home indicator's safe area. */}
+    <div
+      data-bulk
+      className="pointer-events-none absolute inset-x-0 bottom-[calc(2.5rem+env(safe-area-inset-bottom))] z-20 flex flex-col gap-2 px-3 pb-3 max-md:bottom-[calc(3rem+env(safe-area-inset-bottom))]"
+    >
       {/* grid-template-rows 0fr → 1fr over 220 ms: the pinned summary's named exception (brief 10). */}
       <div
         id={previewId}
@@ -121,5 +135,6 @@ export function BulkBar() {
         )}
       </Glass>
     </div>
+    </>
   );
 }

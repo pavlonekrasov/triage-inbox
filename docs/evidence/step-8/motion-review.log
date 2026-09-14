@@ -1,0 +1,12 @@
+[sidebar-motion-day] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99
+[section-motion-day] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
+    at <anonymous>:10:80
+[sidebar-reduced-day] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99
+[sidebar-motion-night] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99
+[section-motion-night] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
+    at <anonymous>:10:80
+[sidebar-reduced-night] failed: Error: Sidebar did not restore its width/state
+    at <anonymous>:23:99

@@ -2,10 +2,11 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { Command } from "cmdk";
-import { Inbox, Keyboard, Moon, PanelRight, Pencil, Search, Sun, Undo2, UsersRound, type LucideIcon } from "lucide-react";
+import { Activity, Inbox, Keyboard, Moon, PanelRight, Pencil, Search, Sun, Undo2, UsersRound, type LucideIcon } from "lucide-react";
 import { useRef, useSyncExternalStore, type ReactNode } from "react";
 import { Keys } from "@/components/controls/KeyHint";
-import { contextFor, hiddenIds, isContextOpen, latestUndoable, rowsFor, useDesk } from "@/components/desk/desk-store";
+import { contextFor, isContextOpen, laneRows, latestUndoable, useDesk } from "@/components/desk/desk-store";
+import { formatPercent, TODAY } from "@/data/metrics";
 import { TICKETS_BY_ID } from "@/data/tickets";
 import { avatarStyle, initials } from "@/lib/avatar";
 import { decisionFor } from "@/lib/decision";
@@ -19,7 +20,7 @@ import { PRIMARY_ICON } from "@/components/thread/DecisionBar";
 import { BACKDROP, POPUP } from "./overlay-classes";
 
 const ITEM =
-  "flex min-h-10 cursor-default items-center gap-3 rounded-input px-2.5 py-1.5 text-body-s outline-none select-none data-[selected=true]:bg-accent";
+  "flex min-h-10 max-md:min-h-11 cursor-default items-center gap-3 rounded-input px-2.5 py-1.5 text-body-s outline-none select-none data-[selected=true]:bg-accent";
 
 const serverTheme = (): Theme => "day";
 
@@ -47,7 +48,6 @@ export function CommandPalette() {
   const escalation = ticket ? escalationDefaults(ticket) : null;
   const teams = escalation ? [...TEAMS].sort((a, b) => Number(b.id === escalation.team) - Number(a.id === escalation.team)) : TEAMS;
   const detailsOpen = isContextOpen(state, wide);
-  const hidden = hiddenIds(state);
   const undoable = latestUndoable(state.outbox);
   const batchSize = undoable?.batch == null ? 0 : Object.values(state.outbox).filter((o) => o.batch === undoable.batch).length;
 
@@ -94,13 +94,15 @@ export function CommandPalette() {
 
               {ticket && decision && escalation && (
                 <Group heading={`Conversation with ${ticket.customer.name}`}>
-                  <Item
-                    icon={PRIMARY_ICON[decision.primary.kind]}
-                    label={decision.primary.label}
-                    keywords={["decide", "approve", "send"]}
-                    caps={decision.primary.kind === "approve" ? ["A"] : undefined}
-                    onSelect={() => run(() => dispatch({ type: "decide", now: readDemoNow(), wall: Date.now() }))}
-                  />
+                  {decision.primary.kind !== "drafting" && (
+                    <Item
+                      icon={PRIMARY_ICON[decision.primary.kind]}
+                      label={decision.primary.label}
+                      keywords={["decide", "approve", "send"]}
+                      caps={decision.primary.kind === "approve" ? ["A"] : undefined}
+                      onSelect={() => run(() => dispatch({ type: "decide", now: readDemoNow(), wall: Date.now() }))}
+                    />
+                  )}
                   <Item icon={Pencil} label="Edit draft" keywords={["edit", "composer"]} caps={["E"]} onSelect={() => run(() => dispatch({ type: "openComposer" }))} />
                   {teams.map((team) => (
                     <Item
@@ -129,14 +131,14 @@ export function CommandPalette() {
                     key={lane.id}
                     icon={Inbox}
                     label={lane.label}
-                    detail={`${rowsFor(state.listState, lane.id, hidden).length} conversations`}
+                    detail={`${laneRows(state, lane.id).length} conversations`}
                     keywords={["lane", "go to"]}
                     caps={[String(index + 1)]}
                     onSelect={() => run(() => dispatch({ type: "selectLane", lane: lane.id }))}
                   />
                 ))}
                 {LANES.flatMap((lane) =>
-                  rowsFor(state.listState, lane.id, hidden).map((t) => (
+                  laneRows(state, lane.id).map((t) => (
                     <Command.Item
                       key={t.id}
                       value={`${t.customer.name} ${t.id}`}
@@ -182,6 +184,13 @@ export function CommandPalette() {
                   label={theme === "day" ? "Switch to Night shift" : "Switch to Day"}
                   keywords={["theme", "dark", "light", "night", "day"]}
                   onSelect={() => run(() => applyTheme(theme === "day" ? "night" : "day"))}
+                />
+                <Item
+                  icon={Activity}
+                  label="Open the quality view"
+                  detail={`${formatPercent(TODAY.autoResolutionRate)} auto · ${formatPercent(TODAY.reopenRate)} reopened`}
+                  keywords={["quality", "metrics", "auto-resolution", "reopen", "satisfaction"]}
+                  onSelect={() => run(() => dispatch({ type: "setOverlay", overlay: "quality" }))}
                 />
                 <Item
                   icon={Keyboard}

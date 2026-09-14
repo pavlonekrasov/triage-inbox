@@ -1,0 +1,411 @@
+[lane-empty-2x] {
+ "title": "Nothing needs you right now.",
+ "body": "142 conversations were auto-resolved today; 7 are sampled for spot-check.",
+ "action": "Review spot-checks"
+}
+[lane-empty-2x] wrote docs/evidence/step-8/lane-empty-2x.png
+[night-lane-empty-2x] {
+ "title": "Nothing needs you right now.",
+ "body": "142 conversations were auto-resolved today; 7 are sampled for spot-check.",
+ "action": "Review spot-checks"
+}
+[night-lane-empty-2x] wrote docs/evidence/step-8/night-lane-empty-2x.png
+[loading-2x] {
+ "rowHeights": [
+  72
+ ],
+ "spinner": false,
+ "busy": "true"
+}
+[loading-2x] wrote docs/evidence/step-8/loading-2x.png
+[night-loading-2x] {
+ "rowHeights": [
+  72
+ ],
+ "spinner": false,
+ "busy": "true"
+}
+[night-loading-2x] wrote docs/evidence/step-8/night-loading-2x.png
+[drafting-2x] {
+ "typing": true,
+ "dots": "typing-dot",
+ "draft": false,
+ "bar": [
+  "Escalate case\nH"
+ ],
+ "row": "18:35"
+}
+[drafting-2x] wrote docs/evidence/step-8/drafting-2x.png
+[night-drafting-2x] {
+ "typing": true,
+ "dots": "typing-dot",
+ "draft": false,
+ "bar": [
+  "Escalate case\nH"
+ ],
+ "row": "18:35"
+}
+[night-drafting-2x] wrote docs/evidence/step-8/night-drafting-2x.png
+[drafting-reduced-motion] {
+ "dotsShown": false,
+ "wordsShown": true
+}
+[drafting-refuses-a] {
+ "notice": "The AI is still drafting. There's nothing to edit yet.",
+ "composer": false,
+ "replies": 0
+}
+[draft-failed-2x] {
+ "lane": "Needs you 9",
+ "inNeedsYou": true,
+ "bubble": "No draft · needs you  Couldn’t draft a reply. The case is ready for you to write one.  Retry drafting",
+ "primary": "Write a reply",
+ "route": "MR Maya Ruiz Written in English: EN Customer’s local time 08:44 local You"
+}
+[draft-failed-2x] wrote docs/evidence/step-8/draft-failed-2x.png
+[night-draft-failed-2x] {
+ "lane": "Needs you 9",
+ "inNeedsYou": true,
+ "bubble": "No draft · needs you  Couldn’t draft a reply. The case is ready for you to write one.  Retry drafting",
+ "primary": "Write a reply",
+ "route": "MR Maya Ruiz Written in English: EN Customer’s local time 08:44 local You"
+}
+[night-draft-failed-2x] wrote docs/evidence/step-8/night-draft-failed-2x.png
+[draft-retry-arrives] {
+ "during": {
+  "typing": true,
+  "lane": "Drafts 11"
+ },
+ "after": {
+  "draft": true,
+  "primary": "Approve & send\nA"
+ }
+}
+[send-failed-2x] {
+ "status": "Not sent · Retry",
+ "inDrafts": true,
+ "primary": "Retry sending"
+}
+[send-failed-2x] wrote docs/evidence/step-8/send-failed-2x.png
+[night-send-failed-2x] {
+ "status": "Not sent · Retry",
+ "inDrafts": true,
+ "primary": "Retry sending"
+}
+[night-send-failed-2x] wrote docs/evidence/step-8/night-send-failed-2x.png
+[sources-disagree-2x] {
+ "panel": true,
+ "restricted": true
+}
+[sources-disagree-2x] wrote docs/evidence/step-8/sources-disagree-2x.png
+[night-sources-disagree-2x] {
+ "panel": true,
+ "restricted": true
+}
+[night-sources-disagree-2x] wrote docs/evidence/step-8/night-sources-disagree-2x.png
+[stale-source-2x] {
+ "panel": "Newer version exists (v4, 2 Sep)",
+ "chip": true
+}
+[stale-source-2x] wrote docs/evidence/step-8/stale-source-2x.png
+[night-stale-source-2x] {
+ "panel": "Newer version exists (v4, 2 Sep)",
+ "chip": true
+}
+[night-stale-source-2x] wrote docs/evidence/step-8/night-stale-source-2x.png
+[collision-2x] {
+ "viewer": "AM Ana is viewing",
+ "notice": "Ana is viewing this conversation too. Send anyway? Send reply anyway",
+ "sentYet": 0
+}
+[collision-2x] wrote docs/evidence/step-8/collision-2x.png
+[night-collision-2x] {
+ "viewer": "AM Ana is viewing",
+ "notice": "Ana is viewing this conversation too. Send anyway? Send reply anyway",
+ "sentYet": 0
+}
+[night-collision-2x] wrote docs/evidence/step-8/night-collision-2x.png
+[collision-second-a-sends] {
+ "open": "t21",
+ "drafts": "10"
+}
+[offline-2x] {
+ "bar": "Offline · actions will send when you reconnect",
+ "status": "Queued · 18:44 , sends when you reconnect"
+}
+[offline-2x] wrote docs/evidence/step-8/offline-2x.png
+[night-offline-2x] {
+ "bar": "Offline · actions will send when you reconnect",
+ "status": "Queued · 18:44 , sends when you reconnect"
+}
+[night-offline-2x] wrote docs/evidence/step-8/night-offline-2x.png
+[offline-reconnect-sends] {
+ "bar": false,
+ "notice": "Back online. 1 queued reply is sending.",
+ "status": "sent"
+}
+[long-complaint-2x] {
+ "lines": 12,
+ "words": 1176,
+ "toggle": "Show full message"
+}
+[long-complaint-2x] wrote docs/evidence/step-8/long-complaint-2x.png
+[night-long-complaint-2x] {
+ "lines": 12,
+ "words": 1176,
+ "toggle": "Show full message"
+}
+[night-long-complaint-2x] wrote docs/evidence/step-8/night-long-complaint-2x.png
+[long-complaint-expands] {
+ "lines": 86,
+ "toggle": "Collapse message",
+ "expanded": "true"
+}
+[long-name-2x] {
+ "listTruncated": true,
+ "headerLines": 2
+}
+[long-name-2x] wrote docs/evidence/step-8/long-name-2x.png
+[night-long-name-2x] {
+ "listTruncated": true,
+ "headerLines": 2
+}
+[night-long-name-2x] wrote docs/evidence/step-8/night-long-name-2x.png
+[quality-sheet-2x] {
+ "pair": [
+  "auto",
+  "reopen"
+ ],
+ "rows": [
+  "auto",
+  "reopen",
+  "first-response",
+  "resolution",
+  "csat"
+ ],
+ "sparklines": 5,
+ "strokes": [
+  "lab(41.8195 2.01778 -7.22043)"
+ ],
+ "mutedInk": "lab(8.16042 2.28816 -7.10021)",
+ "clippedValues": false
+}
+[quality-sheet-2x] wrote docs/evidence/step-8/quality-sheet-2x.png
+[night-quality-sheet-2x] {
+ "pair": [
+  "auto",
+  "reopen"
+ ],
+ "rows": [
+  "auto",
+  "reopen",
+  "first-response",
+  "resolution",
+  "csat"
+ ],
+ "sparklines": 5,
+ "strokes": [
+  "lab(67.3436 1.95897 -7.25262)"
+ ],
+ "mutedInk": "lab(94.132 0.746548 -2.92342)",
+ "clippedValues": false
+}
+[night-quality-sheet-2x] wrote docs/evidence/step-8/night-quality-sheet-2x.png
+[quality-sparkline-hover-2x] {
+ "tooltip": [
+  "66%\n7 Sep"
+ ],
+ "crosshair": true
+}
+[quality-sparkline-hover-2x] wrote docs/evidence/step-8/quality-sparkline-hover-2x.png
+[quality-table-2x] {
+ "rows": 14,
+ "columns": 8
+}
+[quality-table-2x] wrote docs/evidence/step-8/quality-table-2x.png
+[quality-counts-mark-as-wrong] 4 replies marked wrong today
+[tablet-1024-2x] {
+ "width": 1024,
+ "overflowX": false,
+ "list": 320,
+ "thread": 703,
+ "panelOpen": false,
+ "barOverflow": false
+}
+[tablet-1024-2x] wrote docs/evidence/step-8/tablet-1024-2x.png
+[tablet-800-2x] {
+ "width": 800,
+ "overflowX": false,
+ "list": 320,
+ "thread": 479,
+ "panelOpen": false,
+ "barOverflow": false
+}
+[tablet-800-2x] wrote docs/evidence/step-8/tablet-800-2x.png
+[tablet-768-2x] {
+ "width": 768,
+ "overflowX": false,
+ "list": 320,
+ "thread": 447,
+ "panelOpen": false,
+ "barOverflow": false
+}
+[tablet-768-2x] wrote docs/evidence/step-8/tablet-768-2x.png
+[tablet-details-sheet-2x] {
+ "sheet": true,
+ "width": 351
+}
+[tablet-details-sheet-2x] wrote docs/evidence/step-8/tablet-details-sheet-2x.png
+[phone-list-2x] {
+ "overflowX": false,
+ "thread": true,
+ "rowHeight": 72,
+ "smallTargets": []
+}
+[phone-list-2x] wrote docs/evidence/step-8/phone-list-2x.png
+[phone-thread-2x] {
+ "overflowX": false,
+ "listHidden": true,
+ "back": 44,
+ "bar": [
+  "Approve & send",
+  "Edit draft",
+  "Escalate case"
+ ],
+ "barRows": 2,
+ "dockBottom": 16,
+ "smallTargets": []
+}
+[phone-thread-2x] wrote docs/evidence/step-8/phone-thread-2x.png
+[phone-refund-decision-2x] {
+ "overflowX": false,
+ "bar": [
+  "Choose a reply to send",
+  "Edit draft",
+  "Escalate case"
+ ],
+ "smallTargets": []
+}
+[phone-refund-decision-2x] wrote docs/evidence/step-8/phone-refund-decision-2x.png
+[phone-back-to-list] {
+ "thread": true,
+ "listShown": true,
+ "focus": "row-t17"
+}
+[phone-composer-2x] {
+ "overflowX": false,
+ "composer": true,
+ "smallTargets": []
+}
+[phone-composer-2x] wrote docs/evidence/step-8/phone-composer-2x.png
+[phone-bulk-preview-2x] {
+ "overflowX": false,
+ "items": 6,
+ "send": "Approve & send 6 replies",
+ "smallTargets": []
+}
+[phone-bulk-preview-2x] wrote docs/evidence/step-8/phone-bulk-preview-2x.png
+[phone-palette-2x] {
+ "left": 16,
+ "right": 16,
+ "itemHeights": [
+  44,
+  46
+ ]
+}
+[phone-palette-2x] wrote docs/evidence/step-8/phone-palette-2x.png
+[phone-quality-2x] {
+ "left": 16,
+ "right": 16,
+ "overflowX": false,
+ "sheetOverflowX": false
+}
+[phone-quality-2x] wrote docs/evidence/step-8/phone-quality-2x.png
+[night-phone-thread-2x] {
+ "overflowX": false,
+ "bar": [
+  "Take over conversation",
+  "Escalate case"
+ ]
+}
+[night-phone-thread-2x] wrote docs/evidence/step-8/night-phone-thread-2x.png
+[recheck-keyboard-A] {
+ "open": "t21",
+ "focus": "row-t21",
+ "t17InList": false,
+ "undoPill": "Sent to Maya Ruiz · Undo"
+}
+[recheck-keyboard-A-Z] {
+ "open": "t17",
+ "focus": "row-t17",
+ "t17InList": true,
+ "draftBack": true,
+ "undoPill": ""
+}
+[recheck-keyboard-A-Z-A] {
+ "open": "t21",
+ "focus": "row-t21",
+ "t17InList": false
+}
+[recheck-bar-fits-every-ticket-1440] {
+ "checked": 23,
+ "overflowing": []
+}
+[recheck-bar-fits-every-ticket-900] {
+ "checked": 23,
+ "overflowing": []
+}
+[recheck-panel-fits-every-ticket-1440] {
+ "checked": 23,
+ "threadWidth": 738,
+ "panelWidth": 340,
+ "problems": []
+}
+[recheck-panel-fits-every-ticket-1280] {
+ "checked": 23,
+ "threadWidth": 578,
+ "panelWidth": 340,
+ "problems": []
+}
+[reduced-transparency-2x] {
+ "matches": true,
+ "glass": [
+  "lane-track: backdrop=none bg=lab(98.2348 0.276119 -1.0988)",
+  "bulk-bar: backdrop=none bg=lab(98.2348 0.276119 -1.0988)",
+  "thread-header: backdrop=none bg=lab(98.2348 0.276119 -1.0988)",
+  "decision-bar: backdrop=none bg=lab(98.2348 0.276119 -1.0988)"
+ ]
+}
+[reduced-transparency-2x] wrote docs/evidence/step-8/reduced-transparency-2x.png
+[night-reduced-transparency-2x] {
+ "matches": true,
+ "glass": [
+  "lane-track: backdrop=none bg=lab(8.73759 1.9763 -7.94679)",
+  "bulk-bar: backdrop=none bg=lab(8.73759 1.9763 -7.94679)",
+  "thread-header: backdrop=none bg=lab(8.73759 1.9763 -7.94679)",
+  "decision-bar: backdrop=none bg=lab(8.73759 1.9763 -7.94679)"
+ ]
+}
+[night-reduced-transparency-2x] wrote docs/evidence/step-8/night-reduced-transparency-2x.png
+[draft-vs-sent-25pct] {
+ "draft": true,
+ "sent": 2
+}
+[draft-vs-sent-25pct] wrote docs/evidence/step-8/draft-vs-sent-25pct.png
+[drafting-vs-sent-25pct] {
+ "drafting": true,
+ "draft": false
+}
+[drafting-vs-sent-25pct] wrote docs/evidence/step-8/drafting-vs-sent-25pct.png
+[greyscale-needs-you-2x] wrote docs/evidence/step-8/greyscale-needs-you-2x.png
+[greyscale-decision-t02-2x] wrote docs/evidence/step-8/greyscale-decision-t02-2x.png
+[greyscale-drafting-2x] wrote docs/evidence/step-8/greyscale-drafting-2x.png
+[greyscale-draft-failed-2x] wrote docs/evidence/step-8/greyscale-draft-failed-2x.png
+[greyscale-collision-offline-2x] wrote docs/evidence/step-8/greyscale-collision-offline-2x.png
+[greyscale-quality-sheet-2x] wrote docs/evidence/step-8/greyscale-quality-sheet-2x.png
+[bulk-preview-scrim] {
+ "shown": "1",
+ "previewOpenAfterTap": "false",
+ "stillSelecting": true,
+ "scrimAfterTap": "0"
+}

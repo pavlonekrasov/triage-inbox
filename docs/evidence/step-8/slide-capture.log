@@ -1,0 +1,67 @@
+[s2-flow] {
+ "width": 1440,
+ "height": 900,
+ "theme": "day"
+}
+[s2-flow] wrote docs/evidence/slides/s2-flow.png
+[s3-inbox] failed: waitFor timed out after 20000 ms: !document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')
+[s4-cases] {
+ "width": 1440,
+ "height": 900,
+ "theme": "day"
+}
+[s4-cases] wrote docs/evidence/slides/s4-cases.png
+[s5-safeguards] {
+ "width": 1440,
+ "height": 900,
+ "theme": "day"
+}
+[s5-safeguards] wrote docs/evidence/slides/s5-safeguards.png
+[s5-metrics] {
+ "width": 1440,
+ "height": 900,
+ "theme": "day"
+}
+[s5-metrics] wrote docs/evidence/slides/s5-metrics.png
+[s5-bulk-preview] {
+ "width": 1440,
+ "height": 900,
+ "theme": "day"
+}
+[s5-bulk-preview] wrote docs/evidence/slides/s5-bulk-preview.png
+[s2-flow-night] {
+ "width": 1440,
+ "height": 900,
+ "theme": "night"
+}
+[s2-flow-night] wrote docs/evidence/slides/s2-flow-night.png
+[s3-inbox-night] {
+ "width": 1440,
+ "height": 900,
+ "theme": "night"
+}
+[s3-inbox-night] wrote docs/evidence/slides/s3-inbox-night.png
+[s4-cases-night] {
+ "width": 1440,
+ "height": 900,
+ "theme": "night"
+}
+[s4-cases-night] wrote docs/evidence/slides/s4-cases-night.png
+[s5-safeguards-night] {
+ "width": 1440,
+ "height": 900,
+ "theme": "night"
+}
+[s5-safeguards-night] wrote docs/evidence/slides/s5-safeguards-night.png
+[s5-metrics-night] {
+ "width": 1440,
+ "height": 900,
+ "theme": "night"
+}
+[s5-metrics-night] wrote docs/evidence/slides/s5-metrics-night.png
+[s5-bulk-preview-night] {
+ "width": 1440,
+ "height": 900,
+ "theme": "night"
+}
+[s5-bulk-preview-night] wrote docs/evidence/slides/s5-bulk-preview-night.png

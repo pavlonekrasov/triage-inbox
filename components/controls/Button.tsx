@@ -37,7 +37,8 @@ const FOCUS = "outline-none focus-visible:outline-2 focus-visible:outline-offset
 export function buttonClass({ variant = "ghost", size = "sm", iconOnly = false }: ButtonOptions = {}) {
   if (variant === "text" || variant === "undo") {
     return cn(
-      "relative inline-flex shrink-0 items-center rounded-xs font-medium select-none",
+      // Inline text actions still get a 44 px tall target on a phone (brief 7.2).
+      "relative inline-flex shrink-0 items-center rounded-xs font-medium select-none max-md:min-h-11",
       FOCUS,
       "disabled:pointer-events-none aria-disabled:text-muted-foreground",
       variant === "undo" ? "text-foreground" : "hover:underline hover:underline-offset-2",
@@ -49,8 +50,9 @@ export function buttonClass({ variant = "ghost", size = "sm", iconOnly = false }
     "[transition:background-color_var(--dur-hover)_ease,scale_100ms_var(--ease-out)] active:scale-(--press-scale)",
     "disabled:pointer-events-none disabled:text-muted-foreground",
     "[&_svg]:size-4 [&_svg]:shrink-0",
-    size === "sm" && (iconOnly ? "size-8" : "h-8 px-3"),
-    size === "md" && (iconOnly ? "size-10" : "h-10 px-4"),
+    // Phone layout (brief 7.2): every button is a 44 × 44 px touch target.
+    size === "sm" && (iconOnly ? "size-8 max-md:size-11" : "h-8 px-3 max-md:h-11"),
+    size === "md" && (iconOnly ? "size-10 max-md:size-11" : "h-10 px-4 max-md:h-11"),
     variant === "primary" &&
       "bg-primary text-primary-foreground hover:bg-primary/90 aria-disabled:bg-muted aria-disabled:text-muted-foreground aria-disabled:hover:bg-muted",
     variant === "ghost" &&

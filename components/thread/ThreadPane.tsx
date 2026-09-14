@@ -11,11 +11,11 @@ import { CustomerBubble, SentBubble } from "./Bubble";
 import { BarFeedback, DecisionBar } from "./DecisionBar";
 import { EditComposer } from "./EditComposer";
 import { PinnedSummary } from "./PinnedSummary";
-import { ReplyBubble } from "./ReplyBubble";
+import { DraftFailedBubble, DraftingBubble, ReplyBubble } from "./ReplyBubble";
 import { DaySeparator, ServiceGroup } from "./ServiceMessage";
 import { ThreadHeader } from "./ThreadHeader";
 
-export function ThreadPane() {
+export function ThreadPane({ compact = false }: { compact?: boolean }) {
   const { state } = useDesk();
   const ticket = state.openId ? TICKETS_BY_ID.get(state.openId) : undefined;
   const scroller = useRef<HTMLDivElement>(null);
@@ -95,7 +95,7 @@ export function ThreadPane() {
             lets clicks through. px-6 and max-w-168 line the card up with the bubble column below. */}
         <div
           ref={strip}
-          className="pointer-events-none sticky top-0 z-10 flex shrink-0 flex-col items-center gap-2 px-6 pt-3"
+          className="pointer-events-none sticky top-0 z-10 flex shrink-0 flex-col items-center gap-2 px-3 pt-3 md:px-6"
         >
           <ThreadHeader ticket={ticket} />
           <ThreadNotice />
@@ -107,17 +107,18 @@ export function ThreadPane() {
           role="list"
           data-swap={seen.swapped}
           aria-label="Timeline"
-          className="mx-auto flex w-full max-w-180 shrink-0 grow flex-col justify-end gap-3 px-6 pt-6 pb-[calc(var(--dock-h,4.5rem)+1rem)] motion-safe:data-[swap=true]:animate-thread-in"
+          className="mx-auto flex w-full max-w-180 shrink-0 grow flex-col justify-end gap-3 px-3 pt-6 md:px-6 pb-[calc(var(--dock-h,4.5rem)+1rem)] motion-safe:data-[swap=true]:animate-thread-in"
         >
-          <Timeline ticket={ticket} overlay={threadOverlay(state, ticket)} showTranslation={state.showTranslation} />
+          <Timeline ticket={ticket} overlay={threadOverlay(state, ticket)} showTranslation={state.showTranslation} compact={compact} />
         </ol>
       </div>
 
-      {/* The dock floats 16 px above the bottom edge: decision feedback, then the bar or the composer. */}
+      {/* The dock floats 16 px above the bottom edge, or above a phone's home indicator (safe area), with
+          decision feedback, then the bar or the composer. */}
       <div
         ref={dock}
         data-dock
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2 px-6 pb-4"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2 px-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:px-6"
       >
         <BarFeedback ticket={ticket} />
         {composer ? (
@@ -130,10 +131,16 @@ export function ThreadPane() {
   );
 }
 
-function Timeline({ ticket, overlay, showTranslation }: { ticket: Ticket; overlay: TimelineOverlay; showTranslation: boolean }) {
+function Timeline({ ticket, overlay, showTranslation, compact }: { ticket: Ticket; overlay: TimelineOverlay; showTranslation: boolean; compact: boolean }) {
   const { state, dispatch } = useDesk();
   const { customer, triage } = ticket;
-  const items = buildTimeline(ticket, undefined, overlay);
+  // The three-case export omits processing logs and previews one variant at a time. The radio choice
+  // still controls the real decision; merely displaying the first variant never selects it for sending.
+  const previewId = state.variantChoice[ticket.id] ?? triage.drafts[0]?.id;
+  const items = buildTimeline(ticket, undefined, overlay).filter(item => !compact || (
+    item.kind !== "day" && item.kind !== "steps" && item.kind !== "spot-check" &&
+    (item.kind !== "draft" || item.draft.id === previewId)
+  ));
   const lastDraftKey = items.filter((i) => i.kind === "draft").at(-1)?.key;
 
   return items.map((item) => {
@@ -173,10 +180,17 @@ function Timeline({ ticket, overlay, showTranslation }: { ticket: Ticket; overla
             undoUntil={latest?.undoUntil}
             onUndo={() => dispatch({ type: "undoSend", id: ticket.id })}
             onRetry={() => dispatch({ type: "retrySend", id: ticket.id })}
+            offline={!state.online}
             showTranslation={showTranslation}
           />
         );
       }
+      case "drafting":
+        return <DraftingBubble key={item.key} />;
+      case "draft-failed":
+        return (
+          <DraftFailedBubble key={item.key} onRetry={() => dispatch({ type: "retryDraft", id: ticket.id, wall: Date.now() })} />
+        );
       case "message":
         return item.message.author === "customer" ? (
           <CustomerBubble

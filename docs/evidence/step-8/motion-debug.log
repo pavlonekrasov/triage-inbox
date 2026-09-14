@@ -1,0 +1,12 @@
+[sidebar-motion-day] failed: Error: {"initial":340,"closing":340,"closed":0,"opening":0,"restored":300,"reversed":300,"focusReturned":false,"inert":true,"reduced":false,"closeAnimations":[220]}
+    at <anonymous>:23:99
+[section-motion-day] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
+    at <anonymous>:10:80
+[sidebar-reduced-day] failed: Error: {"initial":340,"closing":0,"closed":0,"opening":300,"restored":300,"reversed":300,"focusReturned":false,"inert":true,"reduced":true,"closeAnimations":[]}
+    at <anonymous>:23:99
+[sidebar-motion-night] failed: Error: {"initial":340,"closing":340,"closed":0,"opening":0,"restored":300,"reversed":300,"focusReturned":false,"inert":true,"reduced":false,"closeAnimations":[220]}
+    at <anonymous>:23:99
+[section-motion-night] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
+    at <anonymous>:10:80
+[sidebar-reduced-night] failed: Error: {"initial":340,"closing":0,"closed":0,"opening":300,"restored":300,"reversed":300,"focusReturned":false,"inert":true,"reduced":true,"closeAnimations":[]}
+    at <anonymous>:23:99

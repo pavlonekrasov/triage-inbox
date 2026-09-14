@@ -2,9 +2,11 @@ import { DEMO_NOW } from "@/lib/clock";
 import type { Customer, Message, Platform, StepKind, Ticket, TriageResult } from "@/lib/types";
 import { sources } from "./sources";
 import { ACCOUNTS } from "./accounts";
+import { LONG_COMPLAINT } from "./long-complaint";
 
-/* 22 fixtures (brief 11): the 16 seed cases, then 6 low-risk Sure drafts queued while auto-send is
-   paused for the policy v4 rollout. All people are fictional; emails use the reserved example.com. */
+/* 23 fixtures (brief 11, 12): the 16 seed cases, 6 low-risk Sure drafts queued while auto-send is
+   paused for the policy v4 rollout, and one long complaint for the long-content state. All people are
+   fictional; emails use the reserved example.com. */
 
 const MINUTE = 60_000;
 const iso = (ms: number) => new Date(ms).toISOString();
@@ -1095,6 +1097,54 @@ export const TICKETS: readonly Ticket[] = [
           body: "Hi Kwame, open Nebula, tap Profile, then Birth details, and change your birth place. Your birth chart and horoscopes recalculate straight away with the new location.",
         },
       ],
+    },
+  }),
+
+  // 23 · long content (brief 12): a complaint of about 1,200 words, collapsed after 12 lines in the thread.
+  ticket({
+    id: "t23",
+    customer: customer("cus_harriet_okafor", "Harriet Okafor", {
+      locale: "en-GB", timeZone: "Europe/London", platform: "android", since: "2024-02-19", contacts: 4,
+    }),
+    receivedMinutesAgo: 44,
+    slaMinutesLeft: 96,
+    body: LONG_COMPLAINT,
+    triage: {
+      language: "en-GB",
+      category: { primary: "refund", secondary: "Annual renewal" },
+      summary:
+        "Annual plan renewed at £89.99 two days after she asked to switch to monthly. Wants the renewal refunded, the switch made and two lost chat credits back.",
+      risk: "high",
+      confidence: "likely",
+      confidenceScore: 0.8,
+      confidenceNote: "asks are explicit; the switch request is on record but not in the store",
+      route: "human_led",
+      hardRules: ["money_decision"],
+      reasons: [
+        { label: "Money decision", evidence: "Refund of a £89.99 annual renewal charged 10 Sep", sourceId: "src-refund-v4", caution: true },
+        { label: "Switch asked for before renewal", evidence: "Contact on 8 Sep asked to move to monthly; reply promised the change" },
+        { label: "Credits lost in a dropped session", evidence: "2 credits used on 3 Sep; the session ended after a minute", sourceId: "src-session-drop" },
+      ],
+      sources: sources("src-refund-v4", "src-session-drop"),
+      steps: [
+        ["classified", "Classified: Refund › Annual renewal"],
+        ["checked_account", "Checked account: Google Play annual plan, renewed 10 Sep"],
+        ["retrieved", "Retrieved: Refund policy v4, Interrupted advisor sessions v3"],
+        ["routed", "Routed: needs a person, money decision"],
+        ["drafted", "Drafted reply"],
+      ],
+      drafts: [
+        {
+          id: "t23-draft",
+          language: "en-GB",
+          body: "Hi Harriet, thank you for setting all of this out, and I'm sorry the renewal went through after you asked us to switch. I can see your request from 8 September. I've refunded the £89.99 annual charge through Google Play and moved you to the monthly plan from today. I've also returned the 2 chat credits from the session that dropped on 3 September. The refund reaches your account in 3 to 5 working days.",
+        },
+      ],
+      suggestedEscalation: {
+        team: "billing",
+        reason: "Refund of an annual renewal",
+        handoffNote: "Asked to switch to monthly on 8 Sep and was told it would happen; renewed at £89.99 on 10 Sep. Also 2 credits lost in a dropped session on 3 Sep.",
+      },
     },
   }),
 ];

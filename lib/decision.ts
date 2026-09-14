@@ -18,9 +18,22 @@ export type PrimaryKind =
   | "review-send" // other human-led drafts: read and send them from the composer
   | "follow-up" // already answered
   | "retry" // the send failed
-  | "write"; // no draft to start from
+  | "write" // no draft to start from
+  | "drafting"; // the AI is still writing: the bar offers Escalate only
 
-export type OutgoingStatus = "undoable" | "sending" | "sent" | "failed";
+/** Offline, a reply that leaves its undo window is "queued" until the desk reconnects. */
+export type OutgoingStatus = "undoable" | "queued" | "sending" | "sent" | "failed";
+
+/** A conversation's AI draft that is not ready (brief 12): still generating, or the model gave up. */
+export type DraftStatus = "drafting" | "failed";
+
+/** A retried draft arrives after this long in the prototype. */
+export const DRAFT_RETRY_MS = 2400;
+
+/** Drafting and draft failure apply to conversations the AI writes a reply for, not to ones it already answered. */
+export const canSimulateDraft = (ticket: Ticket) => ticket.triage.route !== "auto_send" && ticket.triage.drafts.length > 0;
+
+const DRAFTING = "The AI is still drafting this reply. Escalate now, or wait for the draft.";
 
 export interface DecisionContext {
   /** The variant a person chose on a two-draft case. */
@@ -28,6 +41,8 @@ export interface DecisionContext {
   takenOver?: boolean;
   /** The state of a reply a person already sent from this desk. */
   outgoing?: OutgoingStatus | null;
+  /** The AI draft is still generating, or failed. */
+  draft?: DraftStatus | null;
 }
 
 export interface Decision {
@@ -54,12 +69,19 @@ export function decisionFor(ticket: Ticket, ctx: DecisionContext = {}): Decision
   }
   if (ctx.outgoing) {
     // A follow-up waits for the reply before it, so the customer never gets them out of order.
-    const blocked = ctx.outgoing === "sent" ? null : "Your reply is still sending. Follow up once it's delivered.";
+    const blocked =
+      ctx.outgoing === "sent" ? null
+      : ctx.outgoing === "queued" ? "Your reply is queued until you reconnect. Follow up once it's delivered."
+      : "Your reply is still sending. Follow up once it's delivered.";
     return { ...base, primary: { kind: "follow-up", label: "Follow up", blocked } };
   }
   if (triage.route === "auto_send") {
     return { ...base, primary: { kind: "follow-up", label: "Follow up", blocked: null }, markWrong: true };
   }
+
+  // Without a draft the case falls to a person (brief 12): while it generates only Escalate is on offer; once it fails, the reply is written by hand.
+  if (ctx.draft === "drafting") return { ...base, primary: { kind: "drafting", label: "Drafting reply", blocked: DRAFTING } };
+  if (ctx.draft === "failed") return { ...base, primary: { kind: "write", label: "Write a reply", blocked: null } };
 
   if (triage.hardRules.includes("wellbeing")) {
     return ctx.takenOver
@@ -119,7 +141,10 @@ export function approveBlocked(ticket: Ticket, ctx: DecisionContext = {}): strin
       return "This reply wasn't sent. Retry sending, or edit it first.";
     case "follow-up":
       return ctx.outgoing ? "This reply is already sent. Follow up instead." : "This reply was sent automatically. Follow up instead.";
+    case "drafting":
+      return DRAFTING;
     case "write":
+      if (ctx.draft === "failed") return "The AI couldn't draft this reply. Write one yourself instead.";
       return ctx.takenOver
         ? "You're writing this reply yourself, so there's nothing to approve."
         : "There's no draft to approve. Write a reply instead.";
@@ -142,6 +167,8 @@ export function editTarget(ticket: Ticket, ctx: DecisionContext = {}): { draft: 
   switch (decision.primary.kind) {
     case "take-over":
       return { blocked: "There's no draft for a wellbeing case. Take over to write in your own words." };
+    case "drafting":
+      return { blocked: "The AI is still drafting. There's nothing to edit yet." };
     case "follow-up":
       return { blocked: "This reply is already sent. Follow up instead." };
     default:

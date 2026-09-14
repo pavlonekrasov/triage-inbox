@@ -454,7 +454,7 @@ Problem     With the panel open at 1280 px the thread column is 578 px, and tick
 Decision    Key hints show from 1280 px, as before, and also only while the thread column is at least 640 px wide (a container query on the thread).
 Reasoning   Brief 9.2 ties hints to room on screen; the thread's own width is the room that matters once a third pane takes 340 px.
 Trade-off   At 1280 to 1339 px with the panel open, hints are hidden; aria-keyshortcuts and the ? sheet in step 7 still name every key.
-Validation  panel-fits-every-ticket-1280: 22 tickets, no problems; inbox-t04-panel-2x at 1440: hints shown; step 5 bar-fits sweeps at 1440 and 900 still clean.
+Validation  panel-fits-every-ticket-1280: 22 tickets, no problems; inbox-t04-panel-2x at 1440: hints shown; step 5 bar-fits sweeps at 1440 and 900 still report no overflow.
 ```
 
 ## Step 6 fixes
@@ -539,4 +539,119 @@ Decision    --scrim is a token per theme: ink at 16% in Day, black at 50% in Nig
 Reasoning   A dimmed desk says "the page is behind this" without making a fifth glass surface.
 Trade-off   The desk behind a dialog stays readable, which is less focusing than a blur.
 Validation  palette-open-2x.png: backdrop-filter none; night-palette-2x.png.
+```
+
+## Step 8: states catalogue, quality sheet, tablet and phone, Night shift
+
+### Every state opens from a URL and from the prototype controls
+
+```
+Problem     Brief 12: a state that is not built ships broken, and drafting, a failed draft, a colleague on the same case and a lost connection cannot be reached by clicking through fixtures.
+Decision    Each is desk state with a URL parameter (draft=drafting|failed, viewer=ana, net=offline) and a switch in the prototype controls beside the send API. Offline also follows the browser's own online and offline events.
+Reasoning   A capture plan opens a state by URL, as list=loading has since step 2, so every screenshot in this step regenerates from scripts/plans/make-step-8.mjs.
+Trade-off   The prototype controls grew from two groups to five; they stay in the list footer and are stripped from every screenshot.
+Validation  step-8 capture: 12 states in Day and in Night; desk-store.states.test.ts: 15 cases; 273 tests pass.
+```
+
+### Drafting offers Escalate only; a failed draft falls to Needs you
+
+```
+Problem     Brief 12: while the AI drafts, the bar offers only Escalate; a failed draft leaves a case with nothing to approve.
+Decision    Drafting puts a typing indicator in the draft treatment where the draft will appear, and A and E say why they do nothing. A failed draft drops the violet, reads "Couldn't draft a reply. The case is ready for you to write one." with Retry drafting, and moves the case to Needs you: the row, the header glyph and the pinned card all say You, and the primary is Write a reply. Retry brings an open case back to Drafts while the new draft generates.
+Reasoning   The lane follows what a person has to do, and route is never read from one channel alone (standing order 4): card, row and header agree.
+Trade-off   A retried case changes lanes twice; the open conversation moves with it, so it never leaves the screen.
+Validation  draft-failed-2x: Needs you 9, "Needs your decision", "Write a reply"; draft-retry-arrives: typing in Drafts, then Approve & send after 2.4 s; drafting-reduced-motion: dots hidden, "Drafting reply" shown.
+```
+
+### A colleague on the case makes a send ask once, inline
+
+```
+Problem     Brief 12: when another specialist has the ticket open, the header shows them and Approve confirms inline.
+Decision    The header pill shows Ana's avatar with "Ana is viewing" (the avatar alone on a phone, the words kept for screen readers). The first send from the bar, A, the palette or the composer puts "Ana is viewing this conversation too. Send anyway?" above the bar; "Send reply anyway" or the same action again sends. Opening another conversation or the notice timing out withdraws the question, and a viewed draft stays out of bulk selection.
+Reasoning   Feedback sits next to its trigger (brief 9.1), and one more key press costs less than a modal's context switch.
+Trade-off   Two quick presses of A still send: it is a speed bump for a collision, not a lock.
+Validation  collision-2x: question shown, no reply sent; collision-second-a-sends: next conversation open, Drafts 10; states tests: withdrawn on activate and on timeout.
+```
+
+### Offline, a reply reads Queued and sends on reconnect
+
+```
+Problem     Brief 12: offline, Approve queues and the bubble reads "Queued"; a reply labelled "Sent by you" that cannot leave the desk is untrue.
+Decision    A 32 px bar under the list header reads "Offline · actions will send when you reconnect". Decisions still work. From its undo window on, an offline reply reads "Queued" with a clock in place of ticks, leaves its lane like a sent one, and sends when the desk reconnects, with one notice for the count.
+Reasoning   The label names what has happened so far; WhatsApp draws a clock for a message that has not left the phone.
+Trade-off   The case leaves its lane before delivery, as it does online; a send that then fails puts it back.
+Validation  offline-2x: "Queued · 18:44"; offline-reconnect-sends: bar gone, "Back online. 1 queued reply is sending.", then sent.
+```
+
+### A 23rd fixture carries the long complaint
+
+```
+Problem     Brief 11 fixes 22 tickets; brief 12 asks for a 1,200-word complaint, and none of the 22 messages is that long.
+Decision    Ticket 23, Harriet Okafor: an annual renewal charged after she asked to switch plans, 1,176 words, Human-led for a money decision. The bubble clamps at 12 lines measured at its rendered width, with "Show full message" and "Collapse message"; screen readers get the whole text. The 48-character name stays on ticket 21.
+Reasoning   Lengthening a seed message would change one of the brief's examples; a new ticket leaves all 22 as written.
+Trade-off   Needs you holds 8 instead of 7, so lane counts in the step 2 to 7 evidence are one lower than the desk today.
+Validation  long-complaint-2x: 12 lines; long-complaint-expands: 86 lines; long-name-2x: truncated in the list, 2 lines in the header; tickets.test.ts: 1,150 to 1,300 words.
+```
+
+### The quality sheet pairs automation with its cost
+
+```
+Problem     Brief 13: rows rather than hero numbers, auto-resolution directly beside the reopen rate, chart colours from the ink ramp only.
+Decision    The footer line opens a sheet. "Automation and its cost" holds auto-resolution and reopened-or-escalated-after-auto in one bordered block; first response, resolution time and satisfaction follow; refund and cancellation rates wait collapsed as downstream signals, not targets. Each row has today's value, the 14-day change in words, one line on what moves it, and a sparkline: a 2 px muted-ink line, today as an 8 px ink dot with a 2 px surface ring. A crosshair and the arrow keys read each day, "Show as a table" lists every value, and Mark as wrong adds to the reopen row.
+Reasoning   A counter-metric in the same block cannot be screenshotted without its pair; the table view means no number is reachable only by hover.
+Trade-off   The sparklines have no axes, so their scale is relative; the change in words carries the size of the trend.
+Validation  quality-sheet-2x: pair [auto, reopen], 5 sparklines, one stroke colour per theme; quality-table-2x: 14 rows; quality-counts-mark-as-wrong: "4 replies marked wrong today"; /tokens: sparkline line 6.00:1 Day, 7.06:1 Night.
+```
+
+### Phone: Telegram's push, 44 px targets, safe-area padding
+
+```
+Problem     Brief 7.2 and gate 14: below 768 px the list is the root and a thread pushes over it, with 44 px targets, safe-area padding and no sideways scroll at 375 px.
+Decision    The list stays mounted under the pushed thread, so Back returns to the same scroll position with focus on the row. The thread slides in from the right over 220 ms on the entrance curve, and appears in place under reduced motion. The header pill gains a back chevron and keeps the name, the route glyph and two controls; the local time and an English chip move to the details. Every button, lane tab, palette row and menu item is 44 px tall, and the dock pads with env(safe-area-inset-bottom) under viewport-fit=cover.
+Reasoning   Telegram for iOS is the named convention, and keeping the list mounted is how its Back returns to the same place.
+Trade-off   Back is instant rather than a slide out, and a phone header shows less at once than the desktop pill.
+Validation  phone-list-2x, phone-thread-2x, phone-composer-2x, phone-bulk-preview-2x: no sideways scroll, no target under 44 px; phone-back-to-list: focus on row-t17; phone-long-name-2x: the name wraps by word.
+```
+
+### Tablet: smaller minimums, and a bar that wraps by thread width
+
+```
+Problem     Brief 7.1's 320 / 520 px minimums are for three panes: at 768 px they needed 840 px, and in a 447 px thread ticket 2's three labelled decisions overflowed the pill.
+Decision    From 768 to 1279 px the list and thread keep minimums of 280 / 440 px. The decision bar reads its thread column's container width: under 36rem it docks as a card, the primary on its own row and the other decisions sharing the second, on a phone and on a narrow tablet alike.
+Reasoning   The bar lives in the thread column beside a resizable list, so the column's width is the constraint, and a viewport breakpoint cannot see it.
+Trade-off   From 768 to about 900 px the bar is two rows tall and covers more of the thread.
+Validation  tablet-768-2x and tablet-800-2x: no overflow of the page or the bar; tablet-details-sheet-2x: details in a 351 px sheet.
+```
+
+### Night shift
+
+```
+Problem     Brief 12: every state in .dark, and every new colour pair measured.
+Decision    Each state screenshot has a night- twin from the same plan. Five new pairs join /tokens: the violet Drafting prefix on the list pane and on a selected row, the typing dots on the draft wash, and the sparkline line and today's dot on the sheet.
+Reasoning   Night values come from the same tokens, so a pair measured on /tokens holds wherever it is used.
+Trade-off   Night doubles the evidence to regenerate; the plan does both in one run.
+Validation  night-*-2x: 12 states including the quality sheet; /tokens: 47 of 47 graded pairs pass in Day and in Night, the new pairs 5.08 to 17.78:1.
+```
+
+### Review gate (brief 18), scored at the end of step 8
+
+```
+1   Pass     No hex, HSL, RGB or arbitrary colour utility in app, components, lib or data (grep).
+2   Pass     /tokens: 47 of 47 graded pairs at or above their minimum in Day and in Night; tokens-contrast-2x.png.
+3   Pass     backdrop-filter appears only in components/glass/Glass.tsx, on thread-header, decision-bar, lane-track and bulk-bar.
+4   Pass     reduced-transparency-2x and night-: all four glass surfaces report backdrop none and an opaque tint, in Day and in Night.
+5   Pass     drafting-reduced-motion: dots hidden, words shown; the phone push translates by 100% × --motion, which is 0 under reduced motion.
+6   Pass     greyscale-*-2x (list, t02 decision, drafting, draft failed, collision with offline, quality sheet): route reads by glyph shape and every state by a word.
+7   Pass     draft-vs-sent-25pct and drafting-vs-sent-25pct: the draft and the drafting slot stay distinct from sent bubbles at 25%.
+8   Pass     route.test.ts: a hard rule forces human_led at confidence sure.
+9   Pass     decision.test.ts, tickets.test.ts: t02, t03, t04, t06, t09 and t13 refuse A in every state and bulk selection; drafting and viewed drafts are also held out of bulk.
+10  Pass     recheck-keyboard-A-Z-A: A opens t21 with focus on its row, Z restores t17 and its draft, A again sends. recheck-bar-fits and recheck-panel-fits sweeps: 23 of 23 tickets, no overflow.
+11  Pass     J/K selection and the 120 ms thread swap did not change in step 8.
+12  Pass     New labels: Retry drafting, Send reply anyway, Show full message, Collapse message, Show as a table, Show sparklines, Show downstream signals, Open the quality view, Back to conversations, Write a reply.
+13  Pass     Every state in brief 12 has a Day and a Night screenshot in docs/evidence/step-8.
+14  Pass     phone-*-2x at 375 px: no target under 44 px, no sideways scroll; the dock pads with env(safe-area-inset-bottom).
+15  Pass     sources-disagree-2x and stale-source-2x: flags in the pinned card, rows in the panel.
+16  Pass     quality-sheet-2x: auto-resolution and reopen share one block.
+17  Partial  axe-core on 10 inbox views (Day, Night, drafting, draft failed, collision with offline, long content, quality sheet, tablet, phone list, phone thread): 0 serious or critical. On /tokens axe flags the "Aa" specimens of the pairs shown for information only. Lighthouse is not installed and was not run.
+18  Pass     Banned-word grep: three uses fixed in step 8; "smooth" remains only as the scroll-behavior value it names.
 ```

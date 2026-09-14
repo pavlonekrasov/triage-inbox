@@ -1,6 +1,6 @@
 import type { Account, BillingEvent, BillingSystem, PreviousContact, RestrictedField, Route, Subscription } from "@/lib/types";
 
-/* Account data for the 22 fixtures (brief 7.5, 11). Times are UTC; the panel shows them in the
+/* Account data for the 23 fixtures (brief 7.5, 11). Times are UTC; the panel shows them in the
    customer's time zone. Ticket 2 and ticket 4 carry the records that disagree; ticket 12 carries the
    automatic reply the customer came back from. */
 
@@ -248,5 +248,19 @@ export const ACCOUNTS: Readonly<Record<string, Account>> = {
   t22: account({
     subscription: monthly("$39.99", "Google Play", "2026-10-02"),
     billing: [charge("t22-b1", "2026-09-02T18:00:00Z", "$39.99", "Google Play")],
+  }),
+
+  t23: account({
+    subscription: { plan: "Nebula Plus, annual", price: "£89.99", status: "active", store: "Google Play", renewsAt: "2027-09-10" },
+    billing: [
+      charge("t23-b1", "2025-09-10T08:12:00Z", "£89.99", "Google Play"),
+      charge("t23-b2", "2026-09-03T18:40:00Z", "2 credits", "Payments", "Advisor chat credits used"),
+      charge("t23-b3", "2026-09-10T08:12:00Z", "£89.99", "Google Play"),
+    ],
+    previousContacts: [
+      contact("t23-c3", "2026-09-12T12:30:00Z", "approve_draft", "Refund of the renewal", "No reply yet"),
+      contact("t23-c2", "2026-09-11T10:15:00Z", "approve_draft", "Refund of the renewal", "Pointed to Google Play refunds"),
+      contact("t23-c1", "2026-09-09T21:05:00Z", "approve_draft", "Switch to monthly", "Reply promised the change before renewal"),
+    ],
   }),
 };

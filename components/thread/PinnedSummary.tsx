@@ -30,10 +30,13 @@ const HEADLINE: Record<RouteGlyphKind, string> = {
  */
 export function PinnedSummary({ ticket }: { ticket: Ticket }) {
   const { triage } = ticket;
-  const { dispatch } = useDesk();
+  const { state, dispatch } = useDesk();
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const kind = glyphKind(triage);
+  // A draft that is still generating or failed changes what the case is waiting for (brief 12).
+  const draft = state.draftStatus[ticket.id]?.status ?? null;
+  const kind = glyphKind(triage, draft);
+  const headline = draft === "drafting" ? "Drafting a reply for approval" : HEADLINE[kind];
   const flags = summaryFlags(triage);
   const category = CATEGORY[triage.category.primary].label;
 
@@ -50,7 +53,7 @@ export function PinnedSummary({ ticket }: { ticket: Ticket }) {
             <span aria-hidden className="inline-flex">
               <RouteGlyph route={kind} showLabel={false} />
             </span>
-            <span>{HEADLINE[kind]}</span>
+            <span>{headline}</span>
             <span aria-hidden className="text-muted-foreground">
               ·
             </span>
@@ -114,7 +117,7 @@ export function PinnedSummary({ ticket }: { ticket: Ticket }) {
 
 function WhyThisRoute({ ticket }: { ticket: Ticket }) {
   const { triage } = ticket;
-  const { dispatch } = useDesk();
+  const { state, dispatch } = useDesk();
   const retrieved = new Map(triage.sources.map((s) => [s.id, s]));
 
   return (
@@ -172,7 +175,10 @@ function WhyThisRoute({ ticket }: { ticket: Ticket }) {
         </dd>
 
         <dt className="text-muted-foreground">Route</dt>
-        <dd>{routeExplanation(triage, { autoSendPaused: ticket.routedWhileAutoSendPaused })}</dd>
+        <dd>
+          {state.draftStatus[ticket.id]?.status === "failed" && "The AI couldn't draft a reply, so the case fell to Needs you. "}
+          {routeExplanation(triage, { autoSendPaused: ticket.routedWhileAutoSendPaused })}
+        </dd>
       </dl>
     </div>
   );

@@ -147,7 +147,7 @@ export function LaneSwitcher({ lane, counts, onSelect }: LaneSwitcherProps) {
         <span
           ref={thumbRef}
           aria-hidden
-          className="pointer-events-none absolute top-0 left-0 z-10 h-8 w-0 overflow-hidden rounded-full bg-primary shadow-(--shadow-thumb)"
+          className="pointer-events-none absolute top-0 left-0 z-10 h-8 w-0 overflow-hidden rounded-full bg-primary shadow-(--shadow-thumb) max-md:h-11"
         >
           <span ref={copiesRef} className="absolute inset-y-0 left-0">
             {LANES.map((l) => (
@@ -178,7 +178,8 @@ export function LaneSwitcher({ lane, counts, onSelect }: LaneSwitcherProps) {
               tabIndex={selected ? 0 : -1}
               onClick={() => onSelect(l.id)}
               className={
-                "relative flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-2.5 text-label whitespace-nowrap outline-none " +
+                // 44 px tall on a phone (brief 7.2); the thumb above matches it.
+                "relative flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-2.5 text-label whitespace-nowrap outline-none max-md:h-11 " +
                 "transition-colors duration-(--dur-hover) hover:bg-accent " +
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring " +
                 // Before hydration places the thumb, the selected tab paints itself as the thumb would.

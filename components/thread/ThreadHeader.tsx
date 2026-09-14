@@ -1,18 +1,19 @@
 "use client";
 
-import { Languages, PanelRight, PanelRightClose } from "lucide-react";
+import { ChevronLeft, Languages, PanelRight, PanelRightClose } from "lucide-react";
 import { Button } from "@/components/controls/Button";
 import { isContextOpen, useDesk } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { RouteGlyph } from "@/components/inbox/RouteGlyph";
 import { glyphKind } from "@/components/inbox/TicketRow";
+import { COLLEAGUE } from "@/data/team";
 import { avatarStyle, initials } from "@/lib/avatar";
 import { formatLocalTime } from "@/lib/clock";
 import { isEnglish, languageCode, languageName } from "@/lib/language";
 import { hasTranslation } from "@/lib/timeline";
 import type { Ticket } from "@/lib/types";
 import { useDemoNow } from "@/lib/use-demo-now";
-import { useWideDesk } from "@/lib/use-wide-desk";
+import { usePhoneDesk, useWideDesk } from "@/lib/use-wide-desk";
 import { cn } from "@/lib/utils";
 import { ThreadMenu } from "./ThreadMenu";
 
@@ -23,10 +24,18 @@ import { ThreadMenu } from "./ThreadMenu";
  */
 export function ThreadHeader({ ticket }: { ticket: Ticket }) {
   const { customer, triage } = ticket;
+  const { state, dispatch } = useDesk();
   const now = useDemoNow();
+  const phone = usePhoneDesk();
 
   return (
     <Glass surface="thread-header" className="pointer-events-auto flex max-w-full items-center gap-2.5 py-1.5 pr-1.5 pl-1.5">
+      {/* Phone (brief 7.2): the pill carries Telegram's back chevron to the list. */}
+      {phone && (
+        <Button iconOnly aria-label="Back to conversations" title="Back to conversations" onClick={() => dispatch({ type: "back" })} className="-mr-1">
+          <ChevronLeft aria-hidden strokeWidth={1.75} />
+        </Button>
+      )}
       <span
         aria-hidden
         className="avatar-tint inline-flex size-7 shrink-0 items-center justify-center rounded-full text-micro"
@@ -34,18 +43,38 @@ export function ThreadHeader({ ticket }: { ticket: Ticket }) {
       >
         {initials(customer.name)}
       </span>
-      <h2 className="min-w-0 text-title break-words">{customer.name}</h2>
+      {/* min-w-20: on a phone the controls beside the name never squeeze it to one letter per line. */}
+      <h2 className="min-w-20 text-title break-words">{customer.name}</h2>
       <div className="flex shrink-0 items-center gap-2 pr-1">
+        {ticket.id in state.viewers && <ViewerChip />}
         <LanguageChip ticket={ticket} />
-        <span className="text-micro text-muted-foreground tabular-nums">
+        {/* On a phone the pill has no room for it; the customer details keep the local time. */}
+        <span className="hidden text-micro text-muted-foreground tabular-nums md:inline">
           <span className="sr-only">Customer’s local time </span>
           {formatLocalTime(now, customer.timeZone)} local
         </span>
-        <RouteGlyph route={glyphKind(triage)} />
+        <RouteGlyph route={glyphKind(triage, state.draftStatus[ticket.id]?.status)} showLabel="md" />
       </div>
       <ContextToggle />
       <ThreadMenu ticket={ticket} />
     </Glass>
+  );
+}
+
+/** Collision (brief 12): a colleague has this conversation open too, so a send asks first. */
+function ViewerChip() {
+  return (
+    <span data-viewer className="flex shrink-0 items-center gap-1.5 rounded-full bg-muted py-0.5 pr-2 pl-0.5 text-micro text-muted-foreground max-md:pr-0.5">
+      <span
+        aria-hidden
+        className="avatar-tint inline-flex size-5 items-center justify-center rounded-full"
+        style={avatarStyle(COLLEAGUE.id)}
+      >
+        {initials(COLLEAGUE.name)}
+      </span>
+      {/* On a phone the avatar stands for the words, which stay for screen readers. */}
+      <span className="max-md:sr-only">{COLLEAGUE.firstName} is viewing</span>
+    </span>
   );
 }
 
@@ -81,7 +110,8 @@ function LanguageChip({ ticket }: { ticket: Ticket }) {
 
   if (isEnglish(tag) || !hasTranslation(ticket)) {
     return (
-      <span className="rounded-full bg-muted px-1.5 text-micro text-muted-foreground">
+      // An English chip is dropped on a phone to leave the name room; the customer details keep the locale.
+      <span className="rounded-full bg-muted px-1.5 text-micro text-muted-foreground max-md:hidden">
         <span className="sr-only">Written in {languageName(tag)}: </span>
         {code}
       </span>
