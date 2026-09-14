@@ -4,7 +4,7 @@
 
 /* Night shift is the `.dark` class on <html> (lib/theme.ts). A `.light` or `.dark` container
    re-declares the tokens for its subtree, which is how /tokens renders both themes side by side. */
-@custom-variant dark (&:is(.dark *):not(.light *));
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 /* Hover styles exist only where a fine pointer can hover (3.1). This replaces Tailwind's built-in
    `hover`, so every `hover:` utility, shadcn's included, follows the rule without a second variant. */
@@ -69,7 +69,6 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
@@ -79,24 +78,11 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 
   --color-brand: var(--brand);
   --color-brand-wash: var(--brand-wash);
@@ -134,14 +120,11 @@
   --background: oklch(0.985 0.003 285); /* app canvas */
   --foreground: oklch(0.21 0.02 285); /* ink */
   --card: oklch(1 0 0); /* bubbles, panels */
-  --popover: oklch(1 0 0);
   --primary: oklch(0.25 0.035 285); /* ink button: Approve & send */
   --primary-foreground: oklch(0.985 0.003 285);
-  --secondary: oklch(0.955 0.006 285);
   --muted: oklch(0.955 0.006 285);
   --muted-foreground: oklch(0.5 0.02 285);
   --accent: oklch(0.21 0.02 285 / 0.06); /* hover and selection wash */
-  --destructive: oklch(0.52 0.15 35); /* follows --risk-high */
   --border: oklch(0.21 0.02 285 / 0.1);
   --input: oklch(0.21 0.02 285 / 0.14);
   --ring: oklch(0.55 0.1 285);
@@ -170,7 +153,6 @@
   --glass-tint-strong: oklch(0.985 0.003 285 / 0.88); /* any glass that carries text */
   --glass-edge: oklch(0.21 0.02 285 / 0.22);
   --glass-highlight: oklch(1 0 0 / 0.65);
-  --glass-highlight-hover: oklch(1 0 0 / 0.9);
   --glass-rim-dark: oklch(0.21 0.02 285 / 0.06);
   --glass-sheen-top: oklch(1 0 0 / 0.3);
   --shadow-glass:
@@ -195,16 +177,12 @@
   --background: oklch(0.17 0.02 280);
   --foreground: oklch(0.95 0.008 285);
   --card: oklch(0.215 0.022 280);
-  --popover: oklch(0.215 0.022 280);
   --primary: oklch(0.93 0.012 285);
   --primary-foreground: oklch(0.19 0.02 280);
-  --secondary: oklch(0.25 0.022 280);
   --muted: oklch(0.25 0.022 280);
   --muted-foreground: oklch(0.72 0.02 285);
   --accent: oklch(1 0 0 / 0.06);
-  /* The brief never redefined these two, so Night inherited Day values: destructive measured
-     3.10:1 on card (fails), the ring 3.52:1 (passes with no margin). */
-  --destructive: oklch(0.72 0.13 35); /* 6.73:1 on card */
+  /* The brief never redefined the ring, so Night inherited Day's: 3.52:1 (passes with no margin). */
   --ring: oklch(0.7 0.1 285); /* 6.42:1 on card, 7.00:1 on canvas */
   --border: oklch(1 0 0 / 0.09);
   --input: oklch(1 0 0 / 0.14);
@@ -226,8 +204,6 @@
   --glass-tint-strong: oklch(0.215 0.022 280 / 0.88);
   --glass-edge: oklch(1 0 0 / 0.12);
   --glass-highlight: oklch(1 0 0 / 0.16);
-  /* Day's hover rim is 1.38× its resting rim; Night keeps the ratio. */
-  --glass-highlight-hover: oklch(1 0 0 / 0.22);
   --glass-rim-dark: oklch(0 0 0 / 0.3);
   /* Day's sheen is 46% of its highlight alpha (0.3 / 0.65); Night keeps the ratio (0.16 × 0.46). */
   --glass-sheen-top: oklch(1 0 0 / 0.07);
@@ -253,25 +229,12 @@
 .dark {
   --radius: 0.75rem;
 
-  --card-foreground: var(--foreground);
+  /* shadcn roles that are aliases here, not separate colours. */
+  --popover: var(--card);
   --popover-foreground: var(--foreground);
+  --secondary: var(--muted);
   --secondary-foreground: var(--foreground);
-  --accent-foreground: var(--foreground);
-
-  --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: var(--accent);
-  --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: var(--border);
-  --sidebar-ring: var(--ring);
-
-  /* Charts use the ink ramp; risk colours never appear in charts (13). */
-  --chart-1: var(--foreground);
-  --chart-2: oklch(from var(--foreground) l c h / 0.72);
-  --chart-3: oklch(from var(--foreground) l c h / 0.5);
-  --chart-4: oklch(from var(--foreground) l c h / 0.32);
-  --chart-5: oklch(from var(--foreground) l c h / 0.18);
+  --destructive: var(--risk-high); /* Night: 6.73:1 on card */
 
   /* A wash is its role's own hue at a fixed alpha, so Night washes come from Night hues. */
   --brand-wash: oklch(from var(--brand) l c h / 0.06);
@@ -284,10 +247,6 @@
   --glass-blur: blur(14px) saturate(1.5) contrast(1.04);
   --glass-bevel: inset 0 1px 0 var(--glass-highlight), inset 0 -1px 0 var(--glass-rim-dark);
   --glass-ring: inset 0 0 0 0.5px oklch(1 0 0 / 0.14);
-  --glass-bevel-hover:
-    inset 0 1px 0 var(--glass-highlight-hover), inset 0 -1px 0 var(--glass-rim-dark),
-    inset 0 0 0 0.5px oklch(1 0 0 / 0.22);
-  --glass-hover-brighten: brightness(1.04) saturate(1.06);
   --glass-sheen: linear-gradient(
     to bottom,
     var(--glass-sheen-top),

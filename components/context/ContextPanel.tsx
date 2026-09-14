@@ -144,7 +144,10 @@ function Section({
       data-context-section={id}
       className="shrink-0 rounded-card border border-border bg-card"
     >
-      <CollapsibleTrigger render={<Button className="h-10 w-full justify-start gap-2 rounded-[inherit] px-3" />}>
+      {/* Open, the header sits on the panel body, so its hover fill squares off at the bottom. */}
+      <CollapsibleTrigger
+        render={<Button className={cn("h-10 w-full justify-start gap-2 rounded-[inherit] px-3", open && "rounded-b-none")} />}
+      >
         <ChevronRight
           aria-hidden
           strokeWidth={1.75}
