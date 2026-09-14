@@ -2,7 +2,7 @@
 
 import { SlidersHorizontal } from "lucide-react";
 import { useId, useState } from "react";
-import { PillButton } from "@/components/controls/PillButton";
+import { Button } from "@/components/controls/Button";
 import { useDesk } from "@/components/desk/desk-store";
 import type { ListState } from "@/lib/desk-params";
 import type { SendFailure } from "@/lib/send";
@@ -79,7 +79,7 @@ export function PrototypeControls() {
           <p className="text-micro text-muted-foreground">Offline and collision are not simulated yet.</p>
         </div>
       )}
-      <PillButton
+      <Button
         iconOnly
         aria-label={label}
         title={label}
@@ -88,7 +88,7 @@ export function PrototypeControls() {
         onClick={() => setOpen((o) => !o)}
       >
         <SlidersHorizontal aria-hidden strokeWidth={1.75} />
-      </PillButton>
+      </Button>
     </div>
   );
 }

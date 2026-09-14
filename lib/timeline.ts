@@ -7,6 +7,8 @@ export type TimelineDraft = TriageResult["drafts"][number];
 
 /** A reply sent from this desk, from its undo window to delivered or failed. */
 export interface TimelineReply {
+  /** Unique per reply on the ticket. */
+  id: string;
   body: string;
   language: string;
   /** The AI draft it came from. The reply takes that draft's key, so the bubble changes in place. */
@@ -18,7 +20,8 @@ export interface TimelineReply {
 
 /** What the specialist has done to a ticket at the desk, laid over the fixture. */
 export interface TimelineOverlay {
-  reply?: TimelineReply | null;
+  /** Replies sent from this desk, oldest first: the reply, then any follow-ups. */
+  replies?: readonly TimelineReply[];
   /** On a two-variant case, the variant a person chose. Until then both drafts show. */
   chosenDraftId?: string | null;
   /** The draft open in the composer is not shown a second time in the thread. */
@@ -78,8 +81,9 @@ export function buildTimeline(ticket: Ticket, now: number = DEMO_NOW, overlay: T
     if (step.kind !== "sent") entries.push({ at: step.at, rank: RANK.step, kind: "step", step });
   }
 
-  if (overlay.reply) {
-    entries.push({ at: overlay.reply.at, rank: RANK.draft, kind: "reply", reply: overlay.reply });
+  const replies = overlay.replies ?? [];
+  if (replies.length > 0) {
+    for (const reply of replies) entries.push({ at: reply.at, rank: RANK.draft, kind: "reply", reply });
   } else {
     // A two-outcome case shows both drafts until a person chooses; the choice then stands alone.
     const chosen = triage.drafts.find((d) => d.id === overlay.chosenDraftId);
@@ -124,7 +128,7 @@ export function buildTimeline(ticket: Ticket, now: number = DEMO_NOW, overlay: T
         items.push({ kind: "draft", key: entry.draft.id, draft: entry.draft, variantCount: entry.variantCount });
         break;
       case "reply":
-        items.push({ kind: "reply", key: entry.reply.draftId ?? `reply-${ticket.id}`, reply: entry.reply });
+        items.push({ kind: "reply", key: entry.reply.draftId ?? `reply-${entry.reply.id}`, reply: entry.reply });
         break;
       case "event":
         items.push({ kind: "event", key: `event-${entry.index}`, at: entry.at, text: entry.text });

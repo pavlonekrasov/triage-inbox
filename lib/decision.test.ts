@@ -36,6 +36,15 @@ describe("decisionFor", () => {
     expect(decisionFor(ticket("t17"), { outgoing: "sent" }).primary.kind).toBe("follow-up");
   });
 
+  it("holds a follow-up until the reply before it is delivered", () => {
+    for (const outgoing of ["undoable", "sending"] as const) {
+      expect(decisionFor(ticket("t17"), { outgoing }).primary.blocked, outgoing).toBe(
+        "Your reply is still sending. Follow up once it's delivered.",
+      );
+    }
+    expect(decisionFor(ticket("t17"), { outgoing: "sent" }).primary.blocked).toBeNull();
+  });
+
   it("turns a taken-over wellbeing case into a reply of the specialist's own", () => {
     expect(decisionFor(ticket("t06"), { takenOver: true }).primary).toMatchObject({ kind: "write", label: "Write a reply" });
   });

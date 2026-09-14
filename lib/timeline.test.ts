@@ -62,10 +62,23 @@ describe("buildTimeline", () => {
     const at = new Date(DEMO_NOW).toISOString();
     const before = buildTimeline(ticket("t17")).at(-1);
     const after = buildTimeline(ticket("t17"), undefined, {
-      reply: { body: "Hi Maya", language: "en-US", draftId: "t17-draft", edited: false, at, status: "undoable" },
+      replies: [{ id: "1", body: "Hi Maya", language: "en-US", draftId: "t17-draft", edited: false, at, status: "undoable" }],
     });
     expect(after.at(-1)).toMatchObject({ kind: "reply", key: before?.key });
     expect(after.some((i) => i.kind === "draft")).toBe(false);
+  });
+
+  it("keeps the first reply when a follow-up is sent after it", () => {
+    const at = new Date(DEMO_NOW).toISOString();
+    const later = new Date(DEMO_NOW + 60_000).toISOString();
+    const items = buildTimeline(ticket("t17"), undefined, {
+      replies: [
+        { id: "1", body: "Hi Maya", language: "en-US", draftId: "t17-draft", edited: false, at, status: "sent" },
+        { id: "2", body: "One more thing", language: "en-US", draftId: null, edited: false, at: later, status: "undoable" },
+      ],
+    });
+    const replies = items.filter((i) => i.kind === "reply");
+    expect(replies.map((i) => i.key)).toEqual(["t17-draft", "reply-2"]);
   });
 
   it("does not show the draft that is open in the composer", () => {
@@ -75,7 +88,7 @@ describe("buildTimeline", () => {
   it("records the specialist's action after the reply it belongs to", () => {
     const at = new Date(DEMO_NOW).toISOString();
     const items = buildTimeline(ticket("t03"), undefined, {
-      reply: { body: "Hi Camille", language: "en-GB", draftId: "t03-ack", edited: false, at, status: "sent" },
+      replies: [{ id: "1", body: "Hi Camille", language: "en-GB", draftId: "t03-ack", edited: false, at, status: "sent" }],
       events: [{ at, text: "Review opened with Trust & Safety" }],
     });
     expect(items.slice(-2).map((i) => i.kind)).toEqual(["reply", "event"]);

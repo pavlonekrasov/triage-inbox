@@ -32,11 +32,13 @@ export const KEYMAP: readonly { key: string; shift?: boolean; command: Command; 
   { key: "escape", command: "exit-selection", label: "Exit selection" },
 ];
 
-function isEditable(target: EventTarget | null) {
-  return (
-    target instanceof HTMLElement &&
-    (target.isContentEditable || target.closest("input, textarea, select") !== null)
-  );
+/** Inputs that take no typed text: a letter pressed on them is still a shortcut. */
+const NON_TEXT_INPUT = new Set(["radio", "checkbox", "button", "submit", "reset", "range", "color", "file", "image"]);
+
+export function isEditable(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target.isContentEditable || target.closest("textarea, select") !== null) return true;
+  return target instanceof HTMLInputElement && !NON_TEXT_INPUT.has(target.type);
 }
 
 export function commandFor(event: KeyboardEvent): Command | null {

@@ -3,7 +3,7 @@
 import { FileCheck, HandHeart, Pencil, Reply, Send, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { KeyHint } from "@/components/controls/KeyHint";
-import { PillButton } from "@/components/controls/PillButton";
+import { Button } from "@/components/controls/Button";
 import { useDesk, type Composer } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { WELLBEING_TEMPLATE } from "@/data/templates";
@@ -72,10 +72,10 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
     if (!pending) return;
     const timer = setTimeout(() => {
       setPending(null);
-      dispatch({ type: "composerRewrite", text: pending.text, language: pending.language });
+      dispatch({ type: "composerRewrite", id: ticket.id, text: pending.text, language: pending.language });
     }, SEND_LATENCY_MS);
     return () => clearTimeout(timer);
-  }, [pending, dispatch]);
+  }, [pending, dispatch, ticket.id]);
 
   const firstName = ticket.customer.name.split(" ")[0];
   const draft = ticket.triage.drafts.find((d) => d.id === composer.draftId) ?? null;
@@ -107,19 +107,21 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
 
   const send = () => {
     if (sendBlock) return setHint(sendBlock);
-    dispatch({ type: "sendComposer", now: readDemoNow(), wall: Date.now() });
+    dispatch({ type: "sendComposer", id: ticket.id, now: readDemoNow(), wall: Date.now() });
   };
+
+  const close = () => dispatch({ type: "closeComposer", id: ticket.id });
 
   const insertTemplate = () => {
     if (composer.text.trim()) return setHint("The template fills an empty reply only. Clear the text to use it.");
     setHint(null);
-    dispatch({ type: "composerInput", text: WELLBEING_TEMPLATE.body(firstName) });
+    dispatch({ type: "composerInput", id: ticket.id, text: WELLBEING_TEMPLATE.body(firstName) });
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Escape") {
       event.preventDefault();
-      dispatch({ type: "closeComposer" });
+      close();
     } else if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       send();
@@ -141,14 +143,14 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
           <p className={cn("text-label", strip.ai && "text-brand")}>{strip.title}</p>
           <p className="truncate text-micro text-muted-foreground">{strip.detail}</p>
         </div>
-        <PillButton
+        <Button
           iconOnly
           aria-label={composer.mode === "edit" ? "Discard edits and close" : "Close the composer"}
           title="Close (Esc)"
-          onClick={() => dispatch({ type: "closeComposer" })}
+          onClick={close}
         >
           <X aria-hidden strokeWidth={1.75} />
-        </PillButton>
+        </Button>
       </div>
 
       <textarea
@@ -161,7 +163,7 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
         placeholder={composer.mode === "take-over" ? `Write to ${firstName} in your own words` : `Write to ${firstName}`}
         onChange={(event) => {
           setHint(null);
-          dispatch({ type: "composerInput", text: event.target.value });
+          dispatch({ type: "composerInput", id: ticket.id, text: event.target.value });
         }}
         onKeyDown={onKeyDown}
         className="field-sizing-content max-h-[40dvh] min-h-24 w-full resize-none rounded-input border border-border bg-card px-3 py-2 text-body outline-none placeholder:text-muted-foreground read-only:text-muted-foreground focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-solid focus-visible:outline-ring"
@@ -182,7 +184,7 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
         {composer.mode === "edit" &&
           draft &&
           CHIPS.filter((chip) => chip.kind !== "translate" || !isEnglish(customerLanguage)).map((chip) => (
-            <PillButton
+            <Button
               key={chip.kind}
               variant="outline"
               data-chip={chip.kind}
@@ -192,15 +194,15 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
               onClick={() => applyRewrite(chip.kind)}
             >
               {chip.label}
-            </PillButton>
+            </Button>
           ))}
         {composer.mode === "take-over" && (
-          <PillButton variant="outline" title={WELLBEING_TEMPLATE.reviewed} onClick={insertTemplate}>
+          <Button variant="outline" title={WELLBEING_TEMPLATE.reviewed} onClick={insertTemplate}>
             <FileCheck aria-hidden strokeWidth={1.75} />
             Insert reviewed template
-          </PillButton>
+          </Button>
         )}
-        <PillButton
+        <Button
           variant="primary"
           size="md"
           className="ml-auto [&_svg]:size-4.5"
@@ -211,7 +213,7 @@ export function EditComposer({ ticket, composer }: { ticket: Ticket; composer: C
           <Send aria-hidden strokeWidth={1.75} />
           {sendLabel}
           <KeyHint onPrimary>{mac ? "⌘↵" : "Ctrl ↵"}</KeyHint>
-        </PillButton>
+        </Button>
       </div>
     </Glass>
   );

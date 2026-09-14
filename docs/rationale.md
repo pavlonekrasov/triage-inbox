@@ -342,3 +342,55 @@ Reasoning   WCAG 1.4.3; the smallest change that clears the pair, with hue and c
 Trade-off   Terracotta is marginally darker everywhere in Day, including SLA countdowns.
 Validation  /tokens: 41/41 pairs in both themes; "Not sent label on wallpaper field B" 4.62:1.
 ```
+
+## Step 5 fixes
+
+### One button component
+
+```
+Problem     Buttons came from four places: PillButton, a shadcn Button nobody on the desk used, UndoButton, and hand-rolled <button> elements for Retry, notice actions, the language chip and reason chips, each restating focus and press styles.
+Decision    components/controls/Button.tsx is the only button. Variants: primary, ghost, outline, text (a word inside a sentence, such as Retry) and undo (the text button that draws its 5 s window). Base UI triggers render it through their render prop. The lane tabs and list rows stay native elements because they are tab and option widgets, not buttons.
+Reasoning   One set of focus, hover, press and aria-disabled rules means a refused action looks and behaves the same everywhere (brief 9.2).
+Trade-off   The undo variant carries behaviour (its countdown), so it is not purely a style.
+Validation  grep finds no other button component; the only native <button> elements left are in LaneSwitcher (role=tab) and TicketRow (role=option).
+```
+
+### A follow-up never erases the reply before it
+
+```
+Problem     A follow-up replaced the delivered reply in state; undoing the follow-up then deleted both, and the case went back to Drafts as if it had never been answered.
+Decision    Each sent reply keeps the delivered reply it follows. The thread shows all of them in order; Undo and a failed send affect only the latest; a follow-up waits until the reply before it is delivered.
+Reasoning   A sent message is a record the customer already has; the desk must never show less than the customer received.
+Trade-off   The Follow up button refuses for up to 5.6 s after a send.
+Validation  desk-store.test.ts "follow-ups keep what was already sent": two replies in order, Undo leaves the first delivered, a failed follow-up keeps the case answered.
+```
+
+### An escalated case refuses every decision
+
+```
+Problem     An escalated case stays open when it was the last in its lane. Its bar was hidden, but A, E and H still sent the draft, opened the composer or reopened Escalate.
+Decision    The bar becomes "With Billing · escalated by you at 18:44", and A, E, H or the composer's send explain "This case is with Billing now, so there is nothing to decide here."
+Reasoning   A refused shortcut says why (brief 9.2); a case handed to a team must not also get a reply from this desk.
+Trade-off   Undo escalation stays in the 6 s notice only, as the popover promises.
+Validation  desk-store.test.ts: approve, decide, openComposer and setEscalateOpen on an escalated t17 send nothing and explain.
+```
+
+### Unsent edits are kept per conversation
+
+```
+Problem     The desk held one composer. Starting an edit on a second conversation dropped the first one's unsent text without a word.
+Decision    Each conversation keeps its own composer until it is sent or discarded, as Telegram keeps a draft per chat.
+Reasoning   Losing typed text silently is the costliest kind of edit error; the specialist moves between cases constantly.
+Trade-off   An abandoned edit waits on its case until Esc discards it.
+Validation  desk-store.test.ts "keeps an unsent edit on one conversation while the specialist edits another".
+```
+
+### Shortcuts work from radios and checkboxes
+
+```
+Problem     Focus on the Refund/Decline radio made A, E and H do nothing, because every <input> counted as a text field.
+Decision    Shortcuts are skipped only in text-entry fields, selects and contenteditable; radios, checkboxes and buttons pass keys through.
+Reasoning   A letter pressed on a radio types nothing, so it can only mean the shortcut; brief 9.2 forbids silent failure.
+Trade-off   None found: radios and checkboxes use arrows and Space, which the keymap does not bind.
+Validation  In the browser, clicking Refund then pressing A shows "Approve is off for this decision. Choose Refund or Decline, then send it."
+```

@@ -3,17 +3,17 @@
 import { Popover } from "@base-ui/react/popover";
 import { Check, UsersRound } from "lucide-react";
 import { useId, useRef, useState, type RefObject } from "react";
+import { Button } from "@/components/controls/Button";
 import { KeyHint } from "@/components/controls/KeyHint";
-import { PillButton, pillButtonClass } from "@/components/controls/PillButton";
 import { useDesk } from "@/components/desk/desk-store";
 import { escalationDefaults, reasonOptions, TEAMS, teamLabel } from "@/lib/escalation";
 import type { EscalationTeam, Ticket } from "@/lib/types";
 import { readDemoNow } from "@/lib/use-demo-now";
 import { cn } from "@/lib/utils";
+import { BAR_BUTTON } from "./DecisionBar";
 
 const CHIP =
   "inline-flex h-8 items-center gap-1 rounded-full border px-3 text-label select-none [&_svg]:size-3.5 [&_svg]:shrink-0";
-const FOCUS = "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring";
 
 /**
  * Escalate grows from its button as an inline popover, never a modal (brief 9.1): team, reasons and
@@ -26,7 +26,7 @@ export function EscalatePopover({ ticket }: { ticket: Ticket }) {
 
   return (
     <Popover.Root open={state.escalateOpen} onOpenChange={(open) => dispatch({ type: "setEscalateOpen", open })}>
-      <Popover.Trigger aria-keyshortcuts="H" className={cn(pillButtonClass({ size: "md" }), "px-3.5 [&_svg]:size-4.5")}>
+      <Popover.Trigger aria-keyshortcuts="H" render={<Button size="md" className={BAR_BUTTON} />}>
         <UsersRound aria-hidden strokeWidth={1.75} />
         Escalate case
         <KeyHint>H</KeyHint>
@@ -137,20 +137,16 @@ function EscalateForm({
           {options.map((reason) => {
             const on = reasons.includes(reason);
             return (
-              <button
+              <Button
                 key={reason}
-                type="button"
+                variant="outline"
                 aria-pressed={on}
                 onClick={() => setReasons(on ? reasons.filter((r) => r !== reason) : [...reasons, reason])}
-                className={cn(
-                  CHIP,
-                  FOCUS,
-                  "border-border bg-card transition-colors duration-(--dur-hover) hover:bg-accent aria-pressed:bg-accent",
-                )}
+                className="gap-1 [&_svg]:size-3.5"
               >
                 {on && <Check aria-hidden strokeWidth={2} />}
                 {reason}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -181,10 +177,10 @@ function EscalateForm({
       )}
 
       <div className="flex justify-end gap-1.5">
-        <PillButton onClick={onCancel}>Cancel escalation</PillButton>
-        <PillButton type="submit" variant="primary" aria-disabled={blocked ? true : undefined}>
+        <Button onClick={onCancel}>Cancel escalation</Button>
+        <Button type="submit" variant="primary" aria-disabled={blocked ? true : undefined}>
           Escalate to {teamLabel(team)}
-        </PillButton>
+        </Button>
       </div>
     </form>
   );

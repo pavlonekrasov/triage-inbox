@@ -29,32 +29,45 @@ export function ThreadPane() {
 
   /*
    * The header strip and the dock float over the thread. The dock's height becomes the timeline's
-   * bottom padding, so the last bubble always clears the decision bar or the composer. When the strip
-   * grows ("Why this route"), or the dock grows while the thread sits at its latest message, the
-   * scroll position moves by the same amount, so the message in view stays where it was. Browser
-   * scroll anchoring is off so nothing corrects twice (and Safari has none).
+   * bottom padding, so the last bubble always clears the decision bar or the composer.
+   *
+   * A thread at its latest message stays there whatever grows: a new reply or service message, the
+   * composer, or "Why this route". Scrolled up, only the strip's growth is compensated, so the message
+   * being read stays where it was. "At the latest message" is measured on scroll, before the growth,
+   * because afterwards the new content already sits below the fold. Browser scroll anchoring is off so
+   * nothing corrects twice (and Safari has none).
    */
   useLayoutEffect(() => {
     const pane = scroller.current;
     const top = strip.current;
     const bottom = dock.current;
-    if (!pane || !top || !bottom) return;
+    const timeline = pane?.querySelector("ol");
+    if (!pane || !top || !bottom || !timeline) return;
     let topHeight = top.offsetHeight;
     let dockHeight = bottom.offsetHeight;
+    let atLatest = true;
     pane.style.setProperty("--dock-h", `${dockHeight}px`);
+    const onScroll = () => {
+      atLatest = pane.scrollHeight - pane.clientHeight - pane.scrollTop < 2;
+    };
     const observer = new ResizeObserver(() => {
       const nextTop = top.offsetHeight;
       const nextDock = bottom.offsetHeight;
-      const atBottom = pane.scrollHeight - pane.clientHeight - pane.scrollTop < 2;
       if (nextDock !== dockHeight) pane.style.setProperty("--dock-h", `${nextDock}px`);
-      pane.scrollTop += nextTop - topHeight + (atBottom ? nextDock - dockHeight : 0);
+      if (atLatest) pane.scrollTop = pane.scrollHeight;
+      else pane.scrollTop += nextTop - topHeight;
       topHeight = nextTop;
       dockHeight = nextDock;
     });
+    pane.addEventListener("scroll", onScroll, { passive: true });
     observer.observe(top);
     observer.observe(bottom);
-    return () => observer.disconnect();
-  }, [hasTicket]);
+    observer.observe(timeline);
+    return () => {
+      pane.removeEventListener("scroll", onScroll);
+      observer.disconnect();
+    };
+  }, [hasTicket, state.openId]);
 
   // Open at the latest message, before paint, like every messaging app.
   useLayoutEffect(() => {
@@ -73,7 +86,7 @@ export function ThreadPane() {
     );
   }
 
-  const composer = state.composer?.ticketId === ticket.id ? state.composer : null;
+  const composer = state.composers[ticket.id] ?? null;
 
   return (
     <main aria-label={`Conversation with ${ticket.customer.name}`} className="wallpaper relative h-full min-w-0">
@@ -146,7 +159,9 @@ function Timeline({ ticket, overlay, showTranslation }: { ticket: Ticket; overla
           />
         );
       case "reply": {
+        // Only the latest reply can still be undone or retried; the ones before it were delivered.
         const outgoing = state.outbox[ticket.id];
+        const latest = outgoing && String(outgoing.attempt) === item.reply.id ? outgoing : undefined;
         const draft = triage.drafts.find((d) => d.id === item.reply.draftId);
         return (
           <ReplyBubble
@@ -154,7 +169,7 @@ function Timeline({ ticket, overlay, showTranslation }: { ticket: Ticket; overla
             kind="reply"
             reply={item.reply}
             gloss={draft && item.reply.body === draft.body ? draft.glossEn : undefined}
-            undoUntil={outgoing?.undoUntil}
+            undoUntil={latest?.undoUntil}
             onUndo={() => dispatch({ type: "undoSend", id: ticket.id })}
             onRetry={() => dispatch({ type: "retrySend", id: ticket.id })}
             showTranslation={showTranslation}

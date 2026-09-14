@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { TICKETS } from "@/data/tickets";
+import { TICKETS, TICKETS_BY_ID } from "@/data/tickets";
 import { DEMO_NOW } from "@/lib/clock";
 import { NO_APPROVAL_RULES } from "@/lib/route";
 import type { Lane } from "@/lib/types";
-import { createDeskState, deskReducer, hiddenIds, rowsFor, type DeskAction, type DeskState } from "./desk-store";
+import {
+  createDeskState,
+  deskReducer,
+  hiddenIds,
+  rowsFor,
+  threadOverlay,
+  type DeskAction,
+  type DeskState,
+} from "./desk-store";
 
 const WALL = 1_000_000;
 const now = DEMO_NOW;
@@ -11,6 +19,12 @@ const start = (ticketId: string, lane: Lane) => createDeskState({ lane, ticketId
 const run = (state: DeskState, ...actions: DeskAction[]) => actions.reduce(deskReducer, state);
 const inLane = (state: DeskState, lane: Lane, id: string) =>
   rowsFor(state.listState, lane, hiddenIds(state)).some((t) => t.id === id);
+
+/** Commits the reply on a ticket and settles the send. */
+const deliver = (state: DeskState, id: string, ok = true) => {
+  const { attempt } = state.outbox[id];
+  return run(state, { type: "commitSend", id, attempt }, { type: "sendSettled", id, attempt, ok });
+};
 
 describe("dismiss and restore", () => {
   it("snoozes a ticket out of its lane, opens the next row, and offers Undo", () => {
@@ -76,9 +90,7 @@ describe("approve and undo (brief 9.3)", () => {
   });
 
   it("commits when the window closes, then marks the reply sent, after which Undo does nothing", () => {
-    const sent = run(start("t17", "drafts"), { type: "approve", now, wall: WALL });
-    const { attempt } = sent.outbox.t17;
-    const delivered = run(sent, { type: "commitSend", id: "t17", attempt }, { type: "sendSettled", id: "t17", attempt, ok: true });
+    const delivered = deliver(run(start("t17", "drafts"), { type: "approve", now, wall: WALL }), "t17");
     expect(delivered.outbox.t17.status).toBe("sent");
     expect(deskReducer(delivered, { type: "undoSend", id: "t17" })).toBe(delivered);
   });
@@ -86,7 +98,7 @@ describe("approve and undo (brief 9.3)", () => {
   it("puts a failed send back in its lane with a notice, and retries as a new attempt", () => {
     const sent = run(start("t17", "drafts"), { type: "approve", now, wall: WALL });
     const { attempt } = sent.outbox.t17;
-    const failed = run(sent, { type: "commitSend", id: "t17", attempt }, { type: "sendSettled", id: "t17", attempt, ok: false });
+    const failed = deliver(sent, "t17", false);
     expect(failed.outbox.t17.status).toBe("failed");
     expect(inLane(failed, "drafts", "t17")).toBe(true);
     expect(failed.notice?.text).toBe("Your reply to Maya Ruiz wasn't sent. It's back in Drafts.");
@@ -102,12 +114,59 @@ describe("approve and undo (brief 9.3)", () => {
     const state = run(
       start("t01", "auto_resolved"),
       { type: "decide", now, wall: WALL },
-      { type: "composerInput", text: "Hi Emma, checking the cancellation went through for you." },
-      { type: "sendComposer", now, wall: WALL },
+      { type: "composerInput", id: "t01", text: "Hi Emma, checking the cancellation went through for you." },
+      { type: "sendComposer", id: "t01", now, wall: WALL },
     );
     expect(state.outbox.t01).toMatchObject({ status: "undoable", draftId: null });
     expect(state.openId).toBe("t01");
     expect(inLane(state, "auto_resolved", "t01")).toBe(true);
+  });
+});
+
+describe("follow-ups keep what was already sent", () => {
+  // Approve Maya's draft, deliver it, and come back to her conversation.
+  const answered = () =>
+    run(deliver(run(start("t17", "drafts"), { type: "approve", now, wall: WALL }), "t17"), { type: "reveal", id: "t17" });
+
+  const followUp = (state: DeskState) =>
+    run(
+      state,
+      { type: "decide", now, wall: WALL },
+      { type: "composerInput", id: "t17", text: "One more thing: you keep access until 20 Sep." },
+      { type: "sendComposer", id: "t17", now: now + 60_000, wall: WALL + 60_000 },
+    );
+
+  it("shows the delivered reply and the follow-up, in order", () => {
+    const state = followUp(answered());
+    const bodies = threadOverlay(state, TICKETS_BY_ID.get("t17")!).replies?.map((r) => r.body);
+    expect(bodies).toHaveLength(2);
+    expect(bodies?.[1]).toBe("One more thing: you keep access until 20 Sep.");
+    expect(inLane(state, "drafts", "t17")).toBe(false);
+  });
+
+  it("undoes only the follow-up: the first reply stays delivered and the case stays out of Drafts", () => {
+    const undone = deskReducer(followUp(answered()), { type: "undoSend", id: "t17" });
+    expect(undone.outbox.t17).toMatchObject({ status: "sent", draftId: "t17-draft" });
+    expect(threadOverlay(undone, TICKETS_BY_ID.get("t17")!).replies).toHaveLength(1);
+    expect(inLane(undone, "drafts", "t17")).toBe(false);
+  });
+
+  it("keeps a case answered when its follow-up fails", () => {
+    const failed = deliver(followUp(answered()), "t17", false);
+    expect(failed.outbox.t17.status).toBe("failed");
+    expect(inLane(failed, "drafts", "t17")).toBe(false);
+  });
+
+  it("refuses a follow-up while the reply before it is still in its undo window", () => {
+    const state = run(start("t01", "auto_resolved"), { type: "decide", now, wall: WALL });
+    const sending = run(
+      state,
+      { type: "composerInput", id: "t01", text: "Hi Emma, a quick check-in." },
+      { type: "sendComposer", id: "t01", now, wall: WALL },
+      { type: "decide", now, wall: WALL },
+    );
+    expect(sending.composers.t01).toBeUndefined();
+    expect(sending.notice?.text).toBe("Your reply is still sending. Follow up once it's delivered.");
   });
 });
 
@@ -139,8 +198,8 @@ describe("two outcomes, take-over and acknowledgment", () => {
   it("takes over a wellbeing case into an empty composer and sends nothing until the person writes", () => {
     const state = run(start("t06", "needs_you"), { type: "decide", now, wall: WALL });
     expect(state.takenOver.t06).toBeDefined();
-    expect(state.composer).toMatchObject({ ticketId: "t06", mode: "take-over", text: "" });
-    const empty = deskReducer(state, { type: "sendComposer", now, wall: WALL });
+    expect(state.composers.t06).toMatchObject({ ticketId: "t06", mode: "take-over", text: "" });
+    const empty = deskReducer(state, { type: "sendComposer", id: "t06", now, wall: WALL });
     expect(empty.outbox.t06).toBeUndefined();
     expect(empty.notice?.text).toBe("Write a reply before sending.");
   });
@@ -148,30 +207,43 @@ describe("two outcomes, take-over and acknowledgment", () => {
   it("acknowledges a safety report with the fixed text, records the review, and never opens it for editing", () => {
     const state = run(start("t03", "needs_you"), { type: "decide", now, wall: WALL });
     expect(state.outbox.t03).toMatchObject({ draftId: "t03-ack", edited: false, events: ["Review opened with Trust & Safety"] });
-    expect(run(start("t03", "needs_you"), { type: "openComposer" }).composer).toBeNull();
+    expect(run(start("t03", "needs_you"), { type: "openComposer" }).composers.t03).toBeUndefined();
   });
 });
 
 describe("edit composer", () => {
   it("opens the draft, marks a changed reply as edited, and reopens the edit on Undo", () => {
     const opened = run(start("t17", "drafts"), { type: "openComposer" });
-    expect(opened.composer).toMatchObject({ mode: "edit", draftId: "t17-draft" });
+    expect(opened.composers.t17).toMatchObject({ mode: "edit", draftId: "t17-draft" });
     const sent = run(
       opened,
-      { type: "composerInput", text: `${opened.composer?.text} Reply here if anything looks wrong.` },
-      { type: "sendComposer", now, wall: WALL },
+      { type: "composerInput", id: "t17", text: `${opened.composers.t17.text} Reply here if anything looks wrong.` },
+      { type: "sendComposer", id: "t17", now, wall: WALL },
     );
     expect(sent.outbox.t17.edited).toBe(true);
-    expect(sent.composer).toBeNull();
-    expect(deskReducer(sent, { type: "undoSend" }).composer?.text).toContain("Reply here if anything looks wrong.");
+    expect(sent.composers.t17).toBeUndefined();
+    expect(deskReducer(sent, { type: "undoSend" }).composers.t17?.text).toContain("Reply here if anything looks wrong.");
+  });
+
+  it("keeps an unsent edit on one conversation while the specialist edits another", () => {
+    const state = run(
+      start("t17", "drafts"),
+      { type: "openComposer" },
+      { type: "composerInput", id: "t17", text: "My careful edit" },
+      { type: "activate", id: "t18" },
+      { type: "openComposer" },
+    );
+    expect(state.composers.t17?.text).toBe("My careful edit");
+    expect(state.composers.t18).toMatchObject({ draftId: "t18-draft" });
+    expect(run(state, { type: "activate", id: "t17" }).composers.t17?.text).toBe("My careful edit");
   });
 
   it("holds an English reply to a customer who wrote in Spanish until it is translated back", () => {
     const state = run(
       start("t07", "drafts"),
       { type: "openComposer" },
-      { type: "composerRewrite", text: "Hi Diego", language: "en" },
-      { type: "sendComposer", now, wall: WALL },
+      { type: "composerRewrite", id: "t07", text: "Hi Diego", language: "en" },
+      { type: "sendComposer", id: "t07", now, wall: WALL },
     );
     expect(state.outbox.t07).toBeUndefined();
     expect(state.notice?.text).toMatch(/^Translate the reply back to Spanish/);
@@ -179,14 +251,16 @@ describe("edit composer", () => {
 });
 
 describe("escalation", () => {
+  const escalate: DeskAction = {
+    type: "escalate",
+    team: "billing",
+    reasons: ["Refund decision"],
+    note: "Please confirm which record is right.",
+    now,
+  };
+
   it("moves the case to the team with a notice, and Undo brings it back open", () => {
-    const state = run(start("t02", "needs_you"), {
-      type: "escalate",
-      team: "billing",
-      reasons: ["Refund decision"],
-      note: "Please confirm which record is right.",
-      now,
-    });
+    const state = run(start("t02", "needs_you"), escalate);
     expect(inLane(state, "needs_you", "t02")).toBe(false);
     expect(state.notice?.text).toBe("Escalated Jordan Kim to Billing.");
     const action = state.notice?.action?.dispatch;
@@ -194,5 +268,19 @@ describe("escalation", () => {
     const undone = deskReducer(state, action);
     expect(inLane(undone, "needs_you", "t02")).toBe(true);
     expect(undone.openId).toBe("t02");
+  });
+
+  it.each<DeskAction>([
+    { type: "approve", now, wall: WALL },
+    { type: "decide", now, wall: WALL },
+    { type: "openComposer" },
+    { type: "setEscalateOpen", open: true },
+  ])("does nothing but explain when $type is pressed on an escalated case still on screen", (action) => {
+    const escalated = run(start("t17", "drafts"), escalate, { type: "reveal", id: "t17" });
+    const state = deskReducer(escalated, action);
+    expect(state.outbox.t17).toBeUndefined();
+    expect(state.composers.t17).toBeUndefined();
+    expect(state.escalateOpen).toBe(false);
+    expect(state.notice).toMatchObject({ where: "bar", text: "This case is with Billing now, so there is nothing to decide here." });
   });
 });

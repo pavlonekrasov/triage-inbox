@@ -2,7 +2,7 @@
 
 import { Check, ChevronDown, FileText, TriangleAlert } from "lucide-react";
 import { useId, useState } from "react";
-import { pillButtonClass } from "@/components/controls/PillButton";
+import { Button } from "@/components/controls/Button";
 import { CATEGORY } from "@/components/inbox/CategoryGlyph";
 import { RouteGlyph, type RouteGlyphKind } from "@/components/inbox/RouteGlyph";
 import { glyphKind } from "@/components/inbox/TicketRow";
@@ -71,12 +71,11 @@ export function PinnedSummary({ ticket }: { ticket: Ticket }) {
               </li>
             ))}
           </ul>
-          <button
-            type="button"
+          <Button
             aria-expanded={open}
             aria-controls={panelId}
             onClick={() => setOpen((o) => !o)}
-            className={cn(pillButtonClass({ variant: "ghost" }), "-mr-2 ml-auto px-2 text-muted-foreground")}
+            className="-mr-2 ml-auto px-2 text-muted-foreground"
           >
             Why this route
             <ChevronDown
@@ -84,7 +83,7 @@ export function PinnedSummary({ ticket }: { ticket: Ticket }) {
               strokeWidth={1.75}
               className="transition-[rotate] duration-[calc(220ms*var(--motion))] ease-(--ease-soft) group-data-[open=true]/summary:rotate-180"
             />
-          </button>
+          </Button>
         </div>
       </div>
 

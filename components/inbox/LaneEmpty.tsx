@@ -1,6 +1,6 @@
 "use client";
 
-import { PillButton } from "@/components/controls/PillButton";
+import { Button } from "@/components/controls/Button";
 import { useDesk } from "@/components/desk/desk-store";
 import { TODAY } from "@/data/metrics";
 import type { Lane } from "@/lib/types";
@@ -29,13 +29,13 @@ export function LaneEmpty({ lane }: { lane: Lane }) {
       <h2 className="text-heading">{title}</h2>
       <p className="max-w-72 text-body-s text-muted-foreground">{body}</p>
       {lane === "needs_you" && (
-        <PillButton
+        <Button
           variant="outline"
           className="mt-2"
           onClick={() => dispatch({ type: "selectLane", lane: "auto_resolved" })}
         >
           Review spot-checks
-        </PillButton>
+        </Button>
       )}
     </div>
   );

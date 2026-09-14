@@ -1,16 +1,17 @@
 "use client";
 
-import { Flag, HandHeart, Pencil, Reply, RotateCw, Send, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Flag, HandHeart, Pencil, Reply, RotateCw, Send, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/controls/Button";
 import { KeyHint } from "@/components/controls/KeyHint";
-import { PillButton } from "@/components/controls/PillButton";
 import { contextFor, latestUndoable, useDesk } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { TICKETS_BY_ID } from "@/data/tickets";
+import { formatClockTime } from "@/lib/clock";
 import { decisionFor, type PrimaryKind } from "@/lib/decision";
+import { teamLabel } from "@/lib/escalation";
 import type { Ticket } from "@/lib/types";
 import { readDemoNow } from "@/lib/use-demo-now";
 import { EscalatePopover } from "./EscalatePopover";
-import { UndoButton } from "./UndoButton";
 
 const PRIMARY_ICON: Record<PrimaryKind, LucideIcon> = {
   approve: Send,
@@ -33,7 +34,19 @@ export const BAR_BUTTON = "px-3.5 [&_svg]:size-4.5";
  */
 export function DecisionBar({ ticket }: { ticket: Ticket }) {
   const { state, dispatch } = useDesk();
-  if (state.escalations[ticket.id]) return null;
+  const escalation = state.escalations[ticket.id];
+  // An escalated case stays on screen when it was the last in its lane. It says where it went; there is nothing left to decide here.
+  if (escalation) {
+    return (
+      <p
+        data-escalated={escalation.team}
+        className="pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-body-s"
+      >
+        <UsersRound aria-hidden className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+        With {teamLabel(escalation.team)} · escalated by you at {formatClockTime(escalation.at)}
+      </p>
+    );
+  }
 
   const decision = decisionFor(ticket, contextFor(state, ticket.id));
   const { primary, edit, variants } = decision;
@@ -78,7 +91,7 @@ export function DecisionBar({ ticket }: { ticket: Ticket }) {
         aria-label={`Decide on the conversation with ${ticket.customer.name}`}
         className="pointer-events-auto flex max-w-[min(35rem,100%)] items-center gap-1 p-1.5"
       >
-        <PillButton
+        <Button
           variant="primary"
           size="md"
           data-primary={primary.kind}
@@ -90,10 +103,10 @@ export function DecisionBar({ ticket }: { ticket: Ticket }) {
           <PrimaryIcon aria-hidden strokeWidth={1.75} />
           {primary.label}
           {primary.kind === "approve" && <KeyHint onPrimary>A</KeyHint>}
-        </PillButton>
+        </Button>
 
         {edit && (
-          <PillButton
+          <Button
             size="md"
             aria-disabled={edit.blocked ? true : undefined}
             aria-keyshortcuts="E"
@@ -103,11 +116,11 @@ export function DecisionBar({ ticket }: { ticket: Ticket }) {
             <Pencil aria-hidden strokeWidth={1.75} />
             {edit.label}
             <KeyHint>E</KeyHint>
-          </PillButton>
+          </Button>
         )}
 
         {decision.markWrong && (
-          <PillButton
+          <Button
             size="md"
             aria-pressed={markedWrong}
             className={BAR_BUTTON}
@@ -115,7 +128,7 @@ export function DecisionBar({ ticket }: { ticket: Ticket }) {
           >
             <Flag aria-hidden strokeWidth={1.75} />
             Mark as wrong
-          </PillButton>
+          </Button>
         )}
 
         <EscalatePopover ticket={ticket} />
@@ -142,13 +155,9 @@ export function BarFeedback({ ticket }: { ticket: Ticket }) {
         <p className="pointer-events-auto flex max-w-md items-center gap-3 rounded-card border border-border bg-card px-3 py-1.5 text-body-s">
           <span>{notice.text}</span>
           {notice.action && (
-            <button
-              type="button"
-              onClick={() => dispatch(notice.action!.dispatch)}
-              className="shrink-0 rounded-xs font-medium outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring"
-            >
+            <Button variant="text" onClick={() => dispatch(notice.action!.dispatch)}>
               {notice.action.label}
-            </button>
+            </Button>
           )}
         </p>
       )}
@@ -158,10 +167,11 @@ export function BarFeedback({ ticket }: { ticket: Ticket }) {
           <span aria-hidden className="text-muted-foreground">
             ·
           </span>
-          <UndoButton
+          <Button
             key={`${away.ticketId}:${away.attempt}`}
+            variant="undo"
             undoUntil={away.undoUntil}
-            onUndo={() => dispatch({ type: "undoSend", id: away.ticketId })}
+            onClick={() => dispatch({ type: "undoSend", id: away.ticketId })}
           />
         </p>
       )}

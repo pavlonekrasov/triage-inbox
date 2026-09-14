@@ -3,7 +3,7 @@
 import { Menu } from "@base-ui/react/menu";
 import { Ban, BellOff, Ellipsis, Link } from "lucide-react";
 import type { ReactNode } from "react";
-import { pillButtonClass } from "@/components/controls/PillButton";
+import { Button } from "@/components/controls/Button";
 import { useDesk } from "@/components/desk/desk-store";
 import { dismissBlock } from "@/lib/lanes";
 import type { Ticket } from "@/lib/types";
@@ -29,7 +29,7 @@ export function ThreadMenu({ ticket }: { ticket: Ticket }) {
     <Menu.Root>
       <Menu.Trigger
         aria-label={`More actions for the conversation with ${ticket.customer.name}`}
-        className={pillButtonClass({ iconOnly: true })}
+        render={<Button iconOnly />}
       >
         <Ellipsis aria-hidden strokeWidth={1.75} />
       </Menu.Trigger>

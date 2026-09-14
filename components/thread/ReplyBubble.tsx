@@ -6,7 +6,7 @@ import type { TimelineDraft, TimelineReply } from "@/lib/timeline";
 import type { Source } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Translation } from "./Bubble";
-import { UndoButton } from "./UndoButton";
+import { Button } from "@/components/controls/Button";
 
 type ReplyBubbleProps = { showTranslation: boolean } & (
   | { kind: "draft"; draft: TimelineDraft; variantCount: number; sources: Source[]; showSources: boolean }
@@ -87,13 +87,9 @@ function ReplyStatus({
       <p className="flex items-center gap-1 text-micro text-risk-high">
         <TriangleAlert aria-hidden className="size-3.5" strokeWidth={1.75} />
         Not sent ·
-        <button
-          type="button"
-          onClick={onRetry}
-          className="rounded-xs font-medium outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring"
-        >
+        <Button variant="text" onClick={onRetry}>
           Retry
-        </button>
+        </Button>
       </p>
     );
   }
@@ -114,7 +110,7 @@ function ReplyStatus({
       {reply.status === "undoable" && undoUntil !== undefined && (
         <>
           <span aria-hidden>·</span>
-          <UndoButton undoUntil={undoUntil} onUndo={onUndo} />
+          <Button variant="undo" undoUntil={undoUntil} onClick={onUndo} />
         </>
       )}
     </p>

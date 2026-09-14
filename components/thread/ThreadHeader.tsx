@@ -1,6 +1,7 @@
 "use client";
 
 import { Languages } from "lucide-react";
+import { Button } from "@/components/controls/Button";
 import { useDesk } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { RouteGlyph } from "@/components/inbox/RouteGlyph";
@@ -65,21 +66,17 @@ function LanguageChip({ ticket }: { ticket: Ticket }) {
   }
 
   return (
-    <button
-      type="button"
+    <Button
+      variant={state.showTranslation ? "ghost" : "outline"}
       aria-pressed={state.showTranslation}
       aria-label={`Show English translation of ${languageName(tag)}`}
       title={state.showTranslation ? "Hide English translation" : "Show English translation"}
       onClick={() => dispatch({ type: "toggleTranslation" })}
-      className={cn(
-        "inline-flex h-6 items-center gap-1 rounded-full px-2 text-micro outline-none",
-        "transition-colors duration-(--dur-hover) hover:bg-accent",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring",
-        state.showTranslation ? "bg-muted text-foreground" : "border border-border text-muted-foreground",
-      )}
+      // A chip inside the 28 px header pill: 24 px tall, micro type, 14 px glyph.
+      className={cn("h-6 gap-1 px-2 text-micro [&_svg]:size-3.5", state.showTranslation ? "bg-muted" : "text-muted-foreground")}
     >
-      <Languages aria-hidden className="size-3.5" strokeWidth={1.75} />
+      <Languages aria-hidden strokeWidth={1.75} />
       {state.showTranslation ? `${code} → EN` : code}
-    </button>
+    </Button>
   );
 }

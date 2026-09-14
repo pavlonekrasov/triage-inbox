@@ -52,7 +52,11 @@ export function decisionFor(ticket: Ticket, ctx: DecisionContext = {}): Decision
   if (ctx.outgoing === "failed") {
     return { ...base, primary: { kind: "retry", label: "Retry sending", blocked: null }, edit: { label: "Edit reply", blocked: null } };
   }
-  if (ctx.outgoing) return { ...base, primary: { kind: "follow-up", label: "Follow up", blocked: null } };
+  if (ctx.outgoing) {
+    // A follow-up waits for the reply before it, so the customer never gets them out of order.
+    const blocked = ctx.outgoing === "sent" ? null : "Your reply is still sending. Follow up once it's delivered.";
+    return { ...base, primary: { kind: "follow-up", label: "Follow up", blocked } };
+  }
   if (triage.route === "auto_send") {
     return { ...base, primary: { kind: "follow-up", label: "Follow up", blocked: null }, markWrong: true };
   }

@@ -3,7 +3,7 @@
 import { CirclePause, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion, type Transition } from "motion/react";
 import { useCallback, useEffect, type KeyboardEvent } from "react";
-import { PillButton } from "@/components/controls/PillButton";
+import { Button } from "@/components/controls/Button";
 import { PrototypeControls } from "@/components/dev/PrototypeControls";
 import { hiddenIds, rowsFor, useDesk } from "@/components/desk/desk-store";
 import { ThemeIconToggle } from "@/components/theme/ThemeIconToggle";
@@ -78,9 +78,9 @@ export function ListPane() {
               <div className="mt-2 flex items-center gap-2 rounded-card border border-border bg-card py-1.5 pr-1.5 pl-3">
                 <p className="min-w-0 flex-1 py-0.5 text-body-s">{notice.text}</p>
                 {notice.action && (
-                  <PillButton variant="outline" onClick={() => dispatch(notice.action!.dispatch)}>
+                  <Button variant="outline" onClick={() => dispatch(notice.action!.dispatch)}>
                     {notice.action.label}
-                  </PillButton>
+                  </Button>
                 )}
               </div>
             )}
@@ -174,13 +174,13 @@ function ListHeader() {
           {state.checked.length} selected
         </p>
         {sureCount > 0 && !sureAlreadySelected && (
-          <PillButton onClick={() => dispatch({ type: "selectSureDrafts" })}>
+          <Button onClick={() => dispatch({ type: "selectSureDrafts" })}>
             Select {sureCount} Sure drafts
-          </PillButton>
+          </Button>
         )}
-        <PillButton iconOnly aria-label="Exit selection" title="Exit selection (Esc)" onClick={() => dispatch({ type: "exitSelection" })}>
+        <Button iconOnly aria-label="Exit selection" title="Exit selection (Esc)" onClick={() => dispatch({ type: "exitSelection" })}>
           <X aria-hidden strokeWidth={1.75} />
-        </PillButton>
+        </Button>
       </header>
     );
   }
@@ -192,9 +192,9 @@ function ListHeader() {
         <span className="text-micro text-muted-foreground">concept</span>
       </div>
       {state.lane === "drafts" && drafts.length > 0 && (
-        <PillButton title="Select drafts (X)" onClick={() => dispatch({ type: "enterSelection" })}>
+        <Button title="Select drafts (X)" onClick={() => dispatch({ type: "enterSelection" })}>
           Select drafts
-        </PillButton>
+        </Button>
       )}
       <ThemeIconToggle />
     </header>
