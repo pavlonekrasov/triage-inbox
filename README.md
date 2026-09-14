@@ -35,7 +35,10 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 | `]` | Show or hide customer details (a sheet below 1280 px) |
 | `X` | Select or unselect the focused draft (Drafts only) |
 | `⇧X` | Select every low-risk Sure draft |
-| `Esc` | Exit selection |
+| `A` in selection | Review the selected drafts; `A` again approves and sends them, with one Undo |
+| `Esc` | Close the preview, then exit selection |
+| `Ctrl` `K` / `⌘K` | Command palette: go to a conversation or lane, decide, escalate to a team, switch theme |
+| `?` | Keyboard shortcuts |
 
 The prototype controls in the list footer also set the fake send API to succeed, fail 1 in 20, or
 fail every send, so the "Not sent · Retry" state is real.
@@ -55,8 +58,8 @@ email is logged in the thread.
 | 4 | Pinned summary, both reading depths | Done |
 | 5 | Decision bar: Approve with undo, Edit, Escalate | Done |
 | 6 | Context panel | Done |
-| 7 | Bulk approve, full keymap, command palette, shortcut sheet | Next |
-| 8 | States catalogue, responsive, Night shift pass | |
+| 7 | Bulk approve, full keymap, command palette, shortcut sheet | Done |
+| 8 | States catalogue, responsive, Night shift pass | Next |
 | 9 | Slide routes | |
 | 10 | Slide screenshots | |
 
@@ -66,7 +69,7 @@ email is logged in the thread.
 npm test          # routing matrix, fixtures, accounts, decisions, rewrites, desk reducer
 npm run typecheck
 npm run lint
-node scripts/capture.mjs scripts/plans/step-6.json   # evidence screenshots, needs the dev server
+node scripts/capture.mjs scripts/plans/step-7.json   # evidence screenshots, needs the dev server
 ```
 
 Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from

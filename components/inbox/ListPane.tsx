@@ -7,10 +7,12 @@ import { Button } from "@/components/controls/Button";
 import { PrototypeControls } from "@/components/dev/PrototypeControls";
 import { hiddenIds, rowsFor, useDesk } from "@/components/desk/desk-store";
 import { ThemeIconToggle } from "@/components/theme/ThemeIconToggle";
+import { cn } from "@/lib/utils";
 import { formatDuration, formatPercent, TODAY } from "@/data/metrics";
 import { LANES } from "@/lib/lanes";
 import { isSureLowRiskDraft } from "@/lib/route";
 import type { Lane } from "@/lib/types";
+import { BulkBar } from "./BulkBar";
 import { LaneEmpty } from "./LaneEmpty";
 import { LaneSwitcher } from "./LaneSwitcher";
 import { SkeletonRows } from "./SkeletonRows";
@@ -66,10 +68,14 @@ export function ListPane() {
   const laneLabel = LANES.find((l) => l.id === lane)?.label ?? "";
 
   return (
-    <section data-list-pane aria-label="Conversations" className="@container flex h-full min-w-0 flex-col bg-sidebar">
+    <section data-list-pane aria-label="Conversations" className="@container relative flex h-full min-w-0 flex-col bg-sidebar">
       <ListHeader />
 
-      <motion.div layoutScroll className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <motion.div
+        layoutScroll
+        // In selection the bulk bar floats over the list, so the last row can scroll clear of it.
+        className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain", editMode && lane === "drafts" && "pb-20")}
+      >
         {/* The lane track floats and the list scrolls under it: glass surface 3 of 4 (brief 6.5). */}
         <div className="sticky top-0 z-10 px-3 pt-1 pb-2">
           <LaneSwitcher lane={lane} counts={counts} onSelect={(next) => dispatch({ type: "selectLane", lane: next })} />
@@ -77,11 +83,21 @@ export function ListPane() {
             {notice && (
               <div className="mt-2 flex items-center gap-2 rounded-card border border-border bg-card py-1.5 pr-1.5 pl-3">
                 <p className="min-w-0 flex-1 py-0.5 text-body-s">{notice.text}</p>
-                {notice.action && (
-                  <Button variant="outline" onClick={() => dispatch(notice.action!.dispatch)}>
-                    {notice.action.label}
-                  </Button>
-                )}
+                {notice.action &&
+                  (notice.undoUntil ? (
+                    <Button
+                      variant="undo"
+                      undoUntil={notice.undoUntil}
+                      className="mr-1.5 text-body-s"
+                      onClick={() => dispatch(notice.action!.dispatch)}
+                    >
+                      {notice.action.label}
+                    </Button>
+                  ) : (
+                    <Button variant="outline" onClick={() => dispatch(notice.action!.dispatch)}>
+                      {notice.action.label}
+                    </Button>
+                  ))}
               </div>
             )}
           </div>
@@ -144,6 +160,8 @@ export function ListPane() {
           )}
         </div>
       </motion.div>
+
+      <BulkBar />
 
       {/* Metrics live one click away (brief 1); the line becomes the quality sheet's trigger in step 8. */}
       <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-border pr-1 pl-4 text-micro text-muted-foreground tabular-nums">

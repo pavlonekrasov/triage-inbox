@@ -113,6 +113,7 @@ export function ContextSheet({
         side="right"
         showCloseButton={false}
         data-context-sheet
+        data-pass-shortcut="toggle-context"
         aria-label={`Details for ${ticket.customer.name}`}
         className="gap-0 border-border p-0 data-[side=right]:w-[min(22rem,100vw)] data-[side=right]:sm:max-w-none"
       >

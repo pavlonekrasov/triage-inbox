@@ -31,6 +31,8 @@ export interface Notice {
    */
   where: "list" | "thread" | "bar";
   action?: { label: string; dispatch: DeskAction };
+  /** When set, the action is an Undo, drawn with the countdown of this window. */
+  undoUntil?: number;
 }
 
 /** Telegram's edit mode: a composer bound to the conversation it was opened on, kept per conversation. */
@@ -67,6 +69,8 @@ export interface Outgoing {
   composer: Composer | null;
   /** The delivered reply this one follows up. Undo puts it back, so a follow-up never erases it. */
   previous: Outgoing | null;
+  /** Replies approved together share a batch, so one Undo takes them all back (brief 9.3). */
+  batch: number | null;
 }
 
 export interface Escalation {
@@ -116,6 +120,13 @@ export interface DeskState {
   contextFocus: { target: string; nonce: number } | null;
   /** Emails a specialist revealed, with the time, per ticket. Each reveal is logged in the thread. */
   revealedEmails: Readonly<Record<string, string>>;
+
+  /** Selection mode's preview of the replies a bulk approval would send (brief 9.2). */
+  bulkPreview: boolean;
+  /** The command palette or the shortcut sheet. One at a time. */
+  overlay: "palette" | "shortcuts" | null;
+  /** The team the Escalate popover opens on when it was asked for from the palette. */
+  escalateTeam: EscalationTeam | null;
 }
 
 export type DeskAction =
@@ -141,11 +152,11 @@ export type DeskAction =
   | { type: "composerRewrite"; id: string; text: string; language: string }
   | { type: "closeComposer"; id: string }
   | { type: "sendComposer"; id: string; now: number; wall: number }
-  | { type: "undoSend"; id?: string }
+  | { type: "undoSend"; id?: string; batch?: number }
   | { type: "commitSend"; id: string; attempt: number }
   | { type: "sendSettled"; id: string; attempt: number; ok: boolean }
   | { type: "retrySend"; id: string }
-  | { type: "setEscalateOpen"; open: boolean }
+  | { type: "setEscalateOpen"; open: boolean; team?: EscalationTeam }
   | { type: "escalate"; team: EscalationTeam; reasons: string[]; note: string; now: number }
   | { type: "undoEscalation"; id: string }
   | { type: "toggleMarkWrong"; now: number }
@@ -154,7 +165,10 @@ export type DeskAction =
   | { type: "toggleSection"; section: ContextSection }
   | { type: "focusContext"; section: ContextSection; target: string }
   | { type: "contextFocusDone"; nonce: number }
-  | { type: "revealEmail"; id: string; now: number };
+  | { type: "revealEmail"; id: string; now: number }
+  | { type: "setBulkPreview"; open: boolean }
+  | { type: "bulkApprove"; now: number; wall: number }
+  | { type: "setOverlay"; overlay: DeskState["overlay"] };
 
 /** Tickets out of every lane right now: snoozed, marked spam, escalated, or answered from an open lane. */
 export function hiddenIds(state: Pick<DeskState, "dismissed" | "escalations" | "outbox">): ReadonlySet<string> {
@@ -257,6 +271,9 @@ export function createDeskState({ lane, ticketId, listState }: DeskInit): DeskSt
     collapsedSections: [],
     contextFocus: null,
     revealedEmails: {},
+    bulkPreview: false,
+    overlay: null,
+    escalateTeam: null,
   };
 }
 
@@ -270,9 +287,15 @@ const SELECTION_ELSEWHERE: Record<Lane, string> = {
   auto_resolved: "Auto-resolved replies are already sent, so there is nothing to select.",
 };
 
-function notify(state: DeskState, text: string, where: Notice["where"] = "list", action?: Notice["action"]): DeskState {
+function notify(
+  state: DeskState,
+  text: string,
+  where: Notice["where"] = "list",
+  action?: Notice["action"],
+  undoUntil?: number,
+): DeskState {
   const seq = state.seq + 1;
-  return { ...state, seq, notice: { id: seq, text, where, action } };
+  return { ...state, seq, notice: { id: seq, text, where, action, undoUntil } };
 }
 
 const openTicket = (state: DeskState) => (state.openId ? TICKETS_BY_ID.get(state.openId) : undefined);
@@ -374,6 +397,7 @@ function send(state: DeskState, ticket: Ticket, reply: ReplyPayload, now: number
     events: reply.events ?? [],
     composer: reply.composer ?? null,
     previous,
+    batch: null,
   };
   const next: DeskState = {
     ...state,
@@ -429,6 +453,86 @@ function retry(state: DeskState, id: string): DeskState {
     outbox: { ...state.outbox, [id]: { ...outgoing, status: "sending", attempt: seq } },
     notice: state.notice?.where === "list" || state.notice?.where === "bar" ? null : state.notice,
   };
+}
+
+/**
+ * Bulk approval (brief 9.2, 9.3): every selected draft that bulk selection still allows is sent as one
+ * batch, only after the preview was open, so no reply goes out unread. Each reply keeps its own undo
+ * window and send; the batch shares one toast and one Undo. The open conversation moves on as after
+ * Approve when it was among them.
+ */
+function bulkApprove(state: DeskState, now: number, wall: number): DeskState {
+  if (state.lane !== "drafts" || !state.editMode) return state;
+  if (!state.bulkPreview) return { ...state, bulkPreview: state.checked.length > 0 };
+  const rows = rowsFor(state.listState, "drafts", hiddenIds(state));
+  // Review gate 9 again, at the moment of sending: the selection alone is never trusted.
+  const sendable = rows.filter(
+    (t) =>
+      state.checked.includes(t.id) &&
+      canBulkSelect(t.triage) &&
+      !state.escalations[t.id] &&
+      approveBlocked(t, contextFor(state, t.id)) === null,
+  );
+  if (sendable.length === 0) return notify({ ...state, bulkPreview: false }, "None of the selected drafts can be approved in bulk.");
+
+  const seq = state.seq + 1;
+  const outbox = { ...state.outbox };
+  let composers = state.composers;
+  for (const t of sendable) {
+    const draft = t.triage.drafts[0];
+    outbox[t.id] = {
+      ticketId: t.id,
+      body: draft.body,
+      language: draft.language,
+      draftId: draft.id,
+      edited: false,
+      at: iso(now),
+      status: "undoable",
+      undoUntil: wall + UNDO_WINDOW_MS,
+      attempt: seq,
+      events: [],
+      composer: null,
+      previous: null,
+      batch: seq,
+    };
+    composers = omit(composers, t.id);
+  }
+  const sent = new Set(sendable.map((t) => t.id));
+  const remaining = rows.filter((t) => !sent.has(t.id));
+  const openSent = state.openId !== null && sent.has(state.openId);
+  const openId = openSent ? (remaining[0]?.id ?? state.openId) : state.openId;
+  const next: DeskState = {
+    ...state,
+    seq,
+    outbox,
+    composers,
+    editMode: false,
+    checked: [],
+    bulkPreview: false,
+    openId,
+    cursorId: openId,
+    focusRequest: openId && remaining.some((t) => t.id === openId) ? { id: openId, nonce: seq } : state.focusRequest,
+  };
+  const count = sendable.length;
+  return notify(
+    next,
+    `${count} ${count === 1 ? "reply" : "replies"} sent.`,
+    "list",
+    { label: "Undo", dispatch: { type: "undoSend", batch: seq } },
+    wall + UNDO_WINDOW_MS,
+  );
+}
+
+/** Takes back every reply of a bulk send still in its undo window, and puts the selection back as it was. */
+function undoBatch(state: DeskState, batch: number): DeskState {
+  const members = Object.values(state.outbox).filter((o) => o.batch === batch && o.status === "undoable");
+  if (members.length === 0) return state;
+  const ids = members.map((o) => o.ticketId);
+  const outbox = Object.fromEntries(Object.entries(state.outbox).filter(([id]) => !ids.includes(id)));
+  const seq = state.seq + 1;
+  const restored: DeskState = { ...state, seq, outbox, lane: "drafts", editMode: true, checked: ids, bulkPreview: false, notice: null };
+  const first = rowsFor(state.listState, "drafts", hiddenIds(restored)).find((t) => ids.includes(t.id));
+  return first ? { ...restored, cursorId: first.id, focusRequest: { id: first.id, nonce: seq } } : restored;
 }
 
 /** The primary action of the decision bar for the open conversation (brief 9.1). */
@@ -618,6 +722,9 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
 
     case "undoSend": {
       const target = action.id ? state.outbox[action.id] : latestUndoable(state.outbox);
+      // A bulk send comes back whole, from its toast, from Z or from the palette.
+      const batch = action.batch ?? (action.id ? null : (target?.batch ?? null));
+      if (batch !== null) return undoBatch(state, batch);
       if (target?.status !== "undoable") return state;
       const id = target.ticketId;
       // Undoing a follow-up leaves the delivered reply under it, and the case where it already was.
@@ -645,6 +752,15 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       if (action.ok) return next;
       const ticket = TICKETS_BY_ID.get(action.id);
       if (!ticket) return next;
+      if (outgoing.batch !== null) {
+        const failed = Object.values(next.outbox).filter((o) => o.batch === outgoing.batch && o.status === "failed").length;
+        return notify(
+          next,
+          failed === 1
+            ? "1 reply from the bulk send wasn't sent. It's back in Drafts."
+            : `${failed} replies from the bulk send weren't sent. They're back in Drafts.`,
+        );
+      }
       if (state.openId === action.id) return notify(next, "Your reply wasn't sent. Retry sending, or edit it first.", "bar");
       const name = ticket.customer.name;
       const lane = LANES.find((l) => l.id === laneFor(ticket.triage.route))?.label ?? "its lane";
@@ -667,7 +783,13 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       if (composer && composer.text.trim() !== composer.original.trim()) {
         return notify(state, "Send or discard your reply before escalating.", "bar");
       }
-      return { ...state, escalateOpen: true, composers: omit(state.composers, ticket.id), notice: clearBarNotice(state) };
+      return {
+        ...state,
+        escalateOpen: true,
+        escalateTeam: action.team ?? null,
+        composers: omit(state.composers, ticket.id),
+        notice: clearBarNotice(state),
+      };
     }
 
     case "escalate": {
@@ -711,6 +833,20 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
     case "setSendFailure":
       return { ...state, sendFailure: action.sendFailure };
 
+    case "setBulkPreview":
+      if (!action.open) return state.bulkPreview ? { ...state, bulkPreview: false } : state;
+      if (state.lane !== "drafts") return notify(state, SELECTION_ELSEWHERE[state.lane]);
+      if (state.checked.length === 0) {
+        return notify(state, "Select drafts to review first. X selects the focused draft; ⇧X selects every low-risk Sure draft.");
+      }
+      return { ...state, editMode: true, bulkPreview: true };
+
+    case "bulkApprove":
+      return bulkApprove(state, action.now, action.wall);
+
+    case "setOverlay":
+      return state.overlay === action.overlay ? state : { ...state, overlay: action.overlay };
+
     case "setContextOpen":
       return { ...state, contextPanel: action.open ? "open" : "closed" };
 
@@ -747,13 +883,16 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
 }
 
 export function deskReducer(state: DeskState, action: DeskAction): DeskState {
-  const next = reduce(state, action);
+  let next = reduce(state, action);
+  // The preview belongs to a selection, and a preselected team to an open popover.
+  if (next.bulkPreview && (!next.editMode || next.checked.length === 0)) next = { ...next, bulkPreview: false };
+  if (next.escalateTeam && !next.escalateOpen) next = { ...next, escalateTeam: null };
   if (next.openId === state.openId) return next;
   // The Escalate popover and decision feedback belong to the conversation they were raised on.
   const staleBarNotice = next.notice?.where === "bar" && next.notice === state.notice;
   // A request to show a panel row was raised for the conversation that was open.
   const contextFocus = next.contextFocus === state.contextFocus ? null : next.contextFocus;
-  return { ...next, escalateOpen: false, notice: staleBarNotice ? null : next.notice, contextFocus };
+  return { ...next, escalateOpen: false, escalateTeam: null, notice: staleBarNotice ? null : next.notice, contextFocus };
 }
 
 export const DeskContext = createContext<{ state: DeskState; dispatch: Dispatch<DeskAction> } | null>(null);

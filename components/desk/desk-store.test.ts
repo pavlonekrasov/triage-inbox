@@ -337,3 +337,68 @@ describe("context panel requests", () => {
     expect(state.contextFocus).toBeNull();
   });
 });
+
+describe("bulk approval (brief 9.2, 9.3)", () => {
+  const selected = () => run(start("t17", "drafts"), { type: "selectSureDrafts" });
+  const previewed = () => deskReducer(selected(), { type: "setBulkPreview", open: true });
+
+  it("opens a preview before anything is sent, and refuses to preview an empty selection", () => {
+    const state = previewed();
+    expect(state.bulkPreview).toBe(true);
+    expect(Object.keys(state.outbox)).toEqual([]);
+    const empty = run(start("t17", "drafts"), { type: "enterSelection" }, { type: "setBulkPreview", open: true });
+    expect(empty.bulkPreview).toBe(false);
+    expect(empty.notice?.text).toMatch(/^Select drafts to review first/);
+  });
+
+  it("opens the preview instead of sending when bulk approval is asked for without it", () => {
+    const state = deskReducer(selected(), { type: "bulkApprove", now, wall: WALL });
+    expect(state.bulkPreview).toBe(true);
+    expect(Object.keys(state.outbox)).toEqual([]);
+  });
+
+  it("sends every selected draft as one batch with one Undo toast, and leaves selection", () => {
+    const before = previewed();
+    const ids = [...before.checked];
+    expect(ids).toHaveLength(6);
+    const sent = deskReducer(before, { type: "bulkApprove", now, wall: WALL });
+    const batches = new Set(ids.map((id) => sent.outbox[id]?.batch));
+    expect(batches.size).toBe(1);
+    expect([...batches][0]).not.toBeNull();
+    for (const id of ids) expect(inLane(sent, "drafts", id), id).toBe(false);
+    expect(sent.editMode).toBe(false);
+    expect(sent.notice).toMatchObject({ where: "list", text: "6 replies sent.", undoUntil: WALL + 5000 });
+  });
+
+  it("brings the whole batch back, still selected, from the toast or from Z", () => {
+    const before = previewed();
+    const sent = deskReducer(before, { type: "bulkApprove", now, wall: WALL });
+    const toastUndo = sent.notice?.action?.dispatch;
+    if (!toastUndo) throw new Error("no undo on the toast");
+    for (const undo of [toastUndo, { type: "undoSend" } as DeskAction]) {
+      const back = deskReducer(sent, undo);
+      expect(Object.keys(back.outbox)).toEqual([]);
+      expect(back.editMode).toBe(true);
+      expect([...back.checked].sort()).toEqual([...before.checked].sort());
+      for (const id of before.checked) expect(inLane(back, "drafts", id), id).toBe(true);
+    }
+  });
+
+  it("never sends what bulk selection refuses, even when it is in the selection (review gate 9)", () => {
+    const forged: DeskState = { ...start("t17", "drafts"), editMode: true, bulkPreview: true, checked: ["t17", "t02", "t06", "t05"] };
+    const sent = deskReducer(forged, { type: "bulkApprove", now, wall: WALL });
+    expect(Object.keys(sent.outbox).sort()).toEqual(["t05", "t17"]);
+  });
+
+  it("closes the preview when the selection empties", () => {
+    let state = previewed();
+    for (const id of [...state.checked]) state = deskReducer(state, { type: "toggleCheck", id });
+    expect(state.bulkPreview).toBe(false);
+  });
+
+  it("opens Escalate on the team chosen in the palette, and forgets it when the popover closes", () => {
+    const state = deskReducer(start("t17", "drafts"), { type: "setEscalateOpen", open: true, team: "privacy" });
+    expect(state).toMatchObject({ escalateOpen: true, escalateTeam: "privacy" });
+    expect(deskReducer(state, { type: "setEscalateOpen", open: false }).escalateTeam).toBeNull();
+  });
+});

@@ -488,3 +488,55 @@ Reasoning   Review gates 1 and 3; a chip that names a source behaves like every 
 Trade-off   None found.
 Validation  audit h: 352 px at 375 px; audit j: the chip on ticket 5 focuses "Chat credit refunds v3" in the panel.
 ```
+
+## Step 7: bulk approval, keymap, command palette, shortcut sheet
+
+### Bulk approval is review, then send
+
+```
+Problem     Brief 9.2 names the bulk bar "Approve 6 drafts" and also says bulk approval must never mean approving unread text; a button that says Approve but opens a preview does not name what happens (review gate 12).
+Decision    In selection the bulk bar reads "Review 6 drafts". It opens a preview above the bar with each reply's first two lines and a control to take any one out; only then does the bar read "Approve & send 6 replies". A does each step, Esc steps back. The reducer refuses to send unless the preview was open, and re-checks bulk eligibility per ticket at the moment of sending.
+Reasoning   The label names what happens next at each step; "the human is the product": a person reads what goes out, even in bulk.
+Trade-off   Bulk approval is two key presses instead of one, and the first label departs from the brief's wording.
+Validation  bulk-preview-2x.png: 6 items, nothing sent yet; bulk-take-one-out: 5 left and "Approve & send 5 replies"; desk-store.test.ts: bulkApprove without the preview opens it, and a forged selection sends only t05 and t17.
+```
+
+### One toast and one Undo for a bulk send
+
+```
+Problem     Six replies sent together have no single bubble to put Undo on (brief 9.3).
+Decision    The replies share a batch. One toast under the lane track, "6 replies sent · Undo", carries the 5 s countdown and lasts as long as the window. Undo from the toast, Z or the palette takes back the whole batch and puts the selection back as it was. Each reply still commits and sends on its own; failures are counted in one notice.
+Reasoning   The toast sits next to the list the rows left from; putting the selection back lets the specialist take one draft out and send again.
+Trade-off   A reply in the batch cannot be undone alone from the toast.
+Validation  bulk-sent-toast-2x.png; bulk-undo-with-z: Drafts back to 11, "6 selected", focus on row-t19; delivered-after-window: the toast is gone once the window closes.
+```
+
+### The command palette acts on the open conversation and teaches the keys
+
+```
+Problem     Brief 9.2 asks for ⌘K with "Go to ticket", "Escalate to…" and "Switch theme".
+Decision    Ctrl K or ⌘K opens an opaque palette: the open conversation's decision, Edit draft, "Escalate to <team>" for each team with the AI's suggestion first, customer details; every lane and visible conversation; Undo the last send, theme and the shortcut sheet. Each command shows its key. A command runs after the palette has closed, so focus lands where the command puts it. Ctrl K works from text fields and closes the palette again.
+Reasoning   Linear's and Slack's palette grammar; showing keys beside commands is how a palette teaches the keymap.
+Trade-off   cmdk's vim bindings (Ctrl J / Ctrl K to move) are off, because Ctrl K belongs to the desk.
+Validation  palette-go-to-marcus: t04 open with focus on row-t04; palette-escalate-to-privacy-2x.png: Privacy preselected and focused; palette-toggle-with-ctrl-k: closed; palette-reduced-motion: no scale.
+```
+
+### The shortcut sheet is drawn from the keymap
+
+```
+Problem     A hand-written shortcut list drifts from the keys the desk actually binds.
+Decision    ? opens a sheet rendered from KEYMAP plus the keys local to the list, selection and composer; ? or Esc closes it. Dialogs let through only the key that opened them: ? for this sheet, ] for customer details.
+Reasoning   One table for the listener and the sheet; a toggle key that closes what it opened is the Telegram Web and Gmail behaviour.
+Trade-off   Labels must be short enough for the sheet, so the keymap carries display text.
+Validation  shortcut-sheet-2x.png: 7 sections, 20 rows; shortcut-sheet-closes-with-question-mark; shortcuts.test.ts: every combination is bound once.
+```
+
+### A scrim token instead of a blurred backdrop
+
+```
+Problem     shadcn's dialog backdrop blurred the page and used a named black: backdrop-filter outside the four glass surfaces (gate 3), a colour outside the tokens (gate 1), and an ink wash would lighten Night shift instead of dimming it.
+Decision    --scrim is a token per theme: ink at 16% in Day, black at 50% in Night. The palette, the shortcut sheet, dialogs and sheets all use it, with no blur.
+Reasoning   A dimmed desk says "the page is behind this" without making a fifth glass surface.
+Trade-off   The desk behind a dialog stays readable, which is less focusing than a blur.
+Validation  palette-open-2x.png: backdrop-filter none; night-palette-2x.png.
+```

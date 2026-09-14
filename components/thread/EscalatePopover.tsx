@@ -46,6 +46,7 @@ export function EscalatePopover({ ticket }: { ticket: Ticket }) {
           >
             <EscalateForm
               ticket={ticket}
+              initialTeam={state.escalateTeam}
               firstField={firstField}
               onCancel={() => dispatch({ type: "setEscalateOpen", open: false })}
               onSubmit={(values) => dispatch({ type: "escalate", ...values, now: readDemoNow() })}
@@ -59,18 +60,21 @@ export function EscalatePopover({ ticket }: { ticket: Ticket }) {
 
 function EscalateForm({
   ticket,
+  initialTeam,
   firstField,
   onCancel,
   onSubmit,
 }: {
   ticket: Ticket;
+  /** A team chosen in the command palette ("Escalate to Privacy"); otherwise the AI's suggestion. */
+  initialTeam: EscalationTeam | null;
   firstField: RefObject<HTMLInputElement | null>;
   onCancel: () => void;
   onSubmit: (values: { team: EscalationTeam; reasons: string[]; note: string }) => void;
 }) {
   // The popup unmounts when it closes, so each opening starts again from the AI's suggestion.
   const [defaults] = useState(() => escalationDefaults(ticket));
-  const [team, setTeam] = useState(defaults.team);
+  const [team, setTeam] = useState(initialTeam ?? defaults.team);
   const [reasons, setReasons] = useState(defaults.reasons);
   const [note, setNote] = useState(defaults.note);
   const [showBlock, setShowBlock] = useState(false);
@@ -105,7 +109,7 @@ function EscalateForm({
           {TEAMS.map((t) => (
             <label key={t.id}>
               <input
-                ref={t.id === defaults.team ? firstField : undefined}
+                ref={t.id === (initialTeam ?? defaults.team) ? firstField : undefined}
                 type="radio"
                 name={`${id}-team`}
                 value={t.id}

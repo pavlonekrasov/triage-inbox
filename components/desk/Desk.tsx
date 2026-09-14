@@ -2,6 +2,8 @@
 
 import { useEffect, useReducer, useRef } from "react";
 import { ContextPanel, ContextSheet } from "@/components/context/ContextPanel";
+import { CommandPalette } from "@/components/overlays/CommandPalette";
+import { ShortcutSheet } from "@/components/overlays/ShortcutSheet";
 import { ListPane } from "@/components/inbox/ListPane";
 import { ThreadPane } from "@/components/thread/ThreadPane";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -32,11 +34,12 @@ export function Desk({ initial }: { initial: DeskInit }) {
     if (next !== window.location.search) window.history.replaceState(null, "", next);
   }, [state.lane, state.openId, state.listState]);
 
-  // A notice stays 4 s, or 6 s when it offers an action; a newer notice restarts the timer.
+  // A notice stays 4 s, 6 s when it offers an action, or as long as its undo window; a newer notice restarts the timer.
   const { notice, outbox, sendFailure } = state;
   useEffect(() => {
     if (!notice) return;
-    const timer = setTimeout(() => dispatch({ type: "clearNotice", id: notice.id }), notice.action ? 6000 : 4000);
+    const ms = notice.undoUntil ? Math.max(0, notice.undoUntil - Date.now()) : notice.action ? 6000 : 4000;
+    const timer = setTimeout(() => dispatch({ type: "clearNotice", id: notice.id }), ms);
     return () => clearTimeout(timer);
   }, [notice]);
 
@@ -92,11 +95,19 @@ export function Desk({ initial }: { initial: DeskInit }) {
       case "select-sure-drafts":
         return dispatch({ type: "selectSureDrafts" });
       case "exit-selection":
+        // Esc steps back one level: the preview first, then selection.
+        if (state.bulkPreview) return dispatch({ type: "setBulkPreview", open: false });
         if (!state.editMode) return false;
         return dispatch({ type: "exitSelection" });
       case "approve":
-        // In selection mode A belongs to the bulk bar, which acts on the checked drafts.
-        if (state.editMode) return false;
+        // In selection mode A belongs to the bulk bar: the first press opens the preview, the second sends.
+        if (state.editMode) {
+          return dispatch(
+            state.bulkPreview
+              ? { type: "bulkApprove", now: readDemoNow(), wall: Date.now() }
+              : { type: "setBulkPreview", open: true },
+          );
+        }
         return dispatch({ type: "approve", now: readDemoNow(), wall: Date.now() });
       case "edit":
         return dispatch({ type: "openComposer" });
@@ -109,6 +120,10 @@ export function Desk({ initial }: { initial: DeskInit }) {
         // Telegram Web's info panel key (brief 7.1).
         if (!openTicket) return false;
         return setContextOpen(!contextOpen);
+      case "command-palette":
+        return dispatch({ type: "setOverlay", overlay: state.overlay === "palette" ? null : "palette" });
+      case "shortcuts":
+        return dispatch({ type: "setOverlay", overlay: state.overlay === "shortcuts" ? null : "shortcuts" });
     }
   });
 
@@ -148,6 +163,8 @@ export function Desk({ initial }: { initial: DeskInit }) {
         </ResizablePanelGroup>
       </div>
       {!wide && openTicket && <ContextSheet ticket={openTicket} open={contextOpen} onOpenChange={setContextOpen} />}
+      <CommandPalette />
+      <ShortcutSheet />
     </DeskContext>
   );
 }

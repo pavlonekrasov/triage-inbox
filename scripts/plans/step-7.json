@@ -1,0 +1,315 @@
+[
+  {
+    "name": "bulk-selected-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X"
+    ],
+    "waitMs": 400,
+    "out": "docs/evidence/step-7/bulk-selected-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ glass: [...document.querySelectorAll('[data-glass]')].map(e => e.dataset.glass), header: document.querySelector('[data-list-pane] header').innerText, bar: document.querySelector('[data-glass=bulk-bar]').innerText.split(String.fromCharCode(10)).join(' '), barOverflow: (() => { const b = document.querySelector('[data-glass=bulk-bar]'); return b.scrollWidth > b.clientWidth + 1; })() })"
+  },
+  {
+    "name": "bulk-preview-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "waitMs": 500,
+    "out": "docs/evidence/step-7/bulk-preview-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ sentYet: document.querySelectorAll('[data-reply]').length, previewItems: [...document.querySelectorAll('[data-preview-item]')].map(e => e.dataset.previewItem), everyItemHasText: [...document.querySelectorAll('[data-preview-item]')].every(e => e.querySelector('p + p')?.innerText.length > 20), send: document.querySelector('[data-bulk-send]')?.innerText.split(String.fromCharCode(10)).join(' '), barOverflow: (() => { const b = document.querySelector('[data-glass=bulk-bar]'); return b.scrollWidth > b.clientWidth + 1; })() })"
+  },
+  {
+    "name": "bulk-take-one-out",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "waitMs": 400,
+    "eval": "(async () => { document.querySelector('[data-preview-item] button').click(); await new Promise(r => setTimeout(r, 300)); return { left: document.querySelectorAll('[data-preview-item]').length, send: document.querySelector('[data-bulk-send]')?.innerText.split(String.fromCharCode(10)).join(' ') }; })()"
+  },
+  {
+    "name": "bulk-sent-toast-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X",
+      "a",
+      "a"
+    ],
+    "waitMs": 600,
+    "out": "docs/evidence/step-7/bulk-sent-toast-2x.png",
+    "selector": "[data-list-pane]",
+    "eval": "({ notice: (document.querySelector('[data-list-pane] [role=status]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), drafts: document.querySelector('[data-lane-tab=drafts]').innerText.replace(/[^0-9]/g, ''), selectionClosed: !document.querySelector('[data-glass=bulk-bar]'), focus: (() => { const a = document.activeElement; return a === document.body ? 'body' : (a.id || a.getAttribute('aria-label') || a.tagName); })(), pillAboveBar: !!document.querySelector('[data-dock]')?.innerText.includes('Sent to') })"
+  },
+  {
+    "name": "bulk-undo-with-z",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X",
+      "a",
+      "a",
+      "z"
+    ],
+    "waitMs": 500,
+    "eval": "({ drafts: document.querySelector('[data-lane-tab=drafts]').innerText.replace(/[^0-9]/g, ''), header: document.querySelector('[data-list-pane] header').innerText, focus: (() => { const a = document.activeElement; return a === document.body ? 'body' : (a.id || a.getAttribute('aria-label') || a.tagName); })() })"
+  },
+  {
+    "name": "bulk-delivered-after-window",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X",
+      "a",
+      "a"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 5600)); return { drafts: document.querySelector('[data-lane-tab=drafts]').innerText.replace(/[^0-9]/g, ''), notice: (document.querySelector('[data-list-pane] [role=status]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), delivered: [...document.querySelectorAll('[data-list-pane] [role=option]')].length }; })()"
+  },
+  {
+    "name": "bulk-escape-steps-back",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+X",
+      "a",
+      "Escape"
+    ],
+    "waitMs": 400,
+    "eval": "({ previewOpen: document.querySelector('[data-bulk-preview]')?.closest('[data-open]')?.dataset.open, stillSelecting: !!document.querySelector('[data-glass=bulk-bar]') })"
+  },
+  {
+    "name": "select-refused-in-needs-you",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "x"
+    ],
+    "waitMs": 300,
+    "eval": "({ notice: (document.querySelector('[data-list-pane] [role=status]')?.innerText ?? '').split(String.fromCharCode(10)).join(' '), selecting: !!document.querySelector('[data-glass=bulk-bar]') })"
+  },
+  {
+    "name": "palette-open-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Control+K"
+    ],
+    "waitMs": 500,
+    "out": "docs/evidence/step-7/palette-open-2x.png",
+    "eval": "({ open: !!document.querySelector('[data-command-palette]'), focus: document.activeElement.getAttribute('cmdk-input') !== null, groups: [...document.querySelectorAll('[cmdk-group-heading]')].map(e => e.innerText), backdropFilter: getComputedStyle(document.querySelector('[data-command-palette]')).backdropFilter })"
+  },
+  {
+    "name": "palette-go-to-marcus",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Control+K",
+      "m",
+      "a",
+      "r",
+      "c",
+      "u",
+      "s",
+      "Enter"
+    ],
+    "waitMs": 600,
+    "eval": "({ ticket: new URLSearchParams(location.search).get('ticket'), lane: new URLSearchParams(location.search).get('lane'), focus: (() => { const a = document.activeElement; return a === document.body ? 'body' : (a.id || a.getAttribute('aria-label') || a.tagName); })(), paletteClosed: !document.querySelector('[data-command-palette]') })"
+  },
+  {
+    "name": "palette-escalate-to-privacy-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Control+K",
+      "p",
+      "r",
+      "i",
+      "v",
+      "a",
+      "c",
+      "y",
+      "Enter"
+    ],
+    "waitMs": 700,
+    "out": "docs/evidence/step-7/palette-escalate-to-privacy-2x.png",
+    "eval": "({ popover: !!document.querySelector('[data-escalate-popover]'), checkedTeam: document.querySelector('[data-escalate-popover] input[type=radio]:checked')?.value, focus: document.activeElement.value ?? (() => { const a = document.activeElement; return a === document.body ? 'body' : (a.id || a.getAttribute('aria-label') || a.tagName); })() })"
+  },
+  {
+    "name": "palette-toggle-with-ctrl-k",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Control+K",
+      "Control+K"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 600)); return { open: !!document.querySelector('[data-command-palette]') }; })()"
+  },
+  {
+    "name": "palette-reduced-motion",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "keys": [
+      "Control+K"
+    ],
+    "waitMs": 20,
+    "eval": "(() => { const p = document.querySelector('[data-command-palette]'); return { scale: getComputedStyle(p).scale }; })()"
+  },
+  {
+    "name": "shortcut-sheet-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+?"
+    ],
+    "waitMs": 500,
+    "out": "docs/evidence/step-7/shortcut-sheet-2x.png",
+    "eval": "({ open: !!document.querySelector('[data-shortcut-sheet]'), sections: [...document.querySelectorAll('[data-shortcut-sheet] h3')].map(e => e.innerText), rows: document.querySelectorAll('[data-shortcut-sheet] dt').length })"
+  },
+  {
+    "name": "shortcut-sheet-closes-with-question-mark",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "Shift+?",
+      "Shift+?"
+    ],
+    "eval": "(async () => { await new Promise(r => setTimeout(r, 600)); return { open: !!document.querySelector('[data-shortcut-sheet]') }; })()"
+  },
+  {
+    "name": "night-palette-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "keys": [
+      "Control+K"
+    ],
+    "waitMs": 500,
+    "out": "docs/evidence/step-7/night-palette-2x.png"
+  },
+  {
+    "name": "night-bulk-preview-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t17",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('main')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "keys": [
+      "Shift+X",
+      "a"
+    ],
+    "waitMs": 500,
+    "out": "docs/evidence/step-7/night-bulk-preview-2x.png",
+    "selector": "[data-list-pane]"
+  }
+]

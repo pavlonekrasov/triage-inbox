@@ -13,7 +13,7 @@ import type { Ticket } from "@/lib/types";
 import { readDemoNow } from "@/lib/use-demo-now";
 import { EscalatePopover } from "./EscalatePopover";
 
-const PRIMARY_ICON: Record<PrimaryKind, LucideIcon> = {
+export const PRIMARY_ICON: Record<PrimaryKind, LucideIcon> = {
   approve: Send,
   "send-variant": Send,
   "take-over": HandHeart,
@@ -146,7 +146,8 @@ export function BarFeedback({ ticket }: { ticket: Ticket }) {
   const { state, dispatch } = useDesk();
   const notice = state.notice?.where === "bar" ? state.notice : null;
   const undoable = latestUndoable(state.outbox);
-  const away = undoable && undoable.ticketId !== ticket.id ? undoable : null;
+  // A bulk send has one toast, in the list where it was sent from (brief 9.3), so it gets no pill here.
+  const away = undoable && undoable.batch === null && undoable.ticketId !== ticket.id ? undoable : null;
   const awayName = away ? TICKETS_BY_ID.get(away.ticketId)?.customer.name : undefined;
 
   return (

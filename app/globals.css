@@ -113,6 +113,7 @@
   --color-field-a: var(--field-a);
   --color-field-b: var(--field-b);
   --color-field-c: var(--field-c);
+  --color-scrim: var(--scrim);
 
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -180,6 +181,9 @@
   /* Avatar initials: lightness per theme, hue from the customer id (lib/avatar.ts). */
   --avatar-bg-l: 0.9;
   --avatar-fg-l: 0.35;
+
+  /* Behind the command palette and dialogs: dims the desk without blur, which belongs to glass only (6.5). */
+  --scrim: oklch(0.21 0.02 285 / 0.16);
 }
 
 /* -----------------------------------------------------------------------------------------------
@@ -235,6 +239,9 @@
 
   --avatar-bg-l: 0.34;
   --avatar-fg-l: 0.9;
+
+  /* An ink scrim lightens a dark desk; Night dims with black instead. */
+  --scrim: oklch(0 0 0 / 0.5);
 }
 
 /* -----------------------------------------------------------------------------------------------
