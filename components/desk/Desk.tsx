@@ -140,7 +140,8 @@ export function Desk({ initial }: { initial: DeskInit }) {
                 maxSize={420}
                 groupResizeBehavior="preserve-pixel-size"
               >
-                <ContextPanel ticket={openTicket} onClose={() => setContextOpen(false)} />
+                {/* Keyed by ticket, so each conversation's details open scrolled to the top. */}
+                <ContextPanel key={openTicket.id} ticket={openTicket} onClose={() => setContextOpen(false)} />
               </ResizablePanel>
             </>
           )}

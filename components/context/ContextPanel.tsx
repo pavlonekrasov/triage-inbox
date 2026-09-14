@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight, FileText, Lock, PanelRightClose, RotateCcw, TriangleAlert } from "lucide-react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { Button } from "@/components/controls/Button";
 import { useDesk } from "@/components/desk/desk-store";
 import { RouteGlyph, type RouteGlyphKind } from "@/components/inbox/RouteGlyph";
@@ -36,23 +36,43 @@ const ROUTE_KIND: Record<Route, RouteGlyphKind> = { auto_send: "auto", approve_d
  * exists and is out of the agent's reach is part of trusting what it did read.
  */
 export function ContextPanel({ ticket, onClose }: { ticket: Ticket; onClose: () => void }) {
-  const { state } = useDesk();
+  const { state, dispatch } = useDesk();
+  const root = useRef<HTMLElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const focus = state.contextFocus;
 
-  // A citation or flag elsewhere asked for a row: bring it into view and move focus to it.
+  /*
+   * A citation or flag elsewhere asked for a row: move focus to it, bring it into view, and flash an
+   * ink wash that fades over 600 ms with ease-in, so it holds near full strength before it goes. Then
+   * the request is marked done, so showing the panel again later does not replay it. Under reduced
+   * motion there is no flash; the focus ring marks the row.
+   */
   useEffect(() => {
     if (!focus) return;
     const row = body.current?.querySelector<HTMLElement>(`[data-context-target="${CSS.escape(focus.target)}"]`);
-    if (!row) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Focus first: in Chromium a focus call after a smooth scroll starts cancels the scroll.
-    row.focus({ preventScroll: true });
-    row.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
-  }, [focus]);
+    if (row) {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // Focus first: in Chromium a focus call after a smooth scroll starts cancels the scroll.
+      row.focus({ preventScroll: true });
+      row.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+      if (!reduced) {
+        row.querySelector("[data-flash]")?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, easing: "ease-in" });
+      }
+    }
+    dispatch({ type: "contextFocusDone", nonce: focus.nonce });
+  }, [focus, dispatch]);
+
+  // Hiding the panel with focus inside it hands focus to the header button that shows it again.
+  // A layout cleanup runs while the panel is still in the document, so the check still sees focus.
+  useLayoutEffect(() => {
+    const panel = root.current;
+    return () => {
+      if (panel?.contains(document.activeElement)) document.querySelector<HTMLElement>("[data-context-toggle]")?.focus();
+    };
+  }, []);
 
   return (
-    <aside aria-label="Customer details" data-context-panel className="flex h-full min-h-0 flex-col bg-sidebar">
+    <aside ref={root} aria-label="Customer details" data-context-panel className="flex h-full min-h-0 flex-col bg-sidebar">
       <header className="flex h-14 shrink-0 items-center gap-2 pr-2 pl-4">
         <h2 className="min-w-0 flex-1 truncate text-title">Customer details</h2>
         <Button
@@ -92,10 +112,11 @@ export function ContextSheet({
       <SheetContent
         side="right"
         showCloseButton={false}
+        data-context-sheet
         aria-label={`Details for ${ticket.customer.name}`}
-        className="w-[min(22rem,100vw)] gap-0 border-border p-0 sm:max-w-none"
+        className="gap-0 border-border p-0 data-[side=right]:w-[min(22rem,100vw)] data-[side=right]:sm:max-w-none"
       >
-        <ContextPanel ticket={ticket} onClose={() => onOpenChange(false)} />
+        <ContextPanel key={ticket.id} ticket={ticket} onClose={() => onOpenChange(false)} />
       </SheetContent>
     </Sheet>
   );
@@ -167,13 +188,8 @@ function RestrictedFields({ ticket, section }: { ticket: Ticket; section: Contex
     ));
 }
 
-/**
- * A row a citation can point at. It flashes an ink wash for 600 ms when asked for; under reduced motion
- * it takes focus with the ring and no flash.
- */
+/** A row a citation can point at. The panel moves focus to it and animates its wash when asked for. */
 function Target({ id, className, children }: { id: string; className?: string; children: ReactNode }) {
-  const { state } = useDesk();
-  const focus = state.contextFocus?.target === id ? state.contextFocus : null;
   return (
     <li
       data-context-target={id}
@@ -183,13 +199,7 @@ function Target({ id, className, children }: { id: string; className?: string; c
         className,
       )}
     >
-      {focus && (
-        <span
-          key={focus.nonce}
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[inherit] bg-foreground/10 motion-safe:animate-context-flash motion-reduce:hidden"
-        />
-      )}
+      <span data-flash aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit] bg-foreground/10 opacity-0" />
       {children}
     </li>
   );
@@ -200,6 +210,15 @@ function CustomerSection({ ticket }: { ticket: Ticket }) {
   const now = useDemoNow();
   const { customer } = ticket;
   const revealedAt = state.revealedEmails[ticket.id];
+  const email = useRef<HTMLSpanElement>(null);
+  const revealing = useRef(false);
+
+  // Reveal removes its own button, so focus moves to the address it revealed.
+  useEffect(() => {
+    if (!revealedAt || !revealing.current) return;
+    revealing.current = false;
+    email.current?.focus();
+  }, [revealedAt]);
 
   return (
     <Section id="customer" title="Customer" status={{ text: PLATFORM_LABEL[customer.platform], risk: false }}>
@@ -208,7 +227,13 @@ function CustomerSection({ ticket }: { ticket: Ticket }) {
         <Field label="Email">
           {revealedAt ? (
             <>
-              <span className="break-all">{customer.email}</span>
+              <span
+                ref={email}
+                tabIndex={-1}
+                className="rounded-xs break-all outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring"
+              >
+                {customer.email}
+              </span>
               <span className="block text-micro text-muted-foreground">
                 Revealed by you at {formatClockTime(revealedAt)}, logged in the thread
               </span>
@@ -219,7 +244,10 @@ function CustomerSection({ ticket }: { ticket: Ticket }) {
               <Button
                 variant="text"
                 aria-label={`Reveal ${customer.name}'s email address. The reveal is logged.`}
-                onClick={() => dispatch({ type: "revealEmail", id: ticket.id, now: readDemoNow() })}
+                onClick={() => {
+                  revealing.current = true;
+                  dispatch({ type: "revealEmail", id: ticket.id, now: readDemoNow() });
+                }}
               >
                 Reveal
               </Button>

@@ -92,7 +92,7 @@
       "document.querySelector('[data-flag=source_conflict] button').click()",
       "new Promise(r => setTimeout(r, 1200))"
     ],
-    "eval": "(() => { const row = document.querySelector('[data-context-target=\"billing-conflict\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()"
+    "eval": "(() => { const row = document.querySelector('[data-context-target=\"billing-conflict\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[data-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: { running: flash.getAnimations().length, opacity: getComputedStyle(flash).opacity } }; })()"
   },
   {
     "name": "flag-t04-midflash-2x",
@@ -108,7 +108,7 @@
     "waitMs": 120,
     "out": "docs/evidence/step-6/flag-t04-midflash-2x.png",
     "selector": "[data-context-panel]",
-    "eval": "(() => { const row = document.querySelector('[data-context-target=\"billing-conflict\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()"
+    "eval": "(() => { const row = document.querySelector('[data-context-target=\"billing-conflict\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[data-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: { running: flash.getAnimations().length, opacity: getComputedStyle(flash).opacity } }; })()"
   },
   {
     "name": "citation-t05-reduced-motion",
@@ -127,7 +127,7 @@
     "media": {
       "prefers-reduced-motion": "reduce"
     },
-    "eval": "(() => { const row = document.querySelector('[data-context-target=\"source:src-credits-v3\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()"
+    "eval": "(() => { const row = document.querySelector('[data-context-target=\"source:src-credits-v3\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[data-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: { running: flash.getAnimations().length, opacity: getComputedStyle(flash).opacity } }; })()"
   },
   {
     "name": "reveal-email-logged-2x",

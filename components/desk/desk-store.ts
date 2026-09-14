@@ -153,6 +153,7 @@ export type DeskAction =
   | { type: "setContextOpen"; open: boolean }
   | { type: "toggleSection"; section: ContextSection }
   | { type: "focusContext"; section: ContextSection; target: string }
+  | { type: "contextFocusDone"; nonce: number }
   | { type: "revealEmail"; id: string; now: number };
 
 /** Tickets out of every lane right now: snoozed, marked spam, escalated, or answered from an open lane. */
@@ -735,6 +736,9 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
       };
     }
 
+    case "contextFocusDone":
+      return state.contextFocus?.nonce === action.nonce ? { ...state, contextFocus: null } : state;
+
     // Revealing is logged once, at the first reveal, as a service message in the thread (brief 7.5).
     case "revealEmail":
       if (state.revealedEmails[action.id]) return state;
@@ -747,7 +751,9 @@ export function deskReducer(state: DeskState, action: DeskAction): DeskState {
   if (next.openId === state.openId) return next;
   // The Escalate popover and decision feedback belong to the conversation they were raised on.
   const staleBarNotice = next.notice?.where === "bar" && next.notice === state.notice;
-  return { ...next, escalateOpen: false, notice: staleBarNotice ? null : next.notice };
+  // A request to show a panel row was raised for the conversation that was open.
+  const contextFocus = next.contextFocus === state.contextFocus ? null : next.contextFocus;
+  return { ...next, escalateOpen: false, notice: staleBarNotice ? null : next.notice, contextFocus };
 }
 
 export const DeskContext = createContext<{ state: DeskState; dispatch: Dispatch<DeskAction> } | null>(null);

@@ -9,7 +9,15 @@ import { Translation } from "./Bubble";
 import { Button } from "@/components/controls/Button";
 
 type ReplyBubbleProps = { showTranslation: boolean } & (
-  | { kind: "draft"; draft: TimelineDraft; variantCount: number; sources: Source[]; showSources: boolean }
+  | {
+      kind: "draft";
+      draft: TimelineDraft;
+      variantCount: number;
+      sources: Source[];
+      showSources: boolean;
+      /** Opens the source's row in the context panel. */
+      onShowSources: (sourceId: string) => void;
+    }
   | { kind: "reply"; reply: TimelineReply; gloss?: string; undoUntil?: number; onUndo: () => void; onRetry: () => void }
 );
 
@@ -66,7 +74,7 @@ export function ReplyBubble(props: ReplyBubbleProps) {
           </div>
         )}
       </div>
-      {!sent && props.showSources && <SourcesChip sources={props.sources} />}
+      {!sent && props.showSources && <SourcesChip sources={props.sources} onShow={props.onShowSources} />}
     </li>
   );
 }
@@ -141,16 +149,28 @@ function Ticks({ delivered }: { delivered: boolean }) {
   );
 }
 
-/** What the draft rests on. An outdated source is flagged here, next to the text it shaped. */
-function SourcesChip({ sources }: { sources: Source[] }) {
+/**
+ * What the draft rests on. An outdated source is flagged here, next to the text it shaped. With sources,
+ * the chip links to them in the context panel, the outdated one first.
+ */
+function SourcesChip({ sources, onShow }: { sources: Source[]; onShow: (sourceId: string) => void }) {
   const stale = sources.filter((s) => s.supersededBy);
   const names = sources.map((s) => `${s.title} ${s.version}`).join(", ");
+  const chip =
+    "inline-flex max-w-full items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-micro text-muted-foreground";
+
+  if (sources.length === 0) return <p className={chip}>No help article or policy used</p>;
 
   return (
-    <p className="inline-flex max-w-full items-center gap-1 rounded-full border border-border bg-card px-2 py-0.5 text-micro text-muted-foreground">
-      {stale.length > 0 && <TriangleAlert aria-hidden className="size-3.5 shrink-0 text-risk-high" strokeWidth={1.75} />}
-      <span className="truncate">{sources.length > 0 ? `Sources: ${names}` : "No help article or policy used"}</span>
+    <Button
+      variant="outline"
+      title="Show in Sources used"
+      onClick={() => onShow((stale[0] ?? sources[0]).id)}
+      className={`${chip} h-auto font-normal [&_svg]:size-3.5`}
+    >
+      {stale.length > 0 && <TriangleAlert aria-hidden className="shrink-0 text-risk-high" strokeWidth={1.75} />}
+      <span className="truncate">Sources: {names}</span>
       {stale.length > 0 && <span className="shrink-0 text-risk-high">· outdated</span>}
-    </p>
+    </Button>
   );
 }

@@ -47,10 +47,14 @@ export function commandFor(event: KeyboardEvent): Command | null {
   if (event.defaultPrevented || event.isComposing) return null;
   if (event.ctrlKey || event.metaKey || event.altKey) return null;
   if (isEditable(event.target)) return null;
-  // An open menu or dialog owns the keyboard: J there is typeahead, not "next conversation".
-  if (event.target instanceof Element && event.target.closest("[role=menu], [role=dialog]")) return null;
   const key = event.key.toLowerCase();
-  return KEYMAP.find((b) => b.key === key && Boolean(b.shift) === event.shiftKey)?.command ?? null;
+  const command = KEYMAP.find((b) => b.key === key && Boolean(b.shift) === event.shiftKey)?.command ?? null;
+  // An open menu or dialog owns the keyboard: J there is typeahead, not "next conversation". The one
+  // exception is ] inside the customer details sheet, which closes it the way it opened it.
+  if (event.target instanceof Element && event.target.closest("[role=menu], [role=dialog]")) {
+    return command === "toggle-context" && event.target.closest("[data-context-sheet]") ? command : null;
+  }
+  return command;
 }
 
 /**

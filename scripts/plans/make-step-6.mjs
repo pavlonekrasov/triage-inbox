@@ -7,7 +7,7 @@ const ready = "!document.querySelector('[data-ssr]') && document.querySelector('
 const strip = "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()";
 const wait = (ms) => `new Promise(r => setTimeout(r, ${ms}))`;
 const rowCheck = (target) =>
-  `(() => { const row = document.querySelector('[data-context-target="${target}"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()`;
+  `(() => { const row = document.querySelector('[data-context-target="${target}"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[data-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: { running: flash.getAnimations().length, opacity: getComputedStyle(flash).opacity } }; })()`;
 
 const sweep = `(async () => {
   const problems = []; let checked = 0;

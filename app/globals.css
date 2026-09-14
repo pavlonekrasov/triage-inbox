@@ -404,23 +404,6 @@
   }
 }
 
-/* Context panel (brief 7.5): a source citation or an evidence flag scrolls its panel row into view,
-   and the row flashes an ink wash that fades over 600 ms. ease-in holds the wash near full strength
-   before it fades, so the eye finds the row; an ease-out curve dropped it to 1% within 150 ms. Under
-   reduced motion there is no flash; the row takes focus instead, which draws the ring. */
-@theme {
-  --animate-context-flash: context-flash 600ms var(--ease-in) both;
-
-  @keyframes context-flash {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-    }
-  }
-}
-
 /* Draft fill: the violet wash composited over card, so the bubble is opaque. Its text then measures
    the same over every wallpaper field, and the draft reads near-white beside the tinted sent bubble. */
 @utility draft-fill {

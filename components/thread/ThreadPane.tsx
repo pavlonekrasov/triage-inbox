@@ -155,6 +155,7 @@ function Timeline({ ticket, overlay, showTranslation }: { ticket: Ticket; overla
             variantCount={item.variantCount}
             sources={triage.sources}
             showSources={item.key === lastDraftKey}
+            onShowSources={(id) => dispatch({ type: "focusContext", section: "sources", target: `source:${id}` })}
             showTranslation={showTranslation}
           />
         );

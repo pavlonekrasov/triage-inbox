@@ -456,3 +456,35 @@ Reasoning   Brief 9.2 ties hints to room on screen; the thread's own width is th
 Trade-off   At 1280 to 1339 px with the panel open, hints are hidden; aria-keyshortcuts and the ? sheet in step 7 still name every key.
 Validation  panel-fits-every-ticket-1280: 22 tickets, no problems; inbox-t04-panel-2x at 1440: hints shown; step 5 bar-fits sweeps at 1440 and 900 still clean.
 ```
+
+## Step 6 fixes
+
+### A panel row request is handled once
+
+```
+Problem     Following a citation left the request in state, so hiding and showing the panel replayed the flash and pulled keyboard focus back into the row; each conversation's details also opened at the previous one's scroll position.
+Decision    The panel marks a request done after it moves focus and flashes the row; opening another conversation drops any request. The panel is keyed by conversation, so it opens at the top. The flash is a Web Animation on a wash that is always present, so nothing re-renders to run it.
+Reasoning   Focus moves only in answer to an action (WCAG 3.2.1); a replayed flash points at nothing the specialist asked for.
+Trade-off   The 600 ms and ease-in now live in the component instead of a CSS token.
+Validation  audit a: after ] ] focus stays where it was and no flash runs; audit c: the next conversation's panel is at scrollTop 0; desk-store.test.ts "context panel requests".
+```
+
+### Focus is never dropped to the page
+
+```
+Problem     Reveal removed its own button and the panel's close button removed itself, both leaving focus on <body>; ] opened the sheet but could not close it, because dialogs swallow shortcuts.
+Decision    After Reveal, focus moves to the revealed address. Hiding the panel with focus inside it hands focus to the header's panel button. ] passes through the customer details sheet, and only that shortcut.
+Reasoning   A keyboard user must never have to find their place again (WCAG 2.4.3); the key that opens a panel should close it.
+Trade-off   None found.
+Validation  audit e: focus on "jordan.kim@example.com"; audit g: focus on the header's "Customer details" button; audit f: ] closes the sheet.
+```
+
+### Smaller fixes
+
+```
+Problem     The sheet measured 281 px on a 375 px phone; the dialog backdrop still carried a named black and a backdrop blur outside Glass.tsx; the "Sources:" chip under drafts looked like the other citations but did nothing.
+Decision    The sheet is min(22rem, 100vw); the backdrop uses an ink wash with no blur; the chip opens its source in the panel, the outdated one first.
+Reasoning   Review gates 1 and 3; a chip that names a source behaves like every other citation.
+Trade-off   None found.
+Validation  audit h: 352 px at 375 px; audit j: the chip on ticket 5 focuses "Chat credit refunds v3" in the panel.
+```

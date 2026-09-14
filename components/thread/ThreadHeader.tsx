@@ -58,6 +58,7 @@ function ContextToggle() {
   return (
     <Button
       iconOnly
+      data-context-toggle
       aria-pressed={open}
       aria-keyshortcuts="]"
       aria-label="Customer details"

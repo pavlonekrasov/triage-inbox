@@ -319,3 +319,21 @@ describe("context panel", () => {
     expect(logged).toEqual([{ at: new Date(now).toISOString(), text: "Email address revealed by you" }]);
   });
 });
+
+describe("context panel requests", () => {
+  it("clears a row request once the panel has handled it, so showing the panel again does not replay it", () => {
+    const asked = deskReducer(start("t04", "needs_you"), { type: "focusContext", section: "billing", target: "billing-conflict" });
+    const nonce = asked.contextFocus?.nonce ?? -1;
+    expect(deskReducer(asked, { type: "contextFocusDone", nonce: nonce + 1 }).contextFocus).not.toBeNull();
+    expect(deskReducer(asked, { type: "contextFocusDone", nonce }).contextFocus).toBeNull();
+  });
+
+  it("drops a row request when another conversation opens", () => {
+    const state = run(
+      start("t04", "needs_you"),
+      { type: "focusContext", section: "billing", target: "billing-conflict" },
+      { type: "activate", id: "t02" },
+    );
+    expect(state.contextFocus).toBeNull();
+  });
+});
