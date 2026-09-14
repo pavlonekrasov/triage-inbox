@@ -1,17 +1,24 @@
 "use client";
 
 import { useEffect, useReducer, useRef } from "react";
+import { ContextPanel, ContextSheet } from "@/components/context/ContextPanel";
 import { ListPane } from "@/components/inbox/ListPane";
 import { ThreadPane } from "@/components/thread/ThreadPane";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { TICKETS_BY_ID } from "@/data/tickets";
 import type { DeskInit } from "@/lib/desk-params";
 import { sendReply } from "@/lib/send";
 import { useShortcuts } from "@/lib/shortcuts";
 import { readDemoNow } from "@/lib/use-demo-now";
-import { createDeskState, DeskContext, deskReducer, latestUndoable } from "./desk-store";
+import { useWideDesk } from "@/lib/use-wide-desk";
+import { createDeskState, DeskContext, deskReducer, isContextOpen, latestUndoable } from "./desk-store";
 
 export function Desk({ initial }: { initial: DeskInit }) {
   const [state, dispatch] = useReducer(deskReducer, initial, createDeskState);
+  const wide = useWideDesk();
+  const contextOpen = isContextOpen(state, wide);
+  const openTicket = state.openId ? TICKETS_BY_ID.get(state.openId) : undefined;
+  const setContextOpen = (open: boolean) => dispatch({ type: "setContextOpen", open });
 
   // Mirror the view into the URL, so a reload or a copied link reopens the same lane and conversation.
   useEffect(() => {
@@ -98,6 +105,10 @@ export function Desk({ initial }: { initial: DeskInit }) {
       case "undo":
         if (!latestUndoable(outbox)) return false;
         return dispatch({ type: "undoSend" });
+      case "toggle-context":
+        // Telegram Web's info panel key (brief 7.1).
+        if (!openTicket) return false;
+        return setContextOpen(!contextOpen);
     }
   });
 
@@ -118,8 +129,24 @@ export function Desk({ initial }: { initial: DeskInit }) {
           <ResizablePanel id="thread" minSize={520}>
             <ThreadPane />
           </ResizablePanel>
+          {/* Three panes from 1280 px: list 360, thread, context 340, with minimums 320 / 520 / 300 (brief 7.1). */}
+          {wide && contextOpen && openTicket && (
+            <>
+              <ResizableHandle />
+              <ResizablePanel
+                id="context"
+                defaultSize={340}
+                minSize={300}
+                maxSize={420}
+                groupResizeBehavior="preserve-pixel-size"
+              >
+                <ContextPanel ticket={openTicket} onClose={() => setContextOpen(false)} />
+              </ResizablePanel>
+            </>
+          )}
         </ResizablePanelGroup>
       </div>
+      {!wide && openTicket && <ContextSheet ticket={openTicket} open={contextOpen} onOpenChange={setContextOpen} />}
     </DeskContext>
   );
 }

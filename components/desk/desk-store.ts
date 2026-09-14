@@ -11,7 +11,7 @@ import { composerSendBlock } from "@/lib/rewrite";
 import { approvalBlock, canBulkSelect, isSureLowRiskDraft, laneFor } from "@/lib/route";
 import { UNDO_WINDOW_MS, type SendFailure } from "@/lib/send";
 import type { TimelineOverlay } from "@/lib/timeline";
-import type { EscalationTeam, Lane, Ticket } from "@/lib/types";
+import type { ContextSection, EscalationTeam, Lane, Ticket } from "@/lib/types";
 
 const SNOOZE_MS = 60 * 60_000;
 const iso = (ms: number) => new Date(ms).toISOString();
@@ -33,7 +33,7 @@ export interface Notice {
   action?: { label: string; dispatch: DeskAction };
 }
 
-/** Telegram's edit mode: one composer at a time, bound to the ticket it was opened on. */
+/** Telegram's edit mode: a composer bound to the conversation it was opened on, kept per conversation. */
 export interface Composer {
   ticketId: string;
   mode: "edit" | "take-over" | "follow-up" | "write";
@@ -108,6 +108,14 @@ export interface DeskState {
   escalateOpen: boolean;
   /** Prototype control: how often the fake send API fails. */
   sendFailure: SendFailure;
+
+  /** The context panel: "auto" is open on a three-pane desk and closed where it would be a sheet. */
+  contextPanel: "auto" | "open" | "closed";
+  collapsedSections: readonly ContextSection[];
+  /** A panel row to scroll to and flash, from a citation or an evidence flag. */
+  contextFocus: { target: string; nonce: number } | null;
+  /** Emails a specialist revealed, with the time, per ticket. Each reveal is logged in the thread. */
+  revealedEmails: Readonly<Record<string, string>>;
 }
 
 export type DeskAction =
@@ -141,7 +149,11 @@ export type DeskAction =
   | { type: "escalate"; team: EscalationTeam; reasons: string[]; note: string; now: number }
   | { type: "undoEscalation"; id: string }
   | { type: "toggleMarkWrong"; now: number }
-  | { type: "setSendFailure"; sendFailure: SendFailure };
+  | { type: "setSendFailure"; sendFailure: SendFailure }
+  | { type: "setContextOpen"; open: boolean }
+  | { type: "toggleSection"; section: ContextSection }
+  | { type: "focusContext"; section: ContextSection; target: string }
+  | { type: "revealEmail"; id: string; now: number };
 
 /** Tickets out of every lane right now: snoozed, marked spam, escalated, or answered from an open lane. */
 export function hiddenIds(state: Pick<DeskState, "dismissed" | "escalations" | "outbox">): ReadonlySet<string> {
@@ -188,6 +200,8 @@ export function threadOverlay(state: DeskState, ticket: Ticket): TimelineOverlay
   const events: { at: string; text: string }[] = [];
   const takenOver = state.takenOver[ticket.id];
   if (takenOver) events.push({ at: takenOver, text: "You took over the conversation" });
+  const revealed = state.revealedEmails[ticket.id];
+  if (revealed) events.push({ at: revealed, text: "Email address revealed by you" });
   const wrong = state.markedWrong[ticket.id];
   if (wrong) events.push({ at: wrong, text: "Marked as wrong by you, for today's quality review" });
   // The latest reply is the head of the outbox entry; the replies it follows up hang off it, newest first.
@@ -238,8 +252,16 @@ export function createDeskState({ lane, ticketId, listState }: DeskInit): DeskSt
     composers: {},
     escalateOpen: false,
     sendFailure: "off",
+    contextPanel: "auto",
+    collapsedSections: [],
+    contextFocus: null,
+    revealedEmails: {},
   };
 }
+
+/** Whether the context panel shows: on a wide desk by default, and wherever the specialist opened it. */
+export const isContextOpen = (state: Pick<DeskState, "contextPanel">, wide: boolean) =>
+  state.contextPanel === "auto" ? wide : state.contextPanel === "open";
 
 const SELECTION_ELSEWHERE: Record<Lane, string> = {
   needs_you: "Bulk selection works in Drafts. Cases in Needs you are decided one at a time.",
@@ -687,6 +709,36 @@ function reduce(state: DeskState, action: DeskAction): DeskState {
 
     case "setSendFailure":
       return { ...state, sendFailure: action.sendFailure };
+
+    case "setContextOpen":
+      return { ...state, contextPanel: action.open ? "open" : "closed" };
+
+    case "toggleSection": {
+      const collapsed = state.collapsedSections.includes(action.section);
+      return {
+        ...state,
+        collapsedSections: collapsed
+          ? state.collapsedSections.filter((s) => s !== action.section)
+          : [...state.collapsedSections, action.section],
+      };
+    }
+
+    // A citation or evidence flag opens the panel, expands the section and asks for the row.
+    case "focusContext": {
+      const seq = state.seq + 1;
+      return {
+        ...state,
+        seq,
+        contextPanel: "open",
+        collapsedSections: state.collapsedSections.filter((s) => s !== action.section),
+        contextFocus: { target: action.target, nonce: seq },
+      };
+    }
+
+    // Revealing is logged once, at the first reveal, as a service message in the thread (brief 7.5).
+    case "revealEmail":
+      if (state.revealedEmails[action.id]) return state;
+      return { ...state, revealedEmails: { ...state.revealedEmails, [action.id]: iso(action.now) } };
   }
 }
 

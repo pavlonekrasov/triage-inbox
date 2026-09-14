@@ -394,3 +394,65 @@ Reasoning   A letter pressed on a radio types nothing, so it can only mean the s
 Trade-off   None found: radios and checkboxes use arrows and Space, which the keymap does not bind.
 Validation  In the browser, clicking Refund then pressing A shows "Approve is off for this decision. Choose Refund or Decline, then send it."
 ```
+
+## Step 6: context panel
+
+### A third pane on the desk, a sheet below it
+
+```
+Problem     The specialist has to check the AI's evidence (billing records, sources, history) without leaving the conversation, and three panes need 1,220 px at their minimum widths.
+Decision    From 1280 px the panel is a third resizable pane, 340 px (300 to 420), open by default. Below 1280 px it is a right sheet, closed by default. The header pill's panel button and ] show or hide it in both.
+Reasoning   Telegram Web's info panel and its ] key (brief 7.1, 7.2); a pane that is always one key away stays out of the reading path.
+Trade-off   At 1280 to 1440 px the thread column narrows to roughly 520 to 680 px while the panel is open.
+Validation  inbox-t04-panel-2x.png; key-bracket-toggle: ] hides the panel, ] again shows it; sheet-900-2x.png: 384 px sheet, opacity 1, no backdrop-filter.
+```
+
+### Records that disagree sit side by side, in the customer's time
+
+```
+Problem     Ticket 4's whole case is a time zone: the App Store logged 3 Sep 23:58 Pacific, payments renewed at 4 Sep 07:02 UTC. A list of UTC timestamps hides that the customer is right about "the 3rd".
+Decision    The billing timeline is in the customer's zone, named once at the top ("Pacific"). The two disagreeing records are grouped into one terracotta-washed entry, "Sources disagree · 4 minutes apart", as two cards side by side, each with its system, the normalised time, and the UTC original underneath, then one sentence saying what disagrees.
+Reasoning   Brief 7.5 asks for exactly this; side by side makes the 4-minute gap a comparison instead of arithmetic. Zone names are written in code, not taken from Intl, so server and browser render the same text.
+Trade-off   In 131 px cards the label and amount take two lines each.
+Validation  accounts.test.ts: ticket 4 renders 3 Sep 23:58 / 4 Sep 06:58 UTC and 4 Sep 00:02 / 4 Sep 07:02 UTC, 4 minutes apart; panel-t04-conflict-2x.png; /tokens "Ink on the sources-disagree wash" 14.85:1 Day.
+```
+
+### Outdated sources: the strike line at 50%, not the text
+
+```
+Problem     Brief 7.5 says a superseded source is "struck through at 50%"; text at 50% opacity measures under 4.5:1, which review gate 2 forbids.
+Decision    The title keeps muted ink (4.5:1 or better) with a line-through drawn at 50% of the ink colour, a warning glyph, and "Newer version exists (v4, 2 Sep)" in terracotta beneath. The section header reads "1 outdated" with the glyph. The pinned card's citation uses the same treatment.
+Reasoning   Gate 2 is a measurement and the brief's 50% is a styling instruction; the struck line still reads as "no longer valid" while the words stay legible.
+Trade-off   The superseded title is less faded than the brief's picture.
+Validation  panel-t05-stale-2x.png; context.test.ts sourcesStatus for ticket 5 is "1 outdated" with risk.
+```
+
+### Restricted fields are shown, and a revealed email is logged
+
+```
+Problem     A field the agent may not read could be hidden, but then the specialist cannot tell "not on record" from "not permitted".
+Decision    Restricted fields (birth details, payment card, transcript content, reading content) show a lock, "Restricted" and the reason in a line underneath. The email is masked to its first letter and domain; Reveal shows it and adds "Email address revealed by you" to the thread, once.
+Reasoning   Brief 7.5: knowing a field exists but is restricted is part of trusting the system; a logged reveal is the helpdesk convention for personal data.
+Trade-off   Every section carries one or two rows that give no data.
+Validation  panel-t03-advisor-2x.png shows the transcript locked and no advisor verdict; desk-store.test.ts "logs the first email reveal in the thread, once".
+```
+
+### Evidence links to its row, which flashes
+
+```
+Problem     The pinned card says "Sources disagree" and cites "Refund policy v4"; the specialist should reach the record behind each claim in one action (review gate 15).
+Decision    Evidence flags on the collapsed card and source citations under "Why this route" are text buttons. Each opens the panel (or the sheet), expands the section, scrolls the row into view, moves focus to it, and flashes an ink wash that fades over 600 ms with ease-in. Under reduced motion there is no flash, and the focus ring marks the row.
+Reasoning   A claim linked to its evidence is "evidence, not belief"; moving focus keeps keyboard and screen-reader users on the same row the eye goes to.
+Trade-off   Following a link takes keyboard focus out of the thread; J and K still work from the panel.
+Validation  flag-t04-link: row in view and focused after 1.2 s; citation-t05-reduced-motion: row focused, flash hidden. The first capture found an ease-out flash at 1% opacity after 150 ms, hence ease-in.
+```
+
+### Key hints need a 640 px thread column
+
+```
+Problem     With the panel open at 1280 px the thread column is 578 px, and ticket 2's decision bar with its key hints needed more than the 530 px left inside the dock's padding.
+Decision    Key hints show from 1280 px, as before, and also only while the thread column is at least 640 px wide (a container query on the thread).
+Reasoning   Brief 9.2 ties hints to room on screen; the thread's own width is the room that matters once a third pane takes 340 px.
+Trade-off   At 1280 to 1339 px with the panel open, hints are hidden; aria-keyshortcuts and the ? sheet in step 7 still name every key.
+Validation  panel-fits-every-ticket-1280: 22 tickets, no problems; inbox-t04-panel-2x at 1440: hints shown; step 5 bar-fits sweeps at 1440 and 900 still clean.
+```

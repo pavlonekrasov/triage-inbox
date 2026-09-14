@@ -10,9 +10,16 @@ const triage = (id: string) => {
 
 describe("summaryFlags", () => {
   it("flags the conflict on ticket 4 and the outdated policy on ticket 5 (review gate 15)", () => {
-    expect(summaryFlags(triage("t04"))).toEqual([{ kind: "source_conflict", text: "Sources disagree" }]);
+    expect(summaryFlags(triage("t04"))).toEqual([
+      { kind: "source_conflict", text: "Sources disagree", section: "billing", target: "billing-conflict" },
+    ]);
     expect(summaryFlags(triage("t05"))).toEqual([
-      { kind: "stale_source", text: "Chat credit refunds v3 is outdated: v4 published 2 Sep" },
+      {
+        kind: "stale_source",
+        text: "Chat credit refunds v3 is outdated: v4 published 2 Sep",
+        section: "sources",
+        target: "source:src-credits-v3",
+      },
     ]);
   });
 
@@ -22,7 +29,7 @@ describe("summaryFlags", () => {
 
   it("still flags a stale_source rule when no superseded source is attached", () => {
     expect(summaryFlags({ hardRules: ["stale_source"], sources: [] })).toEqual([
-      { kind: "stale_source", text: "A source used is outdated" },
+      { kind: "stale_source", text: "A source used is outdated", section: "sources", target: "sources" },
     ]);
   });
 });

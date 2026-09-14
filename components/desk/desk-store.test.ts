@@ -7,6 +7,7 @@ import {
   createDeskState,
   deskReducer,
   hiddenIds,
+  isContextOpen,
   rowsFor,
   threadOverlay,
   type DeskAction,
@@ -282,5 +283,39 @@ describe("escalation", () => {
     expect(state.composers.t17).toBeUndefined();
     expect(state.escalateOpen).toBe(false);
     expect(state.notice).toMatchObject({ where: "bar", text: "This case is with Billing now, so there is nothing to decide here." });
+  });
+});
+
+describe("context panel", () => {
+  it("is open on a wide desk and closed where it would be a sheet, until the specialist chooses", () => {
+    const state = start("t04", "needs_you");
+    expect(isContextOpen(state, true)).toBe(true);
+    expect(isContextOpen(state, false)).toBe(false);
+    const closed = deskReducer(state, { type: "setContextOpen", open: false });
+    expect(isContextOpen(closed, true)).toBe(false);
+  });
+
+  it("opens the panel and the section, and asks for the row again each time a citation is followed", () => {
+    const state = run(
+      start("t05", "drafts"),
+      { type: "setContextOpen", open: false },
+      { type: "toggleSection", section: "sources" },
+      { type: "focusContext", section: "sources", target: "source:src-credits-v3" },
+    );
+    expect(state.contextPanel).toBe("open");
+    expect(state.collapsedSections).not.toContain("sources");
+    expect(state.contextFocus?.target).toBe("source:src-credits-v3");
+    const again = deskReducer(state, { type: "focusContext", section: "sources", target: "source:src-credits-v3" });
+    expect(again.contextFocus?.nonce).not.toBe(state.contextFocus?.nonce);
+  });
+
+  it("logs the first email reveal in the thread, once", () => {
+    const state = run(
+      start("t02", "needs_you"),
+      { type: "revealEmail", id: "t02", now },
+      { type: "revealEmail", id: "t02", now: now + 60_000 },
+    );
+    const logged = threadOverlay(state, TICKETS_BY_ID.get("t02")!).events?.filter((e) => e.text === "Email address revealed by you");
+    expect(logged).toEqual([{ at: new Date(now).toISOString(), text: "Email address revealed by you" }]);
   });
 });

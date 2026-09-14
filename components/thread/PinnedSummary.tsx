@@ -3,6 +3,7 @@
 import { Check, ChevronDown, FileText, TriangleAlert } from "lucide-react";
 import { useId, useState } from "react";
 import { Button } from "@/components/controls/Button";
+import { useDesk } from "@/components/desk/desk-store";
 import { CATEGORY } from "@/components/inbox/CategoryGlyph";
 import { RouteGlyph, type RouteGlyphKind } from "@/components/inbox/RouteGlyph";
 import { glyphKind } from "@/components/inbox/TicketRow";
@@ -29,6 +30,7 @@ const HEADLINE: Record<RouteGlyphKind, string> = {
  */
 export function PinnedSummary({ ticket }: { ticket: Ticket }) {
   const { triage } = ticket;
+  const { dispatch } = useDesk();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const kind = glyphKind(triage);
@@ -67,7 +69,15 @@ export function PinnedSummary({ ticket }: { ticket: Ticket }) {
             {flags.map((flag) => (
               <li key={flag.text} data-flag={flag.kind} className="flex items-start gap-1.5 text-body-s text-risk-high">
                 <TriangleAlert aria-hidden className="mt-px size-4 shrink-0" strokeWidth={1.75} />
-                {flag.text}
+                {/* Each problem links to its evidence in the context panel (review gate 15). */}
+                <Button
+                  variant="text"
+                  title="Show in customer details"
+                  onClick={() => dispatch({ type: "focusContext", section: flag.section, target: flag.target })}
+                  className="text-left font-normal underline decoration-dotted underline-offset-2"
+                >
+                  {flag.text}
+                </Button>
               </li>
             ))}
           </ul>
@@ -104,6 +114,7 @@ export function PinnedSummary({ ticket }: { ticket: Ticket }) {
 
 function WhyThisRoute({ ticket }: { ticket: Ticket }) {
   const { triage } = ticket;
+  const { dispatch } = useDesk();
   const retrieved = new Map(triage.sources.map((s) => [s.id, s]));
 
   return (
@@ -124,7 +135,12 @@ function WhyThisRoute({ ticket }: { ticket: Ticket }) {
                   {reason.label}
                 </p>
                 <p className="text-body-s break-words text-muted-foreground">{reason.evidence}</p>
-                {source && <SourceCitation source={source} />}
+                {source && (
+                  <SourceCitation
+                    source={source}
+                    onShow={() => dispatch({ type: "focusContext", section: "sources", target: `source:${source.id}` })}
+                  />
+                )}
               </div>
             </li>
           );
@@ -164,32 +180,39 @@ function WhyThisRoute({ ticket }: { ticket: Ticket }) {
 
 /**
  * The policy or article a reason rests on, with its version and date. A superseded version is struck
- * through and names the newer one (brief 7.5). It becomes a link to the context panel row in step 6.
+ * through and names the newer one (brief 7.5). It links to its row in the context panel's Sources used.
  */
-function SourceCitation({ source }: { source: Source }) {
+function SourceCitation({ source, onShow }: { source: Source; onShow: () => void }) {
   const newer = source.supersededBy ? SOURCE_REGISTRY.get(source.supersededBy) : undefined;
 
-  if (newer) {
-    return (
-      <p data-source={source.id} className="mt-1 flex flex-wrap items-center gap-x-1.5 text-micro">
-        <TriangleAlert aria-hidden className="size-3.5 shrink-0 text-risk-high" strokeWidth={1.75} />
-        <span className="text-muted-foreground line-through">
-          {source.title} {source.version}
-        </span>
-        <span className="text-risk-high">
-          Newer version exists ({newer.version}, {formatShortDate(newer.updatedAt)})
-        </span>
-      </p>
-    );
-  }
-
   return (
-    <p data-source={source.id} className="mt-1 flex items-center gap-1.5 text-micro text-muted-foreground">
-      <FileText aria-hidden className="size-3.5 shrink-0" strokeWidth={1.75} />
-      <span className="min-w-0 truncate">
-        {source.title} {source.version} · updated {formatShortDate(source.updatedAt)}
-      </span>
-    </p>
+    <Button
+      variant="text"
+      data-source={source.id}
+      title="Show in Sources used"
+      onClick={onShow}
+      className="mt-1 max-w-full flex-wrap gap-x-1.5 text-left text-micro font-normal"
+    >
+      {newer ? (
+        <>
+          <TriangleAlert aria-hidden className="size-3.5 shrink-0 text-risk-high" strokeWidth={1.75} />
+          <span className="text-muted-foreground line-through decoration-foreground/50">
+            <span className="sr-only">Outdated: </span>
+            {source.title} {source.version}
+          </span>
+          <span className="text-risk-high">
+            Newer version exists ({newer.version}, {formatShortDate(newer.updatedAt)})
+          </span>
+        </>
+      ) : (
+        <>
+          <FileText aria-hidden className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.75} />
+          <span className="min-w-0 truncate text-muted-foreground">
+            {source.title} {source.version} · updated {formatShortDate(source.updatedAt)}
+          </span>
+        </>
+      )}
+    </Button>
   );
 }
 

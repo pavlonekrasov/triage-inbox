@@ -1,8 +1,8 @@
 "use client";
 
-import { Languages } from "lucide-react";
+import { Languages, PanelRight, PanelRightClose } from "lucide-react";
 import { Button } from "@/components/controls/Button";
-import { useDesk } from "@/components/desk/desk-store";
+import { isContextOpen, useDesk } from "@/components/desk/desk-store";
 import { Glass } from "@/components/glass/Glass";
 import { RouteGlyph } from "@/components/inbox/RouteGlyph";
 import { glyphKind } from "@/components/inbox/TicketRow";
@@ -12,6 +12,7 @@ import { isEnglish, languageCode, languageName } from "@/lib/language";
 import { hasTranslation } from "@/lib/timeline";
 import type { Ticket } from "@/lib/types";
 import { useDemoNow } from "@/lib/use-demo-now";
+import { useWideDesk } from "@/lib/use-wide-desk";
 import { cn } from "@/lib/utils";
 import { ThreadMenu } from "./ThreadMenu";
 
@@ -42,8 +43,29 @@ export function ThreadHeader({ ticket }: { ticket: Ticket }) {
         </span>
         <RouteGlyph route={glyphKind(triage)} />
       </div>
+      <ContextToggle />
       <ThreadMenu ticket={ticket} />
     </Glass>
+  );
+}
+
+/** Shows or hides the context panel, which is a sheet below 1280 px (brief 7.2). ] does the same. */
+function ContextToggle() {
+  const { state, dispatch } = useDesk();
+  const wide = useWideDesk();
+  const open = isContextOpen(state, wide);
+  const Icon = open ? PanelRightClose : PanelRight;
+  return (
+    <Button
+      iconOnly
+      aria-pressed={open}
+      aria-keyshortcuts="]"
+      aria-label="Customer details"
+      title={open ? "Hide customer details (])" : "Show customer details (])"}
+      onClick={() => dispatch({ type: "setContextOpen", open: !open })}
+    >
+      <Icon aria-hidden strokeWidth={1.75} />
+    </Button>
   );
 }
 

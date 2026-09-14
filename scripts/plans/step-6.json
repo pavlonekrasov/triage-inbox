@@ -1,0 +1,232 @@
+[
+  {
+    "name": "inbox-t04-panel-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-6/inbox-t04-panel-2x.png",
+    "eval": "({ glass: [...document.querySelectorAll('[data-glass]')].map(e => e.dataset.glass), blurOutsideGlass: [...document.querySelectorAll('body *')].filter(e => !e.closest('[data-glass]') && getComputedStyle(e).backdropFilter !== 'none').length, panelWidth: Math.round(document.querySelector('[data-context-panel]').getBoundingClientRect().width), kbdShown: getComputedStyle(document.querySelector('[data-glass=decision-bar] kbd')).display })"
+  },
+  {
+    "name": "panel-t04-conflict-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 1500,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-6/panel-t04-conflict-2x.png",
+    "selector": "[data-context-section=billing]"
+  },
+  {
+    "name": "panel-t05-stale-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "width": 1440,
+    "height": 1500,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-6/panel-t05-stale-2x.png",
+    "selector": "[data-context-section=sources]"
+  },
+  {
+    "name": "panel-t03-advisor-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t03",
+    "width": 1440,
+    "height": 1500,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-6/panel-t03-advisor-2x.png",
+    "selector": "[data-context-section=advisor]",
+    "eval": "({ restricted: document.querySelectorAll('[data-context-panel] [data-restricted]').length, advisorText: document.querySelector('[data-context-section=advisor]').innerText.split(String.fromCharCode(10)).join(' | ') })"
+  },
+  {
+    "name": "panel-t12-reopened-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t12",
+    "width": 1440,
+    "height": 1500,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "out": "docs/evidence/step-6/panel-t12-reopened-2x.png",
+    "selector": "[data-context-section=contacts]"
+  },
+  {
+    "name": "pinned-t05-citation-2x",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] button[aria-expanded]').click()",
+      "new Promise(r => setTimeout(r, 400))"
+    ],
+    "out": "docs/evidence/step-6/pinned-t05-citation-2x.png",
+    "selector": "[data-pinned-summary]"
+  },
+  {
+    "name": "flag-t04-link",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-flag=source_conflict] button').click()",
+      "new Promise(r => setTimeout(r, 1200))"
+    ],
+    "eval": "(() => { const row = document.querySelector('[data-context-target=\"billing-conflict\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()"
+  },
+  {
+    "name": "flag-t04-midflash-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-flag=source_conflict] button').click()"
+    ],
+    "waitMs": 120,
+    "out": "docs/evidence/step-6/flag-t04-midflash-2x.png",
+    "selector": "[data-context-panel]",
+    "eval": "(() => { const row = document.querySelector('[data-context-target=\"billing-conflict\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()"
+  },
+  {
+    "name": "citation-t05-reduced-motion",
+    "url": "http://localhost:3000/?lane=drafts&ticket=t05",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[data-pinned-summary] button[aria-expanded]').click()",
+      "new Promise(r => setTimeout(r, 300))",
+      "document.querySelector('[data-source=src-credits-v3]').click()",
+      "new Promise(r => setTimeout(r, 300))"
+    ],
+    "media": {
+      "prefers-reduced-motion": "reduce"
+    },
+    "eval": "(() => { const row = document.querySelector('[data-context-target=\"source:src-credits-v3\"]'); const s = row.closest('.overflow-y-auto').getBoundingClientRect(); const r = row.getBoundingClientRect(); const flash = row.querySelector('[class*=animate-context-flash]'); return { inView: r.top >= s.top - 1 && r.bottom <= s.bottom + 1, focused: document.activeElement === row, flash: flash ? { display: getComputedStyle(flash).display, opacity: getComputedStyle(flash).opacity } : null }; })()"
+  },
+  {
+    "name": "reveal-email-logged-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "[...document.querySelectorAll('[data-context-panel] button')].find(b => b.innerText === 'Reveal').click()",
+      "new Promise(r => setTimeout(r, 400))"
+    ],
+    "out": "docs/evidence/step-6/reveal-email-logged-2x.png",
+    "eval": "({ emailShown: document.querySelector('[data-context-panel]').innerText.includes('jordan.kim@example.com'), logged: document.querySelector('main ol').innerText.includes('Email address revealed by you') })"
+  },
+  {
+    "name": "key-bracket-hides",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "]"
+    ],
+    "waitMs": 300,
+    "eval": "({ panel: !!document.querySelector('[data-context-panel]') })"
+  },
+  {
+    "name": "key-bracket-shows-again",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "keys": [
+      "]",
+      "]"
+    ],
+    "waitMs": 300,
+    "eval": "({ panel: !!document.querySelector('[data-context-panel]') })"
+  },
+  {
+    "name": "sheet-900-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 900,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()",
+      "document.querySelector('[aria-label=\"Customer details\"]').click()"
+    ],
+    "waitMs": 700,
+    "out": "docs/evidence/step-6/sheet-900-2x.png",
+    "eval": "(() => { const d = document.querySelector('[data-slot=sheet-content]'); return { opacity: getComputedStyle(d).opacity, width: Math.round(d.getBoundingClientRect().width), blur: getComputedStyle(document.querySelector('[data-slot=sheet-overlay]')).backdropFilter }; })()"
+  },
+  {
+    "name": "night-inbox-t04-panel-2x",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t04",
+    "width": 1440,
+    "height": 900,
+    "scale": 2,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "theme": "night",
+    "out": "docs/evidence/step-6/night-inbox-t04-panel-2x.png"
+  },
+  {
+    "name": "panel-fits-every-ticket-1440",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1440,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(async () => {\n  const problems = []; let checked = 0;\n  for (const lane of ['needs_you', 'drafts', 'auto_resolved']) {\n    document.querySelector('[data-lane-tab=' + lane + ']').click(); await new Promise(r => setTimeout(r, 200));\n    for (const row of [...document.querySelectorAll('[role=option]')]) {\n      row.click(); await new Promise(r => setTimeout(r, 120)); checked++;\n      const panel = document.querySelector('[data-context-panel]');\n      if (!panel) { problems.push(row.id + ' no panel'); continue; }\n      const body = panel.querySelector('.overflow-y-auto');\n      if (body.scrollWidth > body.clientWidth + 1) problems.push(row.id + ' panel overflows ' + body.scrollWidth + '/' + body.clientWidth);\n      const records = [...panel.querySelectorAll('[data-conflict-record]')].map(e => e.getBoundingClientRect());\n      if (records.length && (records.length !== 2 || Math.abs(records[0].top - records[1].top) > 1)) problems.push(row.id + ' conflict records not side by side');\n      const main = document.querySelector('main').getBoundingClientRect();\n      for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) {\n        const r = el.getBoundingClientRect();\n        if (el.scrollWidth > el.clientWidth + 1 || r.left < main.left || r.right > main.right) problems.push(row.id + ' bar ' + Math.round(r.width) + ' in main ' + Math.round(main.width));\n      }\n    }\n  }\n  return { checked, threadWidth: Math.round(document.querySelector('main').getBoundingClientRect().width), panelWidth: Math.round(document.querySelector('[data-context-panel]').getBoundingClientRect().width), problems };\n})()"
+  },
+  {
+    "name": "panel-fits-every-ticket-1280",
+    "url": "http://localhost:3000/?lane=needs_you&ticket=t02",
+    "width": 1280,
+    "height": 900,
+    "scale": 1,
+    "waitFor": "!document.querySelector('[data-ssr]') && document.querySelector('[data-context-panel]')",
+    "actions": [
+      "document.querySelector('nextjs-portal')?.remove(); document.querySelector('[data-prototype-controls]')?.remove()"
+    ],
+    "eval": "(async () => {\n  const problems = []; let checked = 0;\n  for (const lane of ['needs_you', 'drafts', 'auto_resolved']) {\n    document.querySelector('[data-lane-tab=' + lane + ']').click(); await new Promise(r => setTimeout(r, 200));\n    for (const row of [...document.querySelectorAll('[role=option]')]) {\n      row.click(); await new Promise(r => setTimeout(r, 120)); checked++;\n      const panel = document.querySelector('[data-context-panel]');\n      if (!panel) { problems.push(row.id + ' no panel'); continue; }\n      const body = panel.querySelector('.overflow-y-auto');\n      if (body.scrollWidth > body.clientWidth + 1) problems.push(row.id + ' panel overflows ' + body.scrollWidth + '/' + body.clientWidth);\n      const records = [...panel.querySelectorAll('[data-conflict-record]')].map(e => e.getBoundingClientRect());\n      if (records.length && (records.length !== 2 || Math.abs(records[0].top - records[1].top) > 1)) problems.push(row.id + ' conflict records not side by side');\n      const main = document.querySelector('main').getBoundingClientRect();\n      for (const el of document.querySelectorAll('[data-glass=decision-bar], [data-variant-choice]')) {\n        const r = el.getBoundingClientRect();\n        if (el.scrollWidth > el.clientWidth + 1 || r.left < main.left || r.right > main.right) problems.push(row.id + ' bar ' + Math.round(r.width) + ' in main ' + Math.round(main.width));\n      }\n    }\n  }\n  return { checked, threadWidth: Math.round(document.querySelector('main').getBoundingClientRect().width), panelWidth: Math.round(document.querySelector('[data-context-panel]').getBoundingClientRect().width), problems };\n})()"
+  }
+]

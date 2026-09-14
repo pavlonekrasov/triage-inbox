@@ -30,6 +30,7 @@ export const contrastPairs: ContrastPair[] = [
   { label: "Sage on sage wash", fg: "--risk-low", bg: ["--card", "--risk-low-wash"], min: 4.5 },
   { label: "Amber ink on amber wash", fg: "--risk-mid-ink", bg: ["--card", "--risk-mid-wash"], min: 4.5 },
   { label: "Terracotta on terracotta wash", fg: "--risk-high", bg: ["--card", "--risk-high-wash"], min: 4.5 },
+  { label: "Ink on the sources-disagree wash", fg: "--foreground", bg: ["--card", "--risk-high-wash"], min: 4.5 },
   { label: "SLA countdown on list pane", fg: "--risk-high", bg: ["--sidebar"], min: 4.5 },
   { label: "SLA countdown on selected row", fg: "--risk-high", bg: ["--sidebar", "--accent"], min: 4.5 },
   { label: "Label on lane thumb", fg: "--primary-foreground", bg: ["--primary"], min: 4.5 },

@@ -1,6 +1,6 @@
 import { SOURCE_REGISTRY } from "@/data/sources";
 import { formatShortDate } from "./clock";
-import type { Confidence, HardRule, TriageResult } from "./types";
+import type { Confidence, ContextSection, HardRule, TriageResult } from "./types";
 
 /* What the pinned summary says about a ticket (brief 8.1), kept out of the component so it is tested. */
 
@@ -38,7 +38,13 @@ export function routeExplanation(triage: RouteFields, { autoSendPaused = false }
     : "Low risk and Sure, so the reply was sent automatically.";
 }
 
-export type SummaryFlag = { kind: "source_conflict" | "stale_source"; text: string };
+export type SummaryFlag = {
+  kind: "source_conflict" | "stale_source";
+  text: string;
+  /** Where the evidence sits in the context panel: the section, and the row to bring into view. */
+  section: ContextSection;
+  target: string;
+};
 
 /**
  * Evidence problems that change how far the AI's work can be trusted. They show on the collapsed
@@ -47,20 +53,22 @@ export type SummaryFlag = { kind: "source_conflict" | "stale_source"; text: stri
  */
 export function summaryFlags(triage: Pick<TriageResult, "hardRules" | "sources">): SummaryFlag[] {
   const flags: SummaryFlag[] = [];
-  if (triage.hardRules.includes("source_conflict")) flags.push({ kind: "source_conflict", text: "Sources disagree" });
+  if (triage.hardRules.includes("source_conflict")) flags.push({ kind: "source_conflict", text: "Sources disagree", section: "billing", target: "billing-conflict" });
 
   const stale = triage.sources.filter((s) => s.supersededBy);
   for (const source of stale) {
     const newer = source.supersededBy ? SOURCE_REGISTRY.get(source.supersededBy) : undefined;
     flags.push({
       kind: "stale_source",
+      section: "sources",
+      target: `source:${source.id}`,
       text: newer
         ? `${source.title} ${source.version} is outdated: ${newer.version} published ${formatShortDate(newer.updatedAt)}`
         : `${source.title} ${source.version} is outdated`,
     });
   }
   if (stale.length === 0 && triage.hardRules.includes("stale_source")) {
-    flags.push({ kind: "stale_source", text: "A source used is outdated" });
+    flags.push({ kind: "stale_source", text: "A source used is outdated", section: "sources", target: "sources" });
   }
   return flags;
 }

@@ -32,12 +32,18 @@ The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&
 | `E` | Edit the open draft in the composer; `Ctrl`/`⌘` + `Enter` sends, `Esc` discards |
 | `H` | Escalate the case to a team |
 | `Z` | Undo the last send, within 5 seconds |
+| `]` | Show or hide customer details (a sheet below 1280 px) |
 | `X` | Select or unselect the focused draft (Drafts only) |
 | `⇧X` | Select every low-risk Sure draft |
 | `Esc` | Exit selection |
 
 The prototype controls in the list footer also set the fake send API to succeed, fail 1 in 20, or
 fail every send, so the "Not sent · Retry" state is real.
+
+The customer details panel shows what the agent read: customer, subscription, billing timeline, sources
+used, the advisor session on conduct reports, and previous contacts. The evidence flags on the summary
+card and the source citations under "Why this route" open their row in the panel. Revealing a masked
+email is logged in the thread.
 
 ## Delivery status
 
@@ -48,8 +54,8 @@ fail every send, so the "Not sent · Retry" state is real.
 | 3 | Thread: header pill, bubbles, service messages, draft bubble | Done |
 | 4 | Pinned summary, both reading depths | Done |
 | 5 | Decision bar: Approve with undo, Edit, Escalate | Done |
-| 6 | Context panel | Next |
-| 7 | Bulk approve, full keymap, command palette, shortcut sheet | |
+| 6 | Context panel | Done |
+| 7 | Bulk approve, full keymap, command palette, shortcut sheet | Next |
 | 8 | States catalogue, responsive, Night shift pass | |
 | 9 | Slide routes | |
 | 10 | Slide screenshots | |
@@ -57,10 +63,10 @@ fail every send, so the "Not sent · Retry" state is real.
 ## Checks
 
 ```bash
-npm test          # routing matrix, fixtures, decisions, rewrites, desk reducer
+npm test          # routing matrix, fixtures, accounts, decisions, rewrites, desk reducer
 npm run typecheck
 npm run lint
-node scripts/capture.mjs scripts/plans/step-5.json   # evidence screenshots, needs the dev server
+node scripts/capture.mjs scripts/plans/step-6.json   # evidence screenshots, needs the dev server
 ```
 
 Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from

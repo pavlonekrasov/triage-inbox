@@ -94,4 +94,75 @@ export interface Ticket {
   routedWhileAutoSendPaused?: boolean;
   /** An auto-sent reply sampled for a human spot-check. */
   spotCheck?: boolean;
+  /** What the context panel shows about the customer (brief 7.5). */
+  account: Account;
+}
+
+/* Account data around the ticket, as the agent reads it from the stores and payment records. */
+
+export type ContextSection = "customer" | "subscription" | "billing" | "sources" | "advisor" | "contacts";
+export type Store = "App Store" | "Google Play" | "Web";
+/** The system a billing record comes from. Stores and Nebula's own payment records can disagree. */
+export type BillingSystem = "App Store" | "Google Play" | "Web payments" | "Payments";
+
+export interface Subscription {
+  plan: string;
+  price: string;
+  status: "active" | "cancelled";
+  store: Store;
+  renewsAt?: string;
+  cancelledAt?: string;
+  /** Where the customer cancelled. */
+  cancelledIn?: Store;
+}
+
+export interface BillingEvent {
+  id: string;
+  at: string;
+  label: string;
+  amount?: string;
+  system: BillingSystem;
+}
+
+export interface BillingConflict {
+  /** The two records that disagree, shown side by side. */
+  eventIds: [string, string];
+  /** What the disagreement is, in one sentence. */
+  note: string;
+}
+
+export interface AdvisorSession {
+  id: string;
+  advisor: string;
+  startedAt: string;
+  minutes: number;
+}
+
+export interface PreviousContact {
+  id: string;
+  at: string;
+  route: Route;
+  topic: string;
+  outcome: string;
+  /** The customer came back after this contact was resolved automatically. */
+  reopened?: boolean;
+}
+
+/** A field the agent is not permitted to read. The panel shows that it exists, with a lock. */
+export interface RestrictedField {
+  section: ContextSection;
+  label: string;
+  reason: string;
+}
+
+export interface Account {
+  subscription: Subscription | null;
+  /** Oldest first. */
+  billing: BillingEvent[];
+  conflict?: BillingConflict;
+  /** Only for complaints about an advisor. */
+  advisorSession?: AdvisorSession;
+  /** The last three, newest first. */
+  previousContacts: PreviousContact[];
+  restricted: RestrictedField[];
 }

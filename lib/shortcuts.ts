@@ -14,10 +14,12 @@ export type Command =
   | "approve"
   | "edit"
   | "escalate"
-  | "undo";
+  | "undo"
+  | "toggle-context";
 
-/** The desk's one keymap. Delivery step 7 adds ], ⌘K and ? to this table. */
+/** The desk's one keymap. Delivery step 7 adds ⌘K and ? to this table. */
 export const KEYMAP: readonly { key: string; shift?: boolean; command: Command; label: string }[] = [
+  { key: "]", command: "toggle-context", label: "Show or hide customer details" },
   { key: "a", command: "approve", label: "Approve & send the open draft" },
   { key: "e", command: "edit", label: "Edit the open draft" },
   { key: "h", command: "escalate", label: "Escalate the case to a team" },

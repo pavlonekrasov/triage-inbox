@@ -89,7 +89,7 @@ export function ThreadPane() {
   const composer = state.composers[ticket.id] ?? null;
 
   return (
-    <main aria-label={`Conversation with ${ticket.customer.name}`} className="wallpaper relative h-full min-w-0">
+    <main aria-label={`Conversation with ${ticket.customer.name}`} className="wallpaper @container/thread relative h-full min-w-0">
       <div ref={scroller} className="flex h-full flex-col overflow-y-auto overscroll-contain [overflow-anchor:none]">
         {/* The header and the pinned summary float and the thread scrolls under them; the strip itself
             lets clicks through. px-6 and max-w-168 line the card up with the bubble column below. */}

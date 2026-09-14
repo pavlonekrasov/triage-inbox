@@ -174,6 +174,11 @@ async function pressKey(cdp, combo) {
     code = `Digit${name}`;
     keyCode = name.charCodeAt(0);
     text = name;
+  } else if (name === "]") {
+    key = "]";
+    code = "BracketRight";
+    keyCode = 221;
+    text = "]";
   } else {
     throw new Error(`Unsupported key: ${combo}`);
   }

@@ -1,6 +1,7 @@
 import { DEMO_NOW } from "@/lib/clock";
 import type { Customer, Message, Platform, StepKind, Ticket, TriageResult } from "@/lib/types";
 import { sources } from "./sources";
+import { ACCOUNTS } from "./accounts";
 
 /* 22 fixtures (brief 11): the 16 seed cases, then 6 low-risk Sure drafts queued while auto-send is
    paused for the policy v4 rollout. All people are fictional; emails use the reserved example.com. */
@@ -77,7 +78,14 @@ function ticket(seed: Seed): Ticket {
     triage: { ...seed.triage, ticketId: seed.id, steps },
     routedWhileAutoSendPaused: seed.routedWhileAutoSendPaused,
     spotCheck: seed.spotCheck,
+    account: accountFor(seed.id),
   };
+}
+
+function accountFor(id: string) {
+  const account = ACCOUNTS[id];
+  if (!account) throw new Error(`No account fixture for ${id}`);
+  return account;
 }
 
 const PAUSED_STEP: [StepKind, string] = [
