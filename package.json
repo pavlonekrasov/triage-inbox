@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "capture:slides": "node scripts/plans/make-slides.mjs && node scripts/capture.mjs scripts/plans/slides.json && node scripts/verify-exports.mjs",
+    "check:browser": "node scripts/plans/make-review.mjs && node scripts/capture.mjs scripts/plans/review.json",
+    "audit:accessibility": "node scripts/audit.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

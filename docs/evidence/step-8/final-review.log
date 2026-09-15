@@ -1,5 +1,15 @@
-[axe-inbox-day] failed: waitFor timed out after 20000 ms: !document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))
-[axe-drafting-day] failed: waitFor timed out after 20000 ms: !document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))
+
+> triage-inbox@0.1.0 check:browser
+> node scripts/plans/make-review.mjs && node scripts/capture.mjs scripts/plans/review.json
+
+[axe-inbox-day] {
+ "violations": [],
+ "passes": 31
+}
+[axe-drafting-day] {
+ "violations": [],
+ "passes": 29
+}
 [axe-draft-failed-day] {
  "violations": [],
  "passes": 29
@@ -28,12 +38,142 @@
  "violations": [],
  "passes": 21
 }
-[sidebar-motion-day] failed: Error: Sidebar did not restore its width/state
-    at <anonymous>:23:99
-[section-motion-day] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
-    at <anonymous>:10:80
-[sidebar-reduced-day] failed: Error: Sidebar did not restore its width/state
-    at <anonymous>:23:99
+[sidebar-motion-day] {
+ "initial": 340,
+ "closing": 274,
+ "closed": 0,
+ "opening": 66,
+ "restored": 340,
+ "reversed": 340,
+ "focusReturned": true,
+ "inert": true,
+ "reduced": false,
+ "closeAnimations": [
+  220
+ ],
+ "closingFrames": [
+  340,
+  274,
+  182,
+  91,
+  51,
+  31,
+  8,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "openingFrames": [
+  0,
+  0,
+  66,
+  158,
+  249,
+  309,
+  332,
+  339,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340
+ ]
+}
+[section-motion-day] {
+ "before": 304,
+ "during": 223,
+ "closed": 42,
+ "after": 304
+}
+[sidebar-reduced-day] {
+ "initial": 340,
+ "closing": 0,
+ "closed": 0,
+ "opening": 340,
+ "restored": 340,
+ "reversed": 340,
+ "focusReturned": true,
+ "inert": true,
+ "reduced": true,
+ "closeAnimations": [],
+ "closingFrames": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "openingFrames": [
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340
+ ]
+}
 [axe-inbox-night] {
  "violations": [],
  "passes": 31
@@ -70,9 +210,139 @@
  "violations": [],
  "passes": 21
 }
-[sidebar-motion-night] failed: Error: Sidebar did not restore its width/state
-    at <anonymous>:23:99
-[section-motion-night] failed: Error: Section expansion is not animated or did not restore: {"before":304,"during":304,"closed":42,"after":304}
-    at <anonymous>:10:80
-[sidebar-reduced-night] failed: Error: Sidebar did not restore its width/state
-    at <anonymous>:23:99
+[sidebar-motion-night] {
+ "initial": 340,
+ "closing": 274,
+ "closed": 0,
+ "opening": 66,
+ "restored": 340,
+ "reversed": 340,
+ "focusReturned": true,
+ "inert": true,
+ "reduced": false,
+ "closeAnimations": [
+  220
+ ],
+ "closingFrames": [
+  340,
+  274,
+  182,
+  91,
+  51,
+  31,
+  13,
+  5,
+  2,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "openingFrames": [
+  0,
+  0,
+  66,
+  158,
+  249,
+  320,
+  332,
+  339,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340
+ ]
+}
+[section-motion-night] {
+ "before": 304,
+ "during": 223,
+ "closed": 42,
+ "after": 304
+}
+[sidebar-reduced-night] {
+ "initial": 340,
+ "closing": 0,
+ "closed": 0,
+ "opening": 340,
+ "restored": 340,
+ "reversed": 340,
+ "focusReturned": true,
+ "inert": true,
+ "reduced": true,
+ "closeAnimations": [],
+ "closingFrames": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "openingFrames": [
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340,
+  340
+ ]
+}

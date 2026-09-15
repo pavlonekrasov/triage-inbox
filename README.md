@@ -17,6 +17,9 @@ Open http://localhost:3000.
 |---|---|
 | `/` | The inbox |
 | `/tokens` | Colour roles in Day and Night shift with contrast measured in the browser, glass, type scale |
+| `/slides/flow` | Six-stage ticket flow, using Jordan's fixture and the real routing rules |
+| `/slides/cases` | Emma, Jordan and Camille in independent, interactive mobile desks |
+| `/slides/safeguards` | Marcus's evidence beside Camille's escalation form |
 
 The URL keeps the view, so a link reopens it: `/?lane=drafts&ticket=t07`. Add `&list=loading` or
 `&list=empty` for those list states, `&draft=drafting` or `&draft=failed` for the opened conversation's
@@ -70,8 +73,8 @@ email is logged in the thread.
 | 6 | Context panel | Done |
 | 7 | Bulk approve, full keymap, command palette, shortcut sheet | Done |
 | 8 | States catalogue, quality sheet, tablet and phone, Night shift, review gate | Done |
-| 9 | Slide routes | Next |
-| 10 | Slide screenshots | |
+| 9 | Slide routes | Done |
+| 10 | Slide screenshots | Done |
 
 ## Checks
 
@@ -79,8 +82,23 @@ email is logged in the thread.
 npm test          # routing matrix, fixtures, accounts, decisions, rewrites, desk reducer
 npm run typecheck
 npm run lint
+npm run build
+npm run check:browser       # axe in Day/Night, sidebar motion and reduced motion
+npm run audit:accessibility # Lighthouse accessibility in Day/Night
+npm run capture:slides     # 12 final PNG exports, 1440 × 900 at 2×
 node scripts/plans/make-step-8.mjs && node scripts/capture.mjs scripts/plans/step-8.json   # evidence screenshots, needs the dev server
 ```
+
+Browser checks and captures need a running server and Chromium (Edge is detected on Windows).
+Set `BROWSER_PATH` to use another Chromium executable and `CAPTURE_BASE_URL` to change the server
+for the slide, review and Lighthouse scripts. Final images live in [docs/evidence/slides](docs/evidence/slides).
+The slide routes use fixed 1440 × 900 canvases; the theme toggle or `?theme=night` switches their appearance.
+The case presentation reuses the actual thread, summary, reply and decision components, omitting processing
+logs and previewing one refund variant at a time. Choosing a preview does not send a reply.
+
+Customer details now opens and closes over the existing 220 ms timing, remembers its resized width,
+and returns focus to the toggle on close. Section bodies expand with their chevrons; reduced motion
+disables these transitions. Normal resizing and conversation switching retain their direct response.
 
 Design context lives in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md); every departure from
 the brief is argued in [docs/rationale.md](docs/rationale.md), and screenshots are in

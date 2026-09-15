@@ -652,6 +652,38 @@ Validation  night-*-2x: 12 states including the quality sheet; /tokens: 47 of 47
 14  Pass     phone-*-2x at 375 px: no target under 44 px, no sideways scroll; the dock pads with env(safe-area-inset-bottom).
 15  Pass     sources-disagree-2x and stale-source-2x: flags in the pinned card, rows in the panel.
 16  Pass     quality-sheet-2x: auto-resolution and reopen share one block.
-17  Partial  axe-core on 10 inbox views (Day, Night, drafting, draft failed, collision with offline, long content, quality sheet, tablet, phone list, phone thread): 0 serious or critical. On /tokens axe flags the "Aa" specimens of the pairs shown for information only. Lighthouse is not installed and was not run.
+17  Pass     The original axe checks found 0 serious or critical issues. The completion pass adds reproducible Day/Night axe checks and Lighthouse accessibility reports (100/100 in both themes) in docs/evidence/step-8. On /tokens the informational "Aa" specimens remain outside the graded contrast pairs.
 18  Pass     Banned-word grep: three uses fixed in step 8; "smooth" remains only as the scroll-behavior value it names.
+```
+
+## Completion pass: steps 8–10
+
+### Failed drafts and phone recovery
+
+```
+Problem     Undo and failed-send recovery used the fixture's original lane, ignoring a failed draft's move to Needs you; reopening from a notice did not push the phone thread.
+Decision    Recovery reads the current failed-draft state and sets threadPushed when revealing a conversation.
+Reasoning   The conversation, lane, notice and mobile screen must describe the same recoverable state.
+Trade-off   No routing rules change; recovery now respects the runtime state added in step 8.
+Validation  Three regression tests reproduce the original failures and pass; the suite has 276 tests.
+```
+
+### Live slide routes and compact case presentation
+
+```
+Problem     Three full mobile timelines cannot show their messages, drafts and decision bars legibly on a single 1440 × 900 canvas.
+Decision    Embed isolated live desks. Only the case presentation omits processing logs and shows the chosen draft variant (the first is only a preview until selected), with the existing summary, bubbles, controls and reducer. Frames are scaled to 85% for export.
+Reasoning   All three customer messages and the draft/sent distinction remain visible, while the actual Refund / Decline controls and protected acknowledgment still work.
+Trade-off   The slide omits intermediate service logs; the normal inbox retains the full timeline. Slide canvases are intentionally fixed-size export pages.
+Validation  s4-cases.png and its Night counterpart show all three cases; s2-flow uses the actual fixture, routeFor result, Undo constant and metrics. scripts/plans/make-slides.mjs regenerates all 12 images.
+```
+
+### Customer details motion, requested during the completion pass
+
+```
+Problem     The desktop sidebar unmounted instantly and section bodies snapped, despite chevrons and mobile sheets having motion.
+Decision    Keep the resizable rail mounted, transition its space together with the thread over --dur-ui (220 ms) and --ease-soft, preserve content width, and animate section height with Base UI's measured-size variable. Match the sheet/backdrop timing and disable these transitions under reduced motion.
+Reasoning   A sidebar changes the available workspace; moving both panes explains where the space went. Hidden content is inert, closing returns focus, and rapid toggles reverse the transition.
+Trade-off   flex-grow and measured section height are explicit layout-animation exceptions for this user-requested interaction. Pointer resizing and conversation switching remain direct; no new colours or glass surfaces are introduced.
+Validation  Browser frame samples show 340 → 274 → 0 and 0 → 66 → 340, section height 304 → 223 → 42, full restoration after reversal, focus return and no animations under reduced motion, in both themes.
 ```

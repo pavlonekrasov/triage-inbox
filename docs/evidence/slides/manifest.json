@@ -1,0 +1,86 @@
+[
+  {
+    "file": "s2-flow.png",
+    "theme": "day",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "ff36de9328ef3e53a0dc3922d7965b988262ba1ac331fba5323307cd3a2fd2df"
+  },
+  {
+    "file": "s3-inbox.png",
+    "theme": "day",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "9b4435af2b0bc77970c38d858ab5f2f2af81b9b3566f5e9a701f7a2b6713b93e"
+  },
+  {
+    "file": "s4-cases.png",
+    "theme": "day",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "0257f2b5e0f7387cc26c0cfe983927b94cb33f2fed9b361e35091f1f4c59069e"
+  },
+  {
+    "file": "s5-safeguards.png",
+    "theme": "day",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "ae97bf3077d4914c2c75337b427fc36d98fed04ac0b1e3cf23086c31a67c6edc"
+  },
+  {
+    "file": "s5-metrics.png",
+    "theme": "day",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "1ba97d7f4d92ebb3b1a479ad5dbe34465fb3c8618e16083522a6b38e9037788a"
+  },
+  {
+    "file": "s5-bulk-preview.png",
+    "theme": "day",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "c505c24f6e224bece3ec20759639e95ff78fe9a9142c5c2d389ad2f26f74fa1d"
+  },
+  {
+    "file": "s2-flow-night.png",
+    "theme": "night",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "93ecdb95a22ffbba78bd80664ea901861b8dc19070cfaf7096106d4e5a3a3d7c"
+  },
+  {
+    "file": "s3-inbox-night.png",
+    "theme": "night",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "cd49cbca8f0184ea6a2191ebe25873d0479fe553ab01dccc21509ac2d497c683"
+  },
+  {
+    "file": "s4-cases-night.png",
+    "theme": "night",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "5be754a9304dff2b5015b408cfb67cc8ac4d57fdf1ec5d668712299d42c7a483"
+  },
+  {
+    "file": "s5-safeguards-night.png",
+    "theme": "night",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "6be4545e12475bfd74fa374ce9a4df392ac2ecd03b99f0b51e226280def2ced3"
+  },
+  {
+    "file": "s5-metrics-night.png",
+    "theme": "night",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "10e5bd5ad50f465dcfb96b26132ba5ea8bd092b7f45ce438c0370bc27a9b2315"
+  },
+  {
+    "file": "s5-bulk-preview-night.png",
+    "theme": "night",
+    "width": 2880,
+    "height": 1800,
+    "sha256": "e39af28530b331948b47778f6ecf9b58ab4a1a480b986ce5f0ea4114a1f48209"
+  }
+]

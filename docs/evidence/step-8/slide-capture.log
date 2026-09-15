@@ -1,10 +1,20 @@
+
+> triage-inbox@0.1.0 capture:slides
+> node scripts/plans/make-slides.mjs && node scripts/capture.mjs scripts/plans/slides.json
+
+Wrote 12 slide captures.
 [s2-flow] {
  "width": 1440,
  "height": 900,
  "theme": "day"
 }
 [s2-flow] wrote docs/evidence/slides/s2-flow.png
-[s3-inbox] failed: waitFor timed out after 20000 ms: !document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header]')
+[s3-inbox] {
+ "width": 1440,
+ "height": 900,
+ "theme": "day"
+}
+[s3-inbox] wrote docs/evidence/slides/s3-inbox.png
 [s4-cases] {
  "width": 1440,
  "height": 900,

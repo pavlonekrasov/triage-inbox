@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { usePanelRef } from "react-resizable-panels";
 import { ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
 import type { Ticket } from "@/lib/types";
@@ -14,7 +14,7 @@ export function ContextRail({ ticket, open, onOpenChange }: {
   const element = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
   const previousOpen = useRef(open);
-  const initialSize = useRef(open ? 340 : 0);
+  const [initialSize] = useState(open ? 340 : 0);
   const expandedWidth = useRef(340);
 
   useLayoutEffect(() => {
@@ -45,7 +45,7 @@ export function ContextRail({ ticket, open, onOpenChange }: {
       data-open={open}
       elementRef={element}
       panelRef={panel}
-      defaultSize={initialSize.current}
+      defaultSize={initialSize}
       minSize={300}
       maxSize={420}
       collapsible

@@ -1,0 +1,6 @@
+
+> triage-inbox@0.1.0 audit:accessibility
+> node scripts/audit.mjs
+
+day: Lighthouse accessibility 100/100
+night: Lighthouse accessibility 100/100

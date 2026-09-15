@@ -4,6 +4,10 @@ const base = process.env.CAPTURE_BASE_URL ?? "http://localhost:3000";
 const ready = "!document.querySelector('[data-ssr]') && document.querySelector('[data-glass=thread-header], [data-slide][data-ready=true]') && [...document.querySelectorAll('iframe')].every(f => f.dataset.loaded === 'true' && f.contentDocument.querySelector('[data-glass=thread-header]'))";
 const strip = "document.querySelector('nextjs-portal')?.remove()";
 const audit = `(async () => {
+  for (const frame of document.querySelectorAll('iframe')) {
+    frame.contentDocument.querySelector('nextjs-portal')?.remove();
+    frame.contentWindow.eval(axe.source);
+  }
   const result = await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a','wcag2aa','wcag21aa','wcag22aa'] } });
   const violations = result.violations.map(v => ({ id: v.id, impact: v.impact, targets: v.nodes.map(n => n.target) }));
   if (violations.some(v => ['serious', 'critical'].includes(v.impact))) throw new Error(JSON.stringify(violations));
@@ -14,18 +18,20 @@ const motion = `(async () => {
   const rail = document.querySelector('[data-context-rail]');
   const toggle = document.querySelector('[data-context-toggle]');
   const width = () => Math.round(rail.getBoundingClientRect().width);
+  const sample = async () => { const values = []; for (let i=0; i<24; i++) { await new Promise(requestAnimationFrame); values.push(width()); } return values; };
   const initial = width();
   document.querySelector('[aria-label="Hide customer details"]').click();
-  await delay(50);
-  const closing = width();
+  await new Promise(requestAnimationFrame);
   const closeAnimations = rail.getAnimations().map(a => a.effect.getTiming().duration);
+  const closingFrames = await sample();
+  const closing = closingFrames.find(w => w>0 && w<initial) ?? width();
   await delay(300);
   const closed = width();
   const focusReturned = document.activeElement === toggle;
   const inert = rail.inert;
   toggle.click();
-  await delay(50);
-  const opening = width();
+  const openingFrames = await sample();
+  const opening = openingFrames.find(w => w>0 && w<initial) ?? width();
   await delay(300);
   const restored = width();
   toggle.click(); await delay(60); toggle.click(); await delay(350);
@@ -34,7 +40,7 @@ const motion = `(async () => {
   if (closed > 1 || Math.abs(restored-initial)>2 || Math.abs(reversed-initial)>2 || !inert) throw new Error('Sidebar did not restore its width/state');
   if (!reduced && !(closing > 0 && closing < initial && opening > 0 && opening < initial && closeAnimations.length)) throw new Error('Sidebar snapped rather than animating: '+JSON.stringify({initial,closing,opening,closeAnimations}));
   if (reduced && (closing !== closed || closeAnimations.length)) throw new Error('Reduced motion still animates');
-  return {initial,closing,closed,opening,restored,reversed,focusReturned,inert,reduced,closeAnimations};
+  return {initial,closing,closed,opening,restored,reversed,focusReturned,inert,reduced,closeAnimations,closingFrames,openingFrames};
 })()`;
 const section = `(async () => {
   const delay = ms => new Promise(r => setTimeout(r, ms));
@@ -42,8 +48,9 @@ const section = `(async () => {
   const button = root.querySelector('button');
   const height = () => Math.round(root.getBoundingClientRect().height);
   const before = height();
-  button.click(); await delay(60); const during = height();
+  button.click(); const frames = []; for (let i=0; i<24; i++) { await new Promise(requestAnimationFrame); frames.push(height()); }
   await delay(300); const closed = height();
+  const during = frames.find(h => h>closed && h<before) ?? closed;
   button.click(); await delay(350); const after = height();
   if (!(during > closed && during < before) || Math.abs(after-before)>2) throw new Error('Section expansion is not animated or did not restore: '+JSON.stringify({before,during,closed,after}));
   return {before,during,closed,after};
